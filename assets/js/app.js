@@ -1,5 +1,9 @@
 'use strict';
 
+/* ===== 全局缓存版本号（与 index.html 一致，用于 data/*.json 缓存破坏） ===== */
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20260907b';
+function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
+
 /* ===== 杂志配置 ===== */
 const MAGAZINES = {
     qs: {
@@ -88,7 +92,7 @@ function getYearData() { return getMagState()?.yearData || {}; }
 async function loadHomeCounts() {
     for (const [key, conf] of Object.entries(MAGAZINES)) {
         try {
-            const resp = await fetch(`${conf.dataPath}/meta.json`);
+            const resp = await fetch(dataUrl(`${conf.dataPath}/meta.json`));
             const meta = await resp.json();
             // 缓存 meta 到 magCache，供收藏列表跨杂志查找
             if (!state.magCache[key]) {
@@ -177,7 +181,7 @@ async function initMagazine(magKey) {
 
     if (ms.meta.length === 0) {
         try {
-            const resp = await fetch(`${conf.dataPath}/meta.json`);
+            const resp = await fetch(dataUrl(`${conf.dataPath}/meta.json`));
             ms.meta = await resp.json();
         } catch (e) {
             console.error('加载元数据失败:', e);
@@ -190,7 +194,7 @@ async function initMagazine(magKey) {
     // 后台加载文章索引（不阻塞）
     if (!ms.indexLoaded) {
         ms.indexLoaded = true;
-        fetch('data/article_index.json')
+        fetch(dataUrl('data/article_index.json'))
             .then(r => r.ok ? r.json() : null)
             .then(idx => {
                 if (idx) ms.articleIndex = idx[magKey] || {};
@@ -241,7 +245,7 @@ async function loadYearData(year, retry = 2) {
     if (ms.loadedYears.has(year) || ms.loadingYears.has(year)) return ms.loadedYears.has(year);
     ms.loadingYears.add(year);
     try {
-        const resp = await fetch(`${conf.yearsPath}/${year}.json`);
+        const resp = await fetch(dataUrl(`${conf.yearsPath}/${year}.json`));
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         ms.yearData[year] = await resp.json();
         ms.loadedYears.add(year);
