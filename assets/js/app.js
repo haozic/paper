@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data/*.json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20260927a';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20260927b';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -85,8 +85,8 @@ function getMagState() {
     return state.magCache[state.currentMag];
 }
 
-function getMeta() { return getMagState()?.meta || []; }
-function getYearData() { return getMagState()?.yearData || {}; }
+function getMeta() { var ms = getMagState(); return ms ? (ms.meta || []) : []; }
+function getYearData() { var ms = getMagState(); return ms ? (ms.yearData || {}) : {}; }
 
 /* ===== 首页：加载各杂志计数 ===== */
 async function loadHomeCounts() {
@@ -659,7 +659,7 @@ async function showArticle(encUrl) {
     bodyEl.innerHTML = '<div class="article-loading"><div class="spinner"></div><div>加载正文...</div></div>';
 
     // 优先从 markdown 文件加载（轻量，单文件按需加载）
-    const mdPath = ms.articleIndex?.[url];
+    const mdPath = ms.articleIndex ? ms.articleIndex[url] : undefined;
     if (mdPath) {
         try {
             const resp = await fetch(mdPath);
@@ -735,7 +735,7 @@ async function retryShowArticle(encUrl) {
     bodyEl.innerHTML = '<div class="article-loading"><div class="spinner"></div><div>重新加载中...</div></div>';
 
     // 优先重试 markdown 文件
-    const mdPath = ms.articleIndex?.[url];
+    const mdPath = ms.articleIndex ? ms.articleIndex[url] : undefined;
     if (mdPath) {
         try {
             const resp = await fetch(mdPath + '?t=' + Date.now());
@@ -794,10 +794,13 @@ function closeArticlePage() {
     state.currentArticleUrl = null;
     const ring = document.getElementById('progressRingFg');
     if (ring) ring.style.strokeDashoffset = RING_CIRCUMFERENCE;
-    document.getElementById('backToTopBtn')?.classList.remove('show');
+    var btt = document.getElementById('backToTopBtn');
+    if (btt) btt.classList.remove('show');
     // 关闭设置面板
-    document.getElementById('articleSettingsPanel')?.classList.remove('show');
-    document.getElementById('articleSettingsBtn')?.classList.remove('active');
+    var sp = document.getElementById('articleSettingsPanel');
+    if (sp) sp.classList.remove('show');
+    var sb = document.getElementById('articleSettingsBtn');
+    if (sb) sb.classList.remove('active');
 }
 
 /* ===== 阅读设置 ===== */
@@ -839,7 +842,7 @@ function applyTheme(theme) {
 }
 
 function toggleArticleSettings(e) {
-    e?.stopPropagation();
+    if (e && e.stopPropagation) e.stopPropagation();
     const panel = document.getElementById('articleSettingsPanel');
     const btn = document.getElementById('articleSettingsBtn');
     const isOpen = panel.classList.toggle('show');
@@ -870,7 +873,8 @@ function initReadingSettingsListeners() {
         // 点击其他按钮（如收藏、原文链接）时不关闭
         if (e.target.closest('.ap-fav-btn, .ap-original-link')) return;
         panel.classList.remove('show');
-        document.getElementById('articleSettingsBtn')?.classList.remove('active');
+        var asb = document.getElementById('articleSettingsBtn');
+        if (asb) asb.classList.remove('active');
     });
     // 滚动时不关闭面板（面板已为 fixed，会始终保持在屏幕上）
 }
@@ -1386,9 +1390,10 @@ async function init() {
         if (e.key === 'Escape') {
             // 先关闭设置面板
             const settingsPanel = document.getElementById('articleSettingsPanel');
-            if (settingsPanel?.classList.contains('show')) {
+            if (settingsPanel && settingsPanel.classList.contains('show')) {
                 settingsPanel.classList.remove('show');
-                document.getElementById('articleSettingsBtn')?.classList.remove('active');
+                var asb2 = document.getElementById('articleSettingsBtn');
+                if (asb2) asb2.classList.remove('active');
                 return;
             }
             if (document.body.classList.contains('article-active') ||
@@ -1407,7 +1412,7 @@ async function init() {
             closeSectionPage();
         } else if (document.body.classList.contains('about-active')) {
             closeAboutPage();
-        } else if (state.currentMag && !e.state?.mag) {
+        } else if (state.currentMag && !(e.state && e.state.mag)) {
             // 从杂志页返回首页
             state.currentMag = null;
             document.documentElement.style.setProperty('--mag-color-base', '#8b0000');
