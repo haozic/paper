@@ -310,7 +310,7 @@ body.about-active { padding-bottom: 0; }
 /* ===== Home Guide Entry ===== */
 .home-guide-entry {
     padding: 0 16px 8px;
-    max-width: 300px;
+    max-width: 360px;
     width: 100%;
     margin: 0 auto;
 }
