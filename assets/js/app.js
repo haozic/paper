@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data/*.json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261016a';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261016b';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -1456,8 +1456,141 @@ async function init() {
     }
 }
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
-    init();
-}
+// 暴露给密码门模块：登录通过后再启动主应用
+window.__app_init__ = init;
+
+/* ===== 访问密码门（必须在 init 前通过） ===== */
+(function() {
+    'use strict';
+
+    var STORAGE_KEY = 'djyj_gate_ok';
+    var STORAGE_TS = 'djyj_gate_ts';
+    var PASSWORD = '5255';
+    // 默认 12 小时有效期；设为 0 表示关闭会话过期
+    var TTL_MS = 12 * 60 * 60 * 1000;
+
+    function isAuthed() {
+        try {
+            var ok = localStorage.getItem(STORAGE_KEY) === '1';
+            if (!ok) return false;
+            if (TTL_MS <= 0) return true;
+            var ts = parseInt(localStorage.getItem(STORAGE_TS) || '0', 10);
+            if (!ts) return false;
+            return (Date.now() - ts) < TTL_MS;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function setAuthed() {
+        try {
+            localStorage.setItem(STORAGE_KEY, '1');
+            localStorage.setItem(STORAGE_TS, String(Date.now()));
+        } catch (e) {}
+    }
+
+    function openGate() {
+        var gate = document.getElementById('gate');
+        if (gate) gate.classList.remove('gate--hidden');
+        setTimeout(function() {
+            var input = document.getElementById('gateInput');
+            if (input) input.focus();
+        }, 200);
+        // 锁定背景滚动
+        document.body.classList.add('gate-active');
+    }
+
+    function closeGate() {
+        var gate = document.getElementById('gate');
+        if (gate) gate.classList.add('gate--hidden');
+        document.body.classList.remove('gate-active');
+    }
+
+    function shake(el) {
+        if (!el) return;
+        el.classList.remove('gate-shake');
+        // 强制 reflow 触发动画
+        void el.offsetWidth;
+        el.classList.add('gate-shake');
+    }
+
+    function showHint(text, ok) {
+        var hint = document.getElementById('gateHint');
+        if (!hint) return;
+        hint.textContent = text;
+        hint.className = 'gate-hint' + (ok ? ' gate-hint--ok' : ' gate-hint--err');
+    }
+
+    function bind() {
+        var form = document.getElementById('gateForm');
+        var input = document.getElementById('gateInput');
+        var toggle = document.getElementById('gateToggle');
+        var wrap = document.getElementById('gateInputWrap');
+        if (!form || !input) return;
+
+        // 切换显示/隐藏密码
+        if (toggle) {
+            toggle.addEventListener('click', function() {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    toggle.setAttribute('aria-label', '隐藏密码');
+                    toggle.title = '隐藏密码';
+                } else {
+                    input.type = 'password';
+                    toggle.setAttribute('aria-label', '显示密码');
+                    toggle.title = '显示密码';
+                }
+                input.focus();
+            });
+        }
+
+        // 输入时清空错误提示
+        input.addEventListener('input', function() {
+            if (input.classList.contains('gate-input--err')) {
+                input.classList.remove('gate-input--err');
+                showHint('', false);
+            }
+        });
+
+        // 提交验证
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var val = input.value;
+            if (val === PASSWORD) {
+                setAuthed();
+                input.classList.remove('gate-input--err');
+                showHint('验证成功，正在进入...', true);
+                setTimeout(closeGate, 300);
+            } else {
+                input.classList.add('gate-input--err');
+                shake(wrap);
+                showHint('密码错误，请重试', false);
+                input.select();
+            }
+        });
+    }
+
+    function init() {
+        if (isAuthed()) {
+            // 已登录：直接隐藏
+            var gate = document.getElementById('gate');
+            if (gate) gate.classList.add('gate--hidden');
+            document.body.classList.remove('gate-active');
+            return;
+        }
+        bind();
+        openGate();
+    }
+
+    // 把 init() 调用包在密码门之后
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            init();
+            // 触发真正的应用 init
+            if (typeof window.__app_init__ === 'function') window.__app_init__();
+        });
+    } else {
+        init();
+        if (typeof window.__app_init__ === 'function') window.__app_init__();
+    }
+})();

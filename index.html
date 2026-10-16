@@ -9,13 +9,57 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=20261016a">
+<link rel="stylesheet" href="assets/css/style.css?v=20261016b">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b0000' stroke-width='2'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
 <script>
 (function(){try{var t=localStorage.getItem('reading_theme')||'auto';document.documentElement.setAttribute('data-theme',t);var fs=localStorage.getItem('reading_fontsize');if(fs)document.documentElement.style.setProperty('--article-fs',fs+'px');}catch(e){}})();
 </script>
 </head>
 <body>
+
+<!-- ===== 访问密码门 ===== -->
+<div id="gate" class="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <div class="gate-bg" aria-hidden="true">
+        <div class="gate-bg-pattern"></div>
+    </div>
+    <div class="gate-card">
+        <div class="gate-emblem" aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="56" height="56" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 8h24l8 8v40a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4V12a4 4 0 0 1 4-4z"/>
+                <path d="M40 8v8h8"/>
+                <line x1="22" y1="30" x2="38" y2="30"/>
+                <line x1="22" y1="38" x2="38" y2="38"/>
+                <line x1="22" y1="46" x2="32" y2="46"/>
+            </svg>
+        </div>
+        <h1 id="gateTitle" class="gate-title">党内刊物检索系统</h1>
+        <p class="gate-subtitle">请输入访问密码以继续</p>
+        <form id="gateForm" class="gate-form" autocomplete="off" novalidate>
+            <div class="gate-input-wrap" id="gateInputWrap">
+                <input
+                    type="password"
+                    id="gateInput"
+                    class="gate-input"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    maxlength="20"
+                    placeholder="访问密码"
+                    aria-label="访问密码"
+                    autofocus
+                />
+                <button type="button" id="gateToggle" class="gate-toggle" aria-label="显示密码" title="显示密码">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+            </div>
+            <button type="submit" class="gate-submit">
+                <span>进入系统</span>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+            <p id="gateHint" class="gate-hint" role="status" aria-live="polite"></p>
+        </form>
+        <p class="gate-footer">本系统为非公开内容，仅限内部学习研究使用</p>
+    </div>
+</div>
 
 <!-- SVG icon definitions -->
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
@@ -234,7 +278,7 @@
         </div>
         <div class="about-section">
             <h2>数据更新</h2>
-            <p>最近一次数据采集更新时间：<strong>2026 年 10 月 16 日</strong></p>
+            <p>最近一次数据采集更新时间：<strong>2026 年 10 月 16 日</strong> · 新增访问密码门（密码：<strong>5255</strong>，12 小时会话有效）</p>
             <p>《党建研究》：2020 年第 12 期 至 2026 年第 9 期</p>
             <p>《求是》：2019 年第 1 期 至 2026 年第 20 期</p>
             <p>《红旗文稿》：2020 年第 1 期 至 2026 年第 19 期</p>
@@ -312,6 +356,6 @@
     <div class="section-page-body" id="sectionPageBody"></div>
 </div>
 
-<script src="assets/js/app.js?v=20261016a"></script>
+<script src="assets/js/app.js?v=20261016b"></script>
 </body>
 </html>
