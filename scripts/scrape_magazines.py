@@ -210,16 +210,56 @@ def find_catalog_url(mag_key, year, issue):
     html = resp.text
 
     if mag_key in ('qs', 'hqwg'):
-        # 找到指定期号的链接
-        date_prefix = f'{year}{issue:02d}' if issue < 10 else f'{year}{issue:02d}'
-        # 求是/红旗文稿目录页有图片链接指向各期
+        # 求是/红旗文稿目录页只指向最新一期
+        # 从最新期目录页（如已抓到）可通过"上一期"链接找到 19/20 期
+        # 这里用 2026 年度汇总页（从 mulu.htm 的"2026年"链接获取）
+        # 简化：直接返回最新期目录 URL（适合最新一期）
         links = re.findall(r'href="(https?://www\.qstheory\.cn/\d{8}/[0-9a-f]+/c\.html)"', html)
-        # 从图片alt找到对应期数的链接
-        # 实际上目录页只有一个最新期的链接
         if links:
             return links[0]
     elif mag_key == 'djyj':
         return f'https://djyj.12371.cn/{year}/{issue}/'
+    return None
+
+def find_year_aggregate_url(mag_key, year):
+    """从最新期目录页底部找到该年度的汇总页 URL。"""
+    conf = MAGAZINES[mag_key]
+    if mag_key == 'djyj':
+        return f'https://djyj.12371.cn/01/'  # 党建研究使用按期次列表
+    # 求是/红旗文稿：从 mulu.htm 找 "XXXX年" 链接
+    resp = requests.get(conf['catalog_url'], headers=HEADERS, timeout=15, verify=False)
+    resp.encoding = resp.apparent_encoding
+    html = resp.text
+    pattern = r'href="([^"]+)"[^>]*>\s*<img[^>]+alt="' + str(year) + r'年"'
+    m = re.search(pattern, html)
+    if m:
+        href = m.group(1)
+        if not href.startswith('http'):
+            href = urljoin(conf['catalog_url'], href)
+        return href
+    return None
+
+def find_issue_url_in_year(mag_key, year, issue):
+    """从年度汇总页中找到指定期号的目录页 URL。"""
+    conf = MAGAZINES[mag_key]
+    year_url = find_year_aggregate_url(mag_key, year)
+    if not year_url:
+        return None
+    resp = requests.get(year_url, headers=HEADERS, timeout=20, verify=False)
+    resp.encoding = resp.apparent_encoding
+    html = resp.text
+    # 找 "2026年第N期" 文本上下文
+    target = f'{year}年第{issue}期'
+    # 提取所有 c.html 链接
+    all_links = re.findall(r'href="(https?://www\.qstheory\.cn/\d{8}/[0-9a-f]+/c\.html)"', html)
+    # 找前后有 "第N期" 文本的链接
+    # 用更宽松的搜索：按"第N期"位置找其后第一个 c.html
+    for m in re.finditer(re.escape(target), html):
+        # 找前 400 字符内最近的 c.html
+        prefix = html[max(0, m.start()-400):m.end()]
+        hrefs = re.findall(r'href="(https?://www\.qstheory\.cn/\d{8}/[0-9a-f]+/c\.html)"', prefix)
+        if hrefs:
+            return hrefs[-1]
     return None
 
 def parse_qs_hqwg_catalog(catalog_url, year, issue):
@@ -416,6 +456,12 @@ def process_magazine(mag_key, year, issue):
 
     # 找到目录页URL
     catalog_url = find_catalog_url(mag_key, year, issue)
+    # 求是/红旗文稿：mulu.htm 只返回最新期，需要从年度汇总页里找目标期
+    if mag_key in ('qs', 'hqwg') and year == 2026 and issue < get_latest_issue(mag_key):
+        issue_url = find_issue_url_in_year(mag_key, year, issue)
+        if issue_url:
+            catalog_url = issue_url
+            print(f"  找到目标期目录: {issue_url}")
     if not catalog_url:
         print("  !! 未找到目录页URL")
         return []
