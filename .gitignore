@@ -1,12 +1,38 @@
+# ===== OS & 编辑器垃圾 =====
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+*~
+.idea/
+.vscode/
+*.swp
+
+# ===== Node / 包管理 =====
+node_modules/
+npm-debug.log*
+
+# ===== Cloudflare Wrangler 部署临时目录 =====
+.wrangler/
+.uploads/
+.dev.vars
+
+# ===== IDE 助手/插件生成的临时文件 =====
+# Trae IDE 分享副本
+.trae-html-share-packages/
+# Claude Code / Cursor / Continue / Cline 等
+.claude/
+.cursor/
+.codebuddy/
+.continue/
+.aider*
+.windsurf/
+.cody/
+
+# ===== 项目内一次性大文件 / 历史遗留 =====
+# 旧的资源压缩包（现已拆分为 assets/ 目录）
 assets.zip
 *.docx
 *.pdf
 *.xls
 *.xlsx
-node_modules/
-.DS_Store
-Thumbs.db
-*.tmp
-*.bak
-.wrangler/
-.uploads/
