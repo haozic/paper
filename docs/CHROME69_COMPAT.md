@@ -472,6 +472,51 @@ JS 的块注释不嵌套，里面的 `*/` **提前闭合了注释**，于是：
 
 ---
 
+### 4.9 ⚠️ 体检脚本按名字抽函数，前端加了新依赖它就先崩（2026-10-30）
+
+数据侧遗留那批修复里，`assets/js/app.js` 给"未分栏目"加了一个 `sectionLabel()`，
+`renderRelatedArticles()` 改用它。`scripts/check_related.js` 的做法是
+**从 app.js 里按函数名把实现抽出来，在 `vm` 沙箱里跑真实的线上代码**（这是本仓库
+的原则：体检不复刻一份实现，避免逻辑漂移）。
+
+抽取列表是手写的：
+
+```js
+const code = [
+  grabConst(src, 'OTHER_SECTION'),
+  grab(src, 'normalizeSection'),
+  /* ... */
+  grab(src, 'renderRelatedArticles'),
+].join('\n');
+```
+
+`renderRelatedArticles` 改调 `sectionLabel()` 之后，抽取列表里**没有**它，
+于是体检脚本自己先崩：
+
+```
+ReferenceError: sectionLabel is not defined
+    at app.js#related:131:21
+    at renderRelatedArticles (app.js#related:130:11)
+```
+
+**教训**：
+
+1. **体检脚本抽出来的"线上实现"是"按名字挑出来的子集"，不是真正的线上实现。**
+   线上函数新增依赖时，抽取列表必须同步加，否则体检要么崩、要么跑的是残缺版本
+   （后者更糟 —— 它会给出看似正常的结果）。
+2. **这次是"响亮地崩"而不是"静默地错"**，已经是运气好：抽取列表少一个函数，
+   引用是 `ReferenceError`，立刻炸出来。如果缺的是一个**可选**分支
+   （比如 `if (cond) useSectionLabel(x)`），体检就会**静默地少测一条路径**。
+3. 配套的归一化用例也必须跟着更新：这一批把 `OTHER_SECTION` 从"其他"改成
+   "未分栏目"，`check_related.js` 里写死的期望值 `'其他'` 全会 FAIL ——
+   **体检脚本的期望值也是"规格"，规格变了必须同步**。
+
+修法：抽取列表补上 `sectionLabel`，并把归一化用例的期望值改成"未分栏目"、
+补上"来源站兜底值'目录'也要归入未分栏目"这条。跑通后
+`top1 相似度中位数`仍是旧 0.0000 → 新 0.3211，说明算法本身没有被这次改动影响。
+
+---
+
 ## 5. 推荐做法
 
 ### 5.1 用 Can I Use 查询
@@ -487,7 +532,11 @@ JS 的块注释不嵌套，里面的 `*/` **提前闭合了注释**，于是：
    Service Worker 脚本加载起来求值一遍
 5. **改了阅读设置类的开关后**：跑 `python scripts/check_reading_width.py`（§4.8），
    断言"用户点的开关一定产生可测量的几何差异"
-6. **上线阶段**：在 `_headers` 加 `Vary: User-Agent` 不必要，但要监控错误日志
+6. **改了 app.js 的函数依赖后**：跑 `node scripts/check_related.js`（§4.9）——
+   它按名字抽取线上实现，前端加了新依赖就要同步补进抽取列表
+7. **改了板块名相关的代码或数据后**：跑 `python scripts/check_data.py`，
+   它断言"没有兜底板块名（目 录/评论）、没有未归一的旧写法"
+8. **上线阶段**：在 `_headers` 加 `Vary: User-Agent` 不必要，但要监控错误日志
 
 ### 5.3 工具
 
@@ -498,6 +547,8 @@ JS 的块注释不嵌套，里面的 `*/` **提前闭合了注释**，于是：
 - `scripts/check_compat.py`：本仓库自带的 Chrome 69 体检（零依赖）
 - `scripts/check_js_comments.py`：JS 注释层体检 + Service Worker 求值冒烟（零依赖）
 - `scripts/check_reading_width.py`：阅读页宽度/页边距三档体检 + 反向自检（零依赖）
+- `scripts/check_related.js`：相关阅读算法体检（抽取 app.js 真实实现跑）
+- `scripts/check_data.py`：数据体检（分片覆盖 / 重复条目 / 兜底板块名 / 未归一旧写法）
 
 ### 5.4 未来规划
 

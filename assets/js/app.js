@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261030f';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261030g';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -582,7 +582,7 @@ function renderSearchPage() {
             <div class="rc-title">${titleHtml}</div>
             <div class="rc-meta">
                 <span class="rc-tag">${a.y}年第${ci}期</span>
-                <span class="rc-tag">${escHtml(a.s)}</span>
+                ${sectionLabel(a.s) ? `<span class="rc-tag">${escHtml(sectionLabel(a.s))}</span>` : ''}
                 ${authorHtml}
                 ${noBodyTag}
             </div>
@@ -756,7 +756,10 @@ async function showArticle(encUrl, replaceHist) {
 
 function updateArticleMeta(a, wordCount) {
     const ci = a.i <= 24 ? CN[a.i - 1] : a.i;
-    let meta = `${a.y}年第${ci}期 ｜ ${escHtml(normalizeSection(a.s))}${a.a ? ' ｜ ' + escHtml(a.a) : ''}`;
+    const sec = sectionLabel(a.s);
+    let meta = `${a.y}年第${ci}期`;
+    if (sec) meta += ` ｜ ${escHtml(sec)}`;
+    if (a.a) meta += ` ｜ ${escHtml(a.a)}`;
     if (wordCount > 0) {
         meta += ` ｜ 约 ${wordCount} 字`;
         // 按 400 字/分钟估算阅读时长
@@ -1388,8 +1391,10 @@ function renderRelatedArticles(cur, pos, ordered) {
 
     let html = '<div class="ap-related-title">相关阅读</div><div class="ap-related-list">';
     picks.forEach(function (x) {
+        const sec = sectionLabel(x.a.s);
+        const metaTxt = issueLabel(x.a) + (sec ? ' · ' + escHtml(sec) : '');
         html += '<div class="ap-related-item" data-url="' + encodeURIComponent(x.a.u) + '">' +
-            '<span class="ap-related-meta">' + issueLabel(x.a) + ' · ' + escHtml(normalizeSection(x.a.s)) + '</span>' +
+            '<span class="ap-related-meta">' + metaTxt + '</span>' +
             '<span class="ap-related-name">' + escHtml(x.a.t) + '</span></div>';
     });
     html += '</div>';
@@ -1616,11 +1621,20 @@ function renderMarkdown(md) {
  * 归一化后的名字用作板块标识（URL 参数、筛选条件、相关阅读的同板块判断），
  * 因此所有用到板块名的地方都必须走这个函数，不能直接读 meta 里的原始值。
  */
-const OTHER_SECTION = '其他';
+const OTHER_SECTION = '未分栏目';
 
 function normalizeSection(name) {
-    const s = String(name == null ? '' : name).replace(/[\s　 ]+/g, '');
-    return s || OTHER_SECTION;
+    const s = String(name == null ? '' : name).replace(/[\s　 ]+/g, '');
+    /* 「目录」是抓取脚本的兜底值（来源站并没有这个栏目），同样归到未分栏目 */
+    if (!s || s === '目录') return OTHER_SECTION;
+    return s;
+}
+
+/* 板块显示名：来源站没给栏目信息的文章不要显示板块名。
+   显示成"未分栏目"会让人以为它们真属于某个栏目，不如这一段干脆不出现。 */
+function sectionLabel(name) {
+    const s = normalizeSection(name);
+    return s === OTHER_SECTION ? '' : s;
 }
 
 function renderSections() {
@@ -1635,7 +1649,12 @@ function renderSections() {
     const container = document.getElementById('sectionContent');
     let html = '';
     sorted.forEach(([name, count]) => {
-        html += `<div class="section-card" onclick="showSectionPage('${encodeURIComponent(name)}')">
+        /* 未分栏目不是真板块：来源站（旧期）已不再提供栏目信息，
+           给个 title 说明，免得读者以为求是真有个叫"未分栏目"的栏目 */
+        const tip = name === OTHER_SECTION
+            ? ' title="来源站未提供这部分文章的栏目信息（2019—2025 年的目录页已下线栏目结构），按期浏览请用「目录」"'
+            : '';
+        html += `<div class="section-card"${tip} onclick="showSectionPage('${encodeURIComponent(name)}')">
             <div class="sc-name">${escHtml(name)}</div>
             <div class="sc-count">${count}<span class="sc-unit">篇</span></div>
         </div>`;
@@ -1650,7 +1669,12 @@ function showSectionPage(encName) {
     const articles = meta.filter(a => normalizeSection(a.s) === name).sort((a, b) => b.y - a.y || a.i - b.i);
 
     document.getElementById('sectionPageName').textContent = name;
-    document.getElementById('sectionPageCount').textContent = `${articles.length} 篇文章`;
+    const countEl = document.getElementById('sectionPageCount');
+    countEl.textContent = `${articles.length} 篇文章`;
+    /* 未分栏目：说明它不是求是真有的栏目，免得读者误以为"求是有个未分栏目" */
+    countEl.title = name === OTHER_SECTION
+        ? '来源站未提供这部分文章的栏目信息（2019—2025 年的目录页已下线栏目结构），按期浏览请用「目录」'
+        : '';
     document.getElementById('sectionPageSearch').value = '';
     renderSectionPageBody(articles, '');
 
@@ -1731,8 +1755,9 @@ function renderCatalog() {
     meta.forEach(a => {
         if (!catalog[a.y]) catalog[a.y] = {};
         if (!catalog[a.y][a.i]) catalog[a.y][a.i] = {};
-        if (!catalog[a.y][a.i][a.s]) catalog[a.y][a.i][a.s] = [];
-        catalog[a.y][a.i][a.s].push(a);
+        const secKey = normalizeSection(a.s);
+        if (!catalog[a.y][a.i][secKey]) catalog[a.y][a.i][secKey] = [];
+        catalog[a.y][a.i][secKey].push(a);
     });
     state.catalogData = catalog;
     const years = Object.keys(catalog).sort((a, b) => parseInt(b) - parseInt(a));
@@ -1827,7 +1852,11 @@ function toggleIssue(year, ik) {
         let html = '';
         secNames.forEach(sn => {
             const arts = secs[sn];
-            html += `<div class="sec-group"><div class="sg-title">${escHtml(sn)} <span class="count">(${arts.length}篇)</span></div>`;
+            /* 未分栏目这一组不显示小标题（没有栏目名可写），直接列文章 */
+            const titleHtml = sn === OTHER_SECTION
+                ? ''
+                : `<div class="sg-title">${escHtml(sn)} <span class="count">(${arts.length}篇)</span></div>`;
+            html += `<div class="sec-group">${titleHtml}`;
             arts.forEach(a => {
                 const au = a.a ? ` <span class="ai-author">｜${escHtml(a.a)}</span>` : '';
                 const encUrl = encodeURIComponent(a.u);
@@ -1885,7 +1914,7 @@ async function renderFavorites() {
             <div class="rc-title">${escHtml(a.t)}</div>
             <div class="rc-meta">
                 <span class="rc-tag">${a.y}年第${ci}期</span>
-                <span class="rc-tag">${escHtml(a.s)}</span>
+                ${sectionLabel(a.s) ? `<span class="rc-tag">${escHtml(sectionLabel(a.s))}</span>` : ''}
                 ${a.a ? `<span class="rc-author">｜${escHtml(a.a)}</span>` : ''}
             </div>
         </div>`;

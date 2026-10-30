@@ -14,7 +14,7 @@
 
 import requests
 from bs4 import BeautifulSoup, NavigableString, Tag
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 import json
 import os
 import re
@@ -65,6 +65,81 @@ MAGAZINES = {
 }
 
 # ===== 工具函数 =====
+# 板块名归一化：求是/红旗文稿的目录页里，同一个板块有多种等价写法
+#   '目 录'（半角空格）/ '目　录'（全角 U+3000）/ '目\xa0录'（nbsp）
+# 比较板块名之前必须先去掉所有空白，否则同一个板块会被算成好几个。
+_WS_RE = re.compile(r'[\s\u00a0\u3000]+')
+
+def normalize_section(name):
+    """去掉所有空白（含全角空格 / nbsp）后的板块名，用于比较。"""
+    return _WS_RE.sub('', name or '')
+
+# "目 录"是目录页自己的标题（"Table of Contents"），不是栏目，必须排除
+CATALOG_HEADING = normalize_section('目 录')
+
+
+def is_section_heading(span):
+    """判断一个 span 是不是板块标题，是则返回标题文本，否则返回 None。
+
+    求是/红旗文稿的目录页有两种模板：
+      新模板  <span style="color: #ba372a">评论</span>
+      旧模板  <font color="maroon">评论</font>
+    只认前者会漏掉旧期目录页的所有板块。
+    """
+    style = (span.get('style') or '').replace(' ', '').lower()
+    color = (span.get('color') or '').strip().lower()
+    if 'ba372a' not in style and color not in ('maroon', '#ba372a'):
+        return None
+    text = span.get_text(strip=True)
+    if not text or len(text) >= 20:
+        return None
+    if normalize_section(text) == CATALOG_HEADING:
+        return None
+    return text
+
+
+def abs_url(href, base):
+    """把目录页里的链接补成绝对地址。
+
+    目录页里的文章链接是协议相对地址（//www.qstheory.cn/...），
+    旧代码用 href.startswith('http') 过滤，旧期目录页会解析出 0 篇。
+    """
+    if not href:
+        return ''
+    if href.startswith('//'):
+        return 'https:' + href
+    if href.startswith('http'):
+        return href
+    return urljoin(base, href)
+
+
+def canonical_article_url(url):
+    """文章 URL 的规范写法：去掉 /dukan/<刊物>/<年份>/ 里的年份段。
+
+    目录页给的链接是 /dukan/qs/2014/2020-04/16/c_x.htm，
+    而 canonical 形式是 /dukan/qs/2020-04/16/c_x.htm（两者都能访问）。
+    """
+    return re.sub(r'(/dukan/(?:qs|hqwg)/)\d{4}/', r'\1', url or '')
+
+
+def issue_path_prefix(catalog_url):
+    """从目录页 URL 推出"本期文章"的路径前缀。
+
+    旧格式 /dukan/qs/2014/2020-04/16/c_x.htm -> '/dukan/qs/2020-04/16/'
+    新格式 /20251215/8b2f4ea.../c.htm           -> '/20251215/'
+    用来把别期文章（目录页里常混着上一期社论的链接）排除掉。
+    """
+    path = urlparse(catalog_url).path
+    m = re.search(r'/dukan/(?:qs|hqwg)/(?:\d{4}/)?(\d{4}-\d{2}/\d{2})/', path)
+    if m:
+        parts = re.match(r'(/dukan/(?:qs|hqwg)/)', path)
+        return '%s%s/' % (parts.group(1), m.group(1))
+    m = re.match(r'(/\d{8})/', path)
+    if m:
+        return m.group(1) + '/'
+    return None
+
+
 def sanitize_filename(name):
     name = re.sub(r'[<>:"/\\|?*]', '', name)
     name = name.replace(' ', '')
@@ -292,7 +367,17 @@ def find_issue_url_in_year(mag_key, year, issue):
     return None
 
 def parse_qs_hqwg_catalog(catalog_url, year, issue):
-    """解析求是/红旗文稿目录页"""
+    """解析求是/红旗文稿目录页。
+
+    2026-10-30 修掉的三个真 bug：
+      1) 目录页里的文章链接是协议相对地址（//www.qstheory.cn/...），
+         旧代码用 href.startswith('http') 过滤 → 旧期目录页解析出 0 篇；
+      2) 用 f'/{year}' 过滤文章链接，会整期跳过"发布年与期号年不同"的期
+         （如 2026 年第 1 期发布于 2025-12-31，URL 里根本没有 /2026）；
+      3) "目 录"是目录页自己的标题（不是栏目），旧代码只按半角空格比较，
+         '目　录'（全角）/'目\xa0录'（nbsp）都漏掉 → 被当成了板块，
+         于是整期的文章都挂在一个叫"目 录"的假板块下面。
+    """
     resp = requests.get(catalog_url, headers=HEADERS, timeout=15, verify=False)
     resp.encoding = resp.apparent_encoding
     soup = BeautifulSoup(resp.text, 'html.parser')
@@ -304,6 +389,7 @@ def parse_qs_hqwg_catalog(catalog_url, year, issue):
     articles = []
     current_section = ''
     prev_article = None  # 用于合并副标题
+    prefix = issue_path_prefix(catalog_url)
 
     if content:
         for p in content.find_all('p'):
@@ -311,59 +397,67 @@ def parse_qs_hqwg_catalog(catalog_url, year, issue):
             if not text:
                 continue
 
-            # 检查是否是板块标题（红色加粗文字）
-            spans = p.find_all('span')
+            # 检查是否是板块标题（红色/深红加粗文字）
             is_section = False
-            for span in spans:
-                span_style = span.get('style', '')
-                if 'color: #ba372a' in span_style or 'color:#ba372a' in span_style:
-                    section_text = span.get_text(strip=True)
-                    if section_text and len(section_text) < 20 and section_text != '目 录':
-                        current_section = section_text
-                        is_section = True
-                        break
+            for span in p.find_all('span'):
+                section_text = is_section_heading(span)
+                if section_text:
+                    current_section = section_text
+                    is_section = True
+                    break
             if is_section:
                 continue
 
             # 找文章链接
             links = p.find_all('a', href=True)
             for a in links:
-                href = a['href']
-                if href.startswith('http') and f'/{year}' in href:
-                    title = a.get_text(strip=True).replace('\u3000', '').strip()
-                    if not title:
+                href = abs_url(a['href'], catalog_url)
+                if not href.startswith('http'):
+                    continue
+                # 只收本期文章：路径必须落在本期目录下
+                cpath = urlparse(href).path
+                cpath = re.sub(r'(/dukan/(?:qs|hqwg)/)\d{4}/', r'\1', cpath)
+                if prefix:
+                    if not cpath.startswith(prefix):
                         continue
+                elif ('/%d' % year) not in href:
+                    continue
+                title = a.get_text(strip=True).replace('\u3000', '').strip()
+                if not title:
+                    continue
 
-                    # 获取作者
-                    full_text = p.get_text(strip=True)
-                    author = ''
-                    if '/' in full_text:
-                        parts = full_text.split('/', 1)
-                        if len(parts) > 1:
-                            author = parts[1].strip()
+                # 获取作者
+                full_text = p.get_text(strip=True)
+                author = ''
+                if '/' in full_text:
+                    parts = full_text.split('/', 1)
+                    if len(parts) > 1:
+                        author = parts[1].strip()
 
-                    # 副标题合并：以——开头的标题合并到前一篇文章
-                    if title.startswith('——') and prev_article and prev_article['url'] == href:
-                        prev_article['title'] = prev_article['title'] + '——' + title
-                        continue
+                # 副标题合并：以——开头的标题合并到前一篇文章
+                if title.startswith('——') and prev_article and prev_article['url'] == href:
+                    prev_article['title'] = prev_article['title'] + '——' + title
+                    continue
 
-                    # 从标题中提取板块信息（│符号）
-                    section = current_section
-                    if '│' in title:
-                        parts = title.split('│', 1)
-                        section = parts[0].strip()
-                        title = parts[1].strip()
+                # 从标题中提取板块信息（│符号，新版目录页用这个带栏目）
+                section = current_section
+                if '│' in title:
+                    parts = title.split('│', 1)
+                    section = normalize_section(parts[0])
+                    title = parts[1].strip()
+                elif section:
+                    section = normalize_section(section)
 
-                    article = {
-                        'title': title,
-                        'author': author,
-                        'section': section,
-                        'url': href,
-                        'year': year,
-                        'issue': issue,
-                    }
-                    articles.append(article)
-                    prev_article = article
+                article = {
+                    'title': title,
+                    'author': author,
+                    'section': section,
+                    'url': canonical_article_url(href),
+                    'year': year,
+                    'issue': issue,
+                }
+                articles.append(article)
+                prev_article = article
 
     return articles
 

@@ -94,6 +94,10 @@ python scripts/check_data.py
 
 期望看到：**最新期号已更新、重复条目为 0、无"正文缺失"告警、counts 与 meta 一致**。
 
+> 2026-10-30 起体检脚本多断言两项 **板块名**：兜底值（"目 录"/"评论"，不是真实栏目）
+> 与归一表里的旧写法（同一栏目改过名）都必须为 **0 条**。
+> 末尾汇总行会打印 `板块名体检: 兜底值 N 条   未归一旧写法 N 条`。
+
 > 正文数据自 2026-10 起按期分片存放在 `data/<mag>/issues/<年>-<期>.json`，
 > 体检脚本会逐片核对"meta 标了有正文的文章在对应分片里确实存在"，
 > 并报告"孤儿分片"（磁盘上有分片但 meta 里没有该期次）。
@@ -128,13 +132,13 @@ python scripts/check_data.py
 
 | 位置 | 查找 | 当前示例 |
 | --- | --- | --- |
-| `index.html` 第 12 行 | `<link rel="stylesheet" href="assets/css/style.css?v=...` | `?v=20261030f` |
-| `index.html` 第 13 行 | `<link rel="manifest" href="manifest.webmanifest?v=...` | `?v=20261030f` |
-| `index.html` 第 14 行 | `<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=...` | `?v=20261030f` |
-| `index.html` 第 427 行 | `<script src="assets/js/app.js?v=...` | `?v=20261030f` |
-| `assets/js/app.js` 第 4 行 | `const DATA_VERSION = ...` | `'20261030f'` |
+| `index.html` 第 12 行 | `<link rel="stylesheet" href="assets/css/style.css?v=...` | `?v=20261030g` |
+| `index.html` 第 13 行 | `<link rel="manifest" href="manifest.webmanifest?v=...` | `?v=20261030g` |
+| `index.html` 第 14 行 | `<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=...` | `?v=20261030g` |
+| `index.html` 第 427 行 | `<script src="assets/js/app.js?v=...` | `?v=20261030g` |
+| `assets/js/app.js` 第 4 行 | `const DATA_VERSION = ...` | `'20261030g'` |
 
-> `sw.js` 里还有两处 `'20261030f'` 兜底值（第 42、44 行）。正常情况下 SW 从自身 URL 的
+> `sw.js` 里还有两处 `'20261030g'` 兜底值（第 42、44 行）。正常情况下 SW 从自身 URL 的
 > `?v=` 参数取版本（注册时用 `sw.js?v=<DATA_VERSION>`），兜底值只在 SW 被直接访问时才会用到；
 > 但为了让"全仓库搜同一个版本号"的自查能一次搜干净，建议一并改。
 
@@ -335,6 +339,46 @@ python scripts/repair_empty_urls.py --apply    # 写回
 目录页 URL 拼成 `/2026/07/` 会被 12371 重定向到 `error.html`，表现为"解析到 0 篇"。
 
 **处理**：`find_catalog_url()` 已同时尝试 `/年/期/` 与 `/年/0期/` 两种写法，手工排查时两种都试一下。
+
+### 4.8 板块名异常：整期板块是"目录"/"评论"，或整期没有板块
+
+**症状**：板块页上出现一张叫"目 录"或"评论"的卡片；或者某一期文章的板块全空。
+
+**原因（2026-10-30 查清）**：
+
+- **"目 录"是抓取脚本的兜底值**，不是求是真栏目。旧版目录页用 `<font color="maroon">目 录</font>`
+  标目录页自己的标题，老解析器只认 `<span style="color: #ba372a">`，且比较"目 录"时只按半角空格，
+  页面实际有半角 / 全角 U+3000 / nbsp 三种写法 → 全被当成了板块。
+- **"评论"是微博分享控件的产物**：老版本把文章页的 `<div class="fs-pinglun"><span class="big">评论</span>`
+  当成了栏目。
+
+**处理**（**不用重抓正文** —— 板块名只存在 `meta.json` 的 `s` 字段里，正文分片完全不用动）：
+
+```bash
+# 预演：只抓目录页（每期 1 个请求），打印刷回/清空的条数与前后分布，不写盘
+python scripts\refresh_sections.py
+# 实际写回
+python scripts\refresh_sections.py --apply
+# 只处理某一本 / 某几期
+python scripts\refresh_sections.py --mag qs --issues 2026-15,2026-20
+```
+
+脚本**只保留来源站目录页能证实的板块名**，证实不了的一律清空（前端归入"未分栏目"）；
+目录页抓不到就整期不动，不用猜测覆盖已有数据。
+
+**同名栏目被改名**（板块页上多出两张相似的卡片）由 `scripts\canonical_sections.py` 处理：
+
+```bash
+python scripts\canonical_sections.py            # 写盘
+python scripts\canonical_sections.py --check     # 只体检
+```
+
+归一表在 `scripts/canonical_sections.py` 的 `ALIASES` 里，每条都附来源站证据；
+**没有来源站证据的相似名字不合并**（例如党建研究的"调查报告"与"调研报告"保持原样）。
+
+> **边界**：求是 2019–2025 年 14 期（158 期）的栏目信息**在来源站已彻底下线**
+> （实时目录页里 `│` = 0、红色标题 = 0），这批文章只能进"未分栏目"。
+> 彻底修正需要外部档案或第三方镜像。
 
 ---
 

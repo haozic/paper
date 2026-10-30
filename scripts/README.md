@@ -78,6 +78,15 @@ python scripts\scrape_magazines.py --counts
 python scripts\repair_empty_urls.py
 python scripts\repair_empty_urls.py --apply
 
+# 刷新板块名（只抓目录页，不动正文；默认预演，加 --apply 才写盘）
+python scripts\refresh_sections.py
+python scripts\refresh_sections.py --apply
+python scripts\refresh_sections.py --mag qs --issues 2026-15,2026-20
+
+# 板块名归一（同一栏目被改过名时合并；默认写盘，--check 只体检）
+python scripts\canonical_sections.py
+python scripts\canonical_sections.py --check
+
 # Chrome 69 兼容性体检（零依赖，有问题返回非 0 退出码）
 python scripts\check_compat.py
 python scripts\check_compat.py --list
@@ -99,6 +108,8 @@ python scripts\make_icons.py
 | `check_data.py` | 体检三刊的 meta / 正文分片 / counts / article_index 一致性 | 每次抓取后；怀疑数据异常时 |
 | `rebuild_data.py` | 把正文重分片为 `issues/<年>-<期>.json`，丢弃不可达正文，瘦身 article_index | 迁移到分片布局时；怀疑正文文件过大时 |
 | `repair_empty_urls.py` | 修复 `u` 字段为空的条目 | 体检报出空 URL 时 |
+| `refresh_sections.py` | 只抓目录页刷新板块名（不重下正文、不重建分片） | 板块页出现"目录/评论"假板块，或整期无板块时 |
+| `canonical_sections.py` | 合并"同一栏目被改过名"产生的多张相似卡片（归一表附来源站证据） | 板块页上出现两张长得很像的卡片时 |
 | `check_compat.py` | 体检 Chrome 69 兼容性（特性黑名单 + flex gap 兜底缺失） | 改动 CSS / JS 后；详见 [`docs/CHROME69_COMPAT.md`](../docs/CHROME69_COMPAT.md) |
 | `test_check_compat.py` | `check_compat.py` 的反向自测（`@supports` 语义、兜底缺失、注释剥离） | 改动 `check_compat.py` 的解析逻辑后 |
 | `check_js_comments.py` | 体检 JS 注释层（块注释提前闭合）+ Service Worker 求值冒烟 | 改动任何 `.js` 后；详见 [`docs/CHROME69_COMPAT.md` §3.3](../docs/CHROME69_COMPAT.md) |
@@ -336,6 +347,38 @@ for a in meta:
         meta_uniq.append(a)
 meta = meta_uniq
 ```
+
+### 9.7 板块名是"目 录"/"评论"，或某几期整期没有板块
+
+**2026-10-30 查清的三个根因**（都属于**数据层**，不是前端）：
+
+1. **"目 录"是抓取脚本的兜底值**，不是求是真栏目。旧版目录页用
+   `<font color="maroon">目 录</font>` 标目录页自己的标题，解析器只认
+   `<span style="color: #ba372a">`；且比较"目 录"时只按半角空格，
+   页面实际有半角 / 全角 U+3000 / nbsp 三种写法 → 全被当成了板块。
+2. **"评论"是微博分享控件的产物**：老版本把文章页的
+   `<div class="fs-pinglun"><span class="big">评论</span>` 当成了栏目。
+3. **`parse_qs_hqwg_catalog` 的三个老 bug**（从首次入库就有）：
+   - `href.startswith('http')` 过滤掉协议相对 URL（`//www.qstheory.cn/...`）
+     → 旧期目录页解析出 **0 篇**；
+   - `f'/{year}' in href` 年份过滤 → 2026 年第 1 期（发布于 2025-12-31）
+     **整期 0 篇**；
+   - "目 录"比较未归一化 → 被当成了板块。
+
+**处理**：
+
+```bash
+python scripts\refresh_sections.py            # 预演（只抓目录页）
+python scripts\refresh_sections.py --apply    # 写盘
+```
+
+板块名只存在 `meta.json` 的 `s` 字段里，**不需要重抓 85 MB 正文、也不需要重建分片**。
+
+**原则**：只保留来源站目录页能证实的板块名，证实不了的一律清空（前端归入"未分栏目"，
+且不显示为板块名）；目录页抓不到就整期不动。
+
+**边界**：求是 2019–2025 年 14 期（158 期）的栏目信息**在来源站已彻底下线**
+（实时目录页里 `│` = 0、红色标题 = 0），这批文章只能进"未分栏目"。
 
 ---
 

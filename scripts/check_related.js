@@ -81,13 +81,14 @@ function loadApi() {
     grabConst(src, 'OTHER_SECTION'),
     grabConst(src, 'NOISE_TITLES'),
     grab(src, 'normalizeSection'),
+    grab(src, 'sectionLabel'),
     grab(src, 'titleTokens'),
     grab(src, 'isNoiseTitle'),
     grab(src, 'getTitleIndex'),
     grab(src, 'titleSimilarity'),
     grab(src, 'issueLabel'),
     grab(src, 'renderRelatedArticles'),
-    'globalThis.__api = { normalizeSection, titleTokens, isNoiseTitle, getTitleIndex, titleSimilarity, issueLabel, renderRelatedArticles };',
+    'globalThis.__api = { normalizeSection, sectionLabel, titleTokens, isNoiseTitle, getTitleIndex, titleSimilarity, issueLabel, renderRelatedArticles };',
   ].join('\n');
 
   const el = makeEl();
@@ -185,15 +186,16 @@ function main() {
   console.log('');
   console.log('[A] 板块名归一化');
   const normCases = [
-    ['目 录', '目录'],            // 半角空格
-    ['目　录', '目录'],       // 全角空格
-    ['目 录', '目录'],       // 不换行空格
-    ['目 录', '目录'],            // 全角 + 半角
-    ['', '其他'],
-    ['   ', '其他'],
+    ['目 录', '未分栏目'],        // 半角空格
+    ['目　录', '未分栏目'],       // 全角空格
+    ['目 录', '未分栏目'],       // 不换行空格
+    ['目 录', '未分栏目'],            // 全角 + 半角
+    ['目录', '未分栏目'],            // 抓取脚本的兜底值（来源站没有这个栏目）
+    ['', '未分栏目'],
+    ['   ', '未分栏目'],
     ['评论', '评论'],
-    [null, '其他'],
-    [undefined, '其他'],
+    [null, '未分栏目'],
+    [undefined, '未分栏目'],
   ];
   let normBad = 0;
   normCases.forEach(function (c) {
@@ -205,6 +207,9 @@ function main() {
   });
   console.log('  「目 录」三种写法合并为同一个板块名：%s',
     api.normalizeSection('目　录') === api.normalizeSection('目 录') ? '是' : '否');
+  console.log('  未分栏目的文章不显示板块名（sectionLabel 返回空串）：%s',
+    api.sectionLabel('目 录') === '' && api.sectionLabel('') === ''
+      && api.sectionLabel('文化中国') === '文化中国' ? '是' : '否');
 
   /* ---- B. 新旧算法对比 ---- */
   console.log('');

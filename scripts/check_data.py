@@ -26,6 +26,9 @@ import collections
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(SCRIPT_DIR)
 
+sys.path.insert(0, SCRIPT_DIR)
+from canonical_sections import ALIASES    # noqa: E402  板块名归一表（改名合并）
+
 MAGAZINES = [
     ('qs', '求是', 'data/qs/meta.json', 'data/qs/issues'),
     ('hqwg', '红旗文稿', 'data/hqwg/meta.json', 'data/hqwg/issues'),
@@ -83,6 +86,25 @@ def check_one(key, name, meta_path, issues_dir):
     issues = sorted({(a['y'], a['i']) for a in meta})
     no_full = sum(1 for a in meta if not a.get('h'))
 
+    # 板块名体检：meta 里不该再出现抓取脚本的兜底值
+    #   "目 录" —— 来源站并没有叫"目录"的栏目，这是解析器把目录页标题当成了板块
+    #   （还有全角空格 / nbsp 两种写法）
+    #   "评论" —— 老版本把微博分享控件 <span class="big">评论</span> 当成了栏目
+    # 两者都会在板块页上渲染成误导性的卡片，必须为空。
+    placeholder_sections = collections.Counter()
+    for a in meta:
+        sec = ''.join((a.get('s') or '').split())
+        if sec in ('目录', '评论'):
+            placeholder_sections[sec] += 1
+
+    # 板块名归一表体检：同一栏目被来源站改过名之后，meta 里不该再出现旧写法，
+    # 否则板块页上会出现两张长得很像的卡片（详见 scripts/canonical_sections.py）。
+    alias_leaks = collections.Counter()
+    for a in meta:
+        sec = ''.join((a.get('s') or '').split())
+        if sec in ALIASES:
+            alias_leaks[sec] += 1
+
     # 正文分片覆盖检查（按期分片，单片 ~200KB，逐片加载）
     missing_body = []
     body_cache = {}
@@ -123,12 +145,24 @@ def check_one(key, name, meta_path, issues_dir):
         print(f'    !! 孤儿分片 {len(orphan_shards)} 个（meta 中无对应期次），例如: {orphan_shards[0]}')
     if dup_count:
         print(f'    !! 存在重复 URL {dup_count} 条')
+    if placeholder_sections:
+        print('    !! 存在兜底板块名（不是真实栏目，会在板块页渲染成误导性卡片）：'
+              + '、'.join('%s %d 条' % (k, v) for k, v in placeholder_sections.items()))
+    else:
+        print('    板块名: 无兜底值（"目 录"/"评论"）')
+    if alias_leaks:
+        print('    !! 存在未归一的旧板块名（同一栏目的旧写法，板块页会多出相似的卡片）：'
+              + '、'.join('%s %d 条' % (k, v) for k, v in alias_leaks.items()))
+    else:
+        print('    板块名: 无未归一的旧写法')
     return len(meta), dup_count, {
         'articles': len(meta),
         'issues': len(issues),
         'shards': len(shards),
         'missing_body': len(missing_body),
         'orphan_shards': orphan_shards,
+        'placeholder_sections': dict(placeholder_sections),
+        'alias_leaks': dict(alias_leaks),
     }
 
 
@@ -172,7 +206,10 @@ def main():
         if missing:
             print(f'    !! {name}: {len(missing)} 篇有正文但缺 md 映射（示例 {list(missing)[0]}）')
 
+    ph_total = sum(sum((st.get('placeholder_sections') or {}).values()) for st in stats.values())
+    alias_total = sum(sum((st.get('alias_leaks') or {}).values()) for st in stats.values())
     print(f'\n合计文章数: {total_before}   重复条目: {total_dup}')
+    print(f'板块名体检: 兜底值 {ph_total} 条   未归一旧写法 {alias_total} 条')
 
     if dedup and total_dup:
         print('\n开始去重...')
