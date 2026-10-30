@@ -263,6 +263,26 @@ python scripts/check_compat.py --list
 - **B. flex gap 兜底**：任何 `display:flex` + `gap` 的容器，必须在同文件的 `@supports` 兜底块里出现，否则报错——**这正是本次回归的根因**；
 - **C. JS 语法**：先剥离字符串字面量与注释，避免把 `` `#m=${key}` `` 误判成类私有字段。
 
+**`@supports` 的两种语义（体检脚本已区分）**：
+
+Chrome 69 本身就支持 `@supports`（Chrome 28+），所以条件块在 Chrome 69 上要么整块生效、要么整块忽略：
+
+| 写法 | Chrome 69 上的行为 | 体检脚本的判定 |
+| --- | --- | --- |
+| `@supports not (aspect-ratio: 3 / 4)` | **整块生效**（Chrome 69 没有 aspect-ratio） | 逐条检查；块内选择器记为"已覆盖兜底" |
+| `@supports (content-visibility: auto)` | **整块忽略**（Chrome 69 没有 content-visibility） | 整块跳过，无需兜底 |
+| `@supports (display: grid)` | **整块生效**（Chrome 69 有 grid） | 逐条检查 |
+
+判定依据是条件里检测的特性是否在 `FEATURES` 黑名单内。因此新增现代特性时，
+只要放进 `@supports (该特性: ...)` 里，Chrome 69 会自动忽略，**不需要写兜底**；
+但反过来，把现代特性写在 `@supports not (...)` 兜底块里是错的（那块在 Chrome 69 上生效）。
+
+体检脚本自身的判定逻辑有反向自测，改完解析器请跑：
+
+```bash
+python scripts/test_check_compat.py    # 15 条用例，覆盖 @supports / @media / 注释 / 兜底缺失
+```
+
 原始 grep 方式（仅作辅助）：
 
 ```bash

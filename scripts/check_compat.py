@@ -154,35 +154,88 @@ def strip_js_comments(line):
     return line[:i]
 
 
+def strip_css_comments(text):
+    """去掉 CSS 注释，但把注释里的换行保留下来，以免行号错位。"""
+    def repl(m):
+        return re.sub(r'[^\n]', ' ', m.group(0))
+    return re.sub(r'/\*.*?\*/', repl, text, flags=re.S)
+
+
 def css_rules(text):
-    """产出 (选择器, 声明块, 起始行号)，跳过 @ 开头的作用域声明。"""
-    text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
+    """产出 (选择器, 声明块, 起始行号, @supports 条件)，括号感知地解析 CSS。
+
+    相比朴素的正则匹配，这里能正确处理 @supports / @media 的嵌套：
+    每条规则都带上它所处的 @supports 条件（不在任何 @supports 内则为 None），
+    供特性黑名单判断"这条声明在 Chrome 69 上到底会不会生效"。
+    """
     out = []
-    for m in re.finditer(r'([^{}]+)\{([^{}]*)\}', text):
-        sel = ' '.join(m.group(1).split())
-        body = m.group(2)
-        if not sel or sel.startswith('@'):
-            continue
-        line = text.count('\n', 0, m.start()) + 1
-        out.append((sel, body, line))
+    _parse_css(strip_css_comments(text), 1, None, out)
     return out
 
 
-def extract_supports_blocks(css):
-    """取出所有 @supports ... { ... } 的内部文本（用于判断兜底覆盖）。"""
-    blocks = []
-    for m in re.finditer(r'@supports[^{]*\{', css):
-        depth = 1
-        i = m.end()
-        start = i
-        while i < len(css) and depth:
-            if css[i] == '{':
-                depth += 1
-            elif css[i] == '}':
-                depth -= 1
+def _parse_css(text, start_line, cond, out):
+    """start_line 是 text 首行在原文件中的行号；cond 是外层 @supports 条件。"""
+    i = 0
+    n = len(text)
+    buf = []
+    while i < n:
+        ch = text[i]
+        if ch == '{':
+            prelude = ' '.join(''.join(buf).split())
+            buf = []
+            # 找配对的 '}'
+            depth = 1
+            j = i + 1
+            while j < n:
+                if text[j] == '{':
+                    depth += 1
+                elif text[j] == '}':
+                    depth -= 1
+                    if depth == 0:
+                        break
+                j += 1
+            body = text[i + 1:j]
+            line = start_line + text.count('\n', 0, i)
+            body_start_line = start_line + text.count('\n', 0, i + 1)
+            if prelude.startswith('@supports'):
+                # 条件块：内层规则继承该条件
+                _parse_css(body, body_start_line, prelude, out)
+            elif prelude.startswith('@') and '{' in body:
+                # @media / @keyframes / @layer 等：继续往下解析，条件保持不变
+                _parse_css(body, body_start_line, cond, out)
+            elif prelude.startswith('@'):
+                # @font-face 等直接写声明的块：按声明块检查
+                out.append((prelude, body, line, cond))
+            else:
+                out.append((prelude, body, line, cond))
+            i = j + 1
+            continue
+        if ch == '}':
+            buf = []
             i += 1
-        blocks.append(css[start:i - 1])
-    return blocks
+            continue
+        buf.append(ch)
+        i += 1
+
+
+def supports_is_inert(cond):
+    """@supports 块在 Chrome 69 上是否整块不生效。
+
+    Chrome 69 支持 @supports（Chrome 28+），所以：
+      · `@supports (X)` —— 若 X 检测的特性 Chrome 69 也不支持，整块不生效，
+        这些声明天然带渐进增强，无需兜底（例：content-visibility）；
+      · `@supports not (X)` —— 整块在 Chrome 69 上生效，必须逐条检查。
+    """
+    if cond is None:
+        return False
+    if re.search(r'\bnot\s*\(', cond):
+        return False
+    for cat, pattern, desc, ver in FEATURES:
+        if not cat.startswith('CSS'):
+            continue
+        if re.search(pattern, cond):
+            return True
+    return False
 
 
 def last_compound(selector):
@@ -190,21 +243,6 @@ def last_compound(selector):
     parts = re.split(r'[\s>+~]+', selector.strip())
     return parts[-1] if parts else selector
 
-
-def strip_supports_blocks(css):
-    """把 @supports 块整段移除，避免其内部声明被当成"主规则"。"""
-    out = css
-    for m in list(re.finditer(r'@supports[^{]*\{', out)):
-        depth = 1
-        i = m.end()
-        while i < len(out) and depth:
-            if out[i] == '{':
-                depth += 1
-            elif out[i] == '}':
-                depth -= 1
-            i += 1
-        out = out[:m.start()] + out[i:]
-    return out
 
 
 # ---------------------------------------------------------------- CSS 检查
@@ -215,7 +253,11 @@ def check_css(rel, css, problems, base_line=0):
     # 这里记录的是"该兜底写法在本文件里是否存在"。
     file_has = [(fpat, bool(re.search(need, css))) for fpat, need in FILE_FALLBACKS]
 
-    for sel, body, line in css_rules(css):
+    for sel, body, line, cond in css_rules(css):
+        # @supports (X) 块若在 Chrome 69 上整块不生效（X 是 Chrome 69 也没有的特性），
+        # 其声明天然带渐进增强，不需要兜底。
+        if supports_is_inert(cond):
+            continue
         for cat, pattern, desc, ver in FEATURES:
             if not cat.startswith('CSS'):
                 continue
@@ -242,31 +284,30 @@ def check_flex_gap_fallback(rel, css, problems, base_line=0):
     """任何 display:flex + gap 的容器，都必须在同文件的 @supports 兜底块里出现。
 
     flex 的 gap 需要 Chrome 84+，Chrome 69 上会整体丢失间距。
+
+    "兜底块"指 `@supports not (...)` —— 这类块在 Chrome 69 上会生效；
+    `@supports (X)`（X 为 Chrome 69 也没有的特性）在 Chrome 69 上整块忽略，
+    不算兜底。
     """
-    supports = extract_supports_blocks(css)
-    if not supports:
-        covered = set()
-    else:
-        covered = set()
-        for blk in supports:
-            for sel, _body, _ln in css_rules(blk):
-                for p in sel.split(','):
-                    covered.add(last_compound(p.strip()))
-
-    main_css = strip_supports_blocks(css)
-
-    # 收集每个容器的 display 集合与 gap 声明
+    covered = set()
     displays = {}
     gaps = {}
-    for sel, body, line in css_rules(main_css):
-        for p in [s.strip() for s in sel.split(',')]:
-            key = last_compound(p)
-            d = re.search(r'(?<![\w-])display\s*:\s*([\w-]+)', body)
-            if d:
-                displays.setdefault(key, set()).add(d.group(1))
-            g = re.search(r'(?<![\w-])gap\s*:\s*([^;]+)', body)
-            if g:
-                gaps.setdefault(key, []).append((g.group(1).strip(), line, sel))
+
+    for sel, body, line, cond in css_rules(css):
+        if cond is None:
+            # 主规则：收集 display 与 gap
+            for p in [s.strip() for s in sel.split(',')]:
+                key = last_compound(p)
+                d = re.search(r'(?<![\w-])display\s*:\s*([\w-]+)', body)
+                if d:
+                    displays.setdefault(key, set()).add(d.group(1))
+                g = re.search(r'(?<![\w-])gap\s*:\s*([^;]+)', body)
+                if g:
+                    gaps.setdefault(key, []).append((g.group(1).strip(), line, sel))
+        elif not supports_is_inert(cond):
+            # 兜底块：记为"已覆盖"
+            for p in sel.split(','):
+                covered.add(last_compound(p.strip()))
 
     for key, items in sorted(gaps.items()):
         disp = displays.get(key, set())

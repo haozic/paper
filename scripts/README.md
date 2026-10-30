@@ -70,6 +70,9 @@ python scripts\repair_empty_urls.py --apply
 # Chrome 69 兼容性体检（零依赖，有问题返回非 0 退出码）
 python scripts\check_compat.py
 python scripts\check_compat.py --list
+
+# 体检脚本自身的判定逻辑反向自测（15 条用例）
+python scripts\test_check_compat.py
 ```
 
 | 脚本 | 作用 | 何时用 |
@@ -77,6 +80,7 @@ python scripts\check_compat.py --list
 | `check_data.py` | 体检三刊的 meta / years / article_index 一致性 | 每次抓取后；怀疑数据异常时 |
 | `repair_empty_urls.py` | 修复 `u` 字段为空的条目 | 体检报出空 URL 时 |
 | `check_compat.py` | 体检 Chrome 69 兼容性（特性黑名单 + flex gap 兜底缺失） | 改动 CSS / JS 后；详见 [`docs/CHROME69_COMPAT.md`](../docs/CHROME69_COMPAT.md) |
+| `test_check_compat.py` | `check_compat.py` 的反向自测（`@supports` 语义、兜底缺失、注释剥离） | 改动 `check_compat.py` 的解析逻辑后 |
 
 ---
 

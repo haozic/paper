@@ -9,10 +9,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=20261030a">
+<link rel="stylesheet" href="assets/css/style.css?v=20261030b">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b0000' stroke-width='2'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
 <script>
-(function(){try{var t=localStorage.getItem('reading_theme')||'auto';document.documentElement.setAttribute('data-theme',t);var fs=localStorage.getItem('reading_fontsize');if(fs)document.documentElement.style.setProperty('--article-fs',fs+'px');}catch(e){}})();
+(function(){try{
+var d=document.documentElement;
+d.setAttribute('data-theme',localStorage.getItem('reading_theme')||'auto');
+var g=function(k){try{return localStorage.getItem(k);}catch(e){return null;}};
+var fs=g('reading_fontsize');   if(fs)d.style.setProperty('--article-fs',fs+'px');
+var lh=g('reading_lineheight'); if(lh)d.style.setProperty('--article-lh',lh);
+var wd=g('reading_width');      if(wd)d.style.setProperty('--article-w-delta',wd+'px');
+var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',ind+'em');
+}catch(e){}})();
 </script>
 </head>
 <body>
@@ -78,6 +86,10 @@
 <symbol id="i-github" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></symbol>
 <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
 <symbol id="i-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></symbol>
+<symbol id="i-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"/></symbol>
 </svg>
 
 <!-- ===== 首页（三杂志导航） ===== -->
@@ -187,7 +199,8 @@
 <section class="search-bar" id="searchBar">
     <div class="search-box">
         <svg class="icon search-icon"><use href="#i-search"/></svg>
-        <input type="text" id="searchInput" placeholder="输入关键词搜索..." autocomplete="off">
+        <input type="text" id="searchInput" placeholder="输入关键词搜索..." autocomplete="off" title="按 / 或 Ctrl+K 快速聚焦">
+        <kbd class="search-kbd" aria-hidden="true">Ctrl K</kbd>
         <button class="search-btn" id="searchBtn">搜索</button>
     </div>
     <div class="filters" id="filters">
@@ -309,10 +322,17 @@
             <button class="ap-settings-btn" id="articleSettingsBtn" onclick="toggleArticleSettings(event)" title="阅读设置">Aa</button>
             <button class="ap-fav-btn" id="articleFavBtn" onclick="toggleArticleFav()"><svg class="icon"><use href="#i-star"/></svg></button>
             <a class="ap-original-link" id="articleOrigLink" href="#" target="_blank" rel="noopener"><svg class="icon"><use href="#i-external"/></svg></a>
+            <button class="ap-copy-btn" id="articleCopyBtn" onclick="copyArticleLink()" title="复制本篇链接"><svg class="icon"><use href="#i-link"/></svg></button>
         </div>
         <h1 class="ap-title" id="articleTitle"></h1>
         <div class="ap-meta" id="articleMeta"></div>
     </header>
+    <div class="ap-continue" id="articleContinue" hidden>
+        <svg class="icon ap-continue-icon"><use href="#i-clock"/></svg>
+        <span class="ap-continue-text">上次读到 <strong id="articleContinuePct">0%</strong></span>
+        <button class="ap-continue-btn" id="articleContinueBtn">继续阅读</button>
+        <button class="ap-continue-close" onclick="dismissContinue()" title="忽略"><svg class="icon"><use href="#i-close"/></svg></button>
+    </div>
     <div class="ap-settings-panel" id="articleSettingsPanel">
         <button class="asp-close-btn" onclick="toggleArticleSettings()"><svg class="icon"><use href="#i-close"/></svg></button>
         <div class="asp-section">
@@ -332,8 +352,43 @@
                 <button class="asp-btn active" data-theme="auto">跟随系统</button>
             </div>
         </div>
+        <div class="asp-section">
+            <div class="asp-label">行距</div>
+            <div class="asp-btn-group" id="lineHeightGroup">
+                <button class="asp-btn" data-lh="1.75">紧凑</button>
+                <button class="asp-btn active" data-lh="2.05">标准</button>
+                <button class="asp-btn" data-lh="2.35">宽松</button>
+            </div>
+        </div>
+        <div class="asp-section">
+            <div class="asp-label">页宽</div>
+            <div class="asp-btn-group" id="widthGroup">
+                <button class="asp-btn" data-w="-80">窄</button>
+                <button class="asp-btn active" data-w="0">标准</button>
+                <button class="asp-btn" data-w="120">宽</button>
+            </div>
+        </div>
+        <div class="asp-section">
+            <div class="asp-label">首行缩进</div>
+            <div class="asp-btn-group" id="indentGroup">
+                <button class="asp-btn active" data-indent="2">缩进</button>
+                <button class="asp-btn" data-indent="0">不缩进</button>
+            </div>
+        </div>
+        <div class="asp-section asp-section--light-only" id="paperSection">
+            <div class="asp-label">纸张</div>
+            <div class="asp-btn-group" id="paperGroup">
+                <button class="asp-btn active" data-paper="default">默认</button>
+                <button class="asp-btn" data-paper="warm">米黄</button>
+                <button class="asp-btn" data-paper="white">纯白</button>
+            </div>
+        </div>
     </div>
     <div class="article-page-body" id="articleBody"></div>
+    <footer class="article-page-footer" id="articleFooter" hidden>
+        <nav class="ap-nav" id="articleNav" aria-label="上下篇导航"></nav>
+        <section class="ap-related" id="articleRelated" aria-label="相关阅读" hidden></section>
+    </footer>
     <button class="back-to-top" id="backToTopBtn" onclick="scrollToTop()" title="返回顶部">
         <svg class="progress-ring" viewBox="0 0 48 48">
             <circle class="progress-ring-bg" cx="24" cy="24" r="21"></circle>
@@ -356,6 +411,6 @@
     <div class="section-page-body" id="sectionPageBody"></div>
 </div>
 
-<script src="assets/js/app.js?v=20261030a"></script>
+<script src="assets/js/app.js?v=20261030b"></script>
 </body>
 </html>

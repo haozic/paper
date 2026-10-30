@@ -120,10 +120,10 @@ python scripts/check_data.py
 
 | 位置 | 查找 | 示例 |
 | --- | --- | --- |
-| `index.html` 第 12 行 | `<link rel="stylesheet" href="assets/css/style.css?v=...` | `?v=20261030a` |
-| `index.html` 第 359 行 | `<script src="assets/js/app.js?v=...` | `?v=20261030a` |
-| `assets/js/app.js` 第 4 行 | `const DATA_VERSION = ...` | `'20261030a'` |
-| `assets/css/style.css` | `cover_qs/hqwg/djyj.jpg?v=...`（封面更新时） | `?v=20261030a` |
+| `index.html` 第 12 行 | `<link rel="stylesheet" href="assets/css/style.css?v=...` | `?v=20261030b` |
+| `index.html` 第 359 行 | `<script src="assets/js/app.js?v=...` | `?v=20261030b` |
+| `assets/js/app.js` 第 4 行 | `const DATA_VERSION = ...` | `'20261030b'` |
+| `assets/css/style.css` | `cover_qs/hqwg/djyj.jpg?v=...`（封面更新时） | `?v=20261030b` |
 
 **版本号命名规则**：`YYYYMMDDx`，x 是当天的 a/b/c（如果同一天多次更新）。
 
