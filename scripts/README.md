@@ -104,6 +104,10 @@ python scripts\check_sw_navigate.py
 python scripts\check_sw_navigate.py --list          # 列出用例
 python scripts\check_sw_navigate.py --self-test     # 反向自检（2 条用例）
 
+# 备考全书大作文范例字面体检：结构 / 分论点 / 字数 / 重复 / 英文 / Markdown / 乱码 / 体例
+python scripts\check_essays.py
+python scripts\check_essays.py --self-test    # 反向自检（1 正对照 + 12 条注入用例）
+
 # 重新生成 PWA 图标（需要 Pillow；仅在改图标设计时才用）
 python scripts\make_icons.py
 ```
@@ -119,6 +123,7 @@ python scripts\make_icons.py
 | `test_check_compat.py` | `check_compat.py` 的反向自测（`@supports` 语义、兜底缺失、注释剥离） | 改动 `check_compat.py` 的解析逻辑后 |
 | `check_js_comments.py` | 体检 JS 注释层（块注释提前闭合）+ Service Worker 求值冒烟 | 改动任何 `.js` 后；详见 [`docs/CHROME69_COMPAT.md` §3.3](../docs/CHROME69_COMPAT.md) |
 | `check_sw_navigate.py` | 体检 SW 的导航处理（跳转 → opaque 过滤、只接管外壳路由、离线回落） | 改动 `sw.js` 后；首页入口打不开时；详见 [`docs/CHROME69_COMPAT.md` §4.10](../docs/CHROME69_COMPAT.md) |
+| `check_essays.py` | 体检《备考全书》第十章第六节八篇大作文范例的字面合规（结构 / 分论点同构 / 字数 / 重复段落 / 英文夹杂 / Markdown 残留 / 乱码 / 体例 / 批注数字自证） | 改动大作文范例后；详见 [§9.9](#99-大作文范例字面体检) |
 | `make_icons.py` | 生成 PWA 图标（192 / 512 / maskable-512 / apple-touch-icon） | 改图标设计时；需要 Pillow |
 
 ---
@@ -422,6 +427,41 @@ python scripts\check_sw_navigate.py --self-test   # 反向自检
 **排查这类"线上空白"问题的通用顺序**：先比对线上与本地的字节
 （`curl -o 文件` + MD5），字节一致就说明**不是服务端问题**，再往客户端查
 （SW / 缓存 / 相对路径 404）。
+
+---
+
+### 9.9 大作文范例字面体检
+
+《荆楚遴选备考全书》第十章第六节「预测热点大作文完整范例（8篇）」是手写内容，
+篇幅大、句式重复，最容易出**低级文字差错**——写作过程中真实出现过整段复制、
+英文夹杂、乱码、Markdown 标记残留四类问题。它们都不会让页面报错，只会让
+读者看到病句。
+
+```bash
+python scripts\check_essays.py                 # 体检（9 类规则 E1–E9）
+python scripts\check_essays.py --self-test     # 反向自检（1 正对照 + 12 条注入用例）
+```
+
+规则一览：
+
+| 编号 | 检查项 | 抓的是哪类事故 |
+| --- | --- | --- |
+| E1 | 结构完整（八篇齐全，每篇有【审题立意】/【参考范文】/ 亮点批注） | 小节被截断、标签写错 |
+| E2 | 每篇恰好三个分论点，且以"X"领起同构 | 分论点漏写、句式不统一 |
+| E3 | 每篇正文 ≥ 900 字 | 只有提纲没有成文 |
+| E4 | 同一篇内无完全重复的正文段落 | **整段复制**（真实发生过） |
+| E5 | 无未授权英文单词 | **英文夹杂**（fancy / eVTOL 等） |
+| E6 | 无 `**` / `__` 残留 | **Markdown 标记**（纯 HTML 不渲染，会露出星号） |
+| E7 | 无替换字符 / 非法控制字符 / 中英粘连 | **乱码**、中文里粘进英文片段 |
+| E8 | 无感叹号、无网络用语 | 口语化、体例不符 |
+| E9 | 亮点批注里声明的「嵌入 N 处」必须与所列清单条目数一致 | 自己写了个对不上的数字 |
+
+**反向自检必须自带鉴别力**：脚本会先搭一套结构合规的八篇骨架（正对照，必须零错误），
+再逐条注入事故写法，并要求**命中指定的规则编号**。只断言"报错了"是不够的——
+那样会因为别的规则先报错而假通过。
+
+> 写完正文后，**渲染成图片逐张目检**，文字抽取和单元测试都不能替代：
+> 排版错位、表格溢出、callout 塌陷这类问题只有在渲染结果里才看得见。
 
 ---
 
