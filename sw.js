@@ -39,9 +39,9 @@
 var VERSION = (function () {
     try {
         var m = /[?&]v=([^&]+)/.exec(self.location.search);
-        return m ? decodeURIComponent(m[1]) : '20261030d';
+        return m ? decodeURIComponent(m[1]) : '20261030f';
     } catch (e) {
-        return '20261030d';
+        return '20261030f';
     }
 })();
 

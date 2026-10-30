@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261030d';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261030f';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -756,7 +756,7 @@ async function showArticle(encUrl, replaceHist) {
 
 function updateArticleMeta(a, wordCount) {
     const ci = a.i <= 24 ? CN[a.i - 1] : a.i;
-    let meta = `${a.y}年第${ci}期 ｜ ${escHtml(a.s)}${a.a ? ' ｜ ' + escHtml(a.a) : ''}`;
+    let meta = `${a.y}年第${ci}期 ｜ ${escHtml(normalizeSection(a.s))}${a.a ? ' ｜ ' + escHtml(a.a) : ''}`;
     if (wordCount > 0) {
         meta += ` ｜ 约 ${wordCount} 字`;
         // 按 400 字/分钟估算阅读时长
@@ -952,10 +952,15 @@ function applyLineHeight(lh) {
 }
 
 function applyWidth(delta) {
-    state.readingW = String(delta);
-    document.documentElement.style.setProperty('--article-w-delta', String(delta) + 'px');
+    var d = parseInt(delta, 10);
+    if (isNaN(d)) d = 0;
+    state.readingW = String(d);
+    document.documentElement.style.setProperty('--article-w-delta', d + 'px');
+    /* 同时切换页边距档位：<html data-article-width> 驱动 --article-gutter。
+       只改 max-width 的话，窄视口下元素宽被视口顶住，页宽档位看不出任何变化。 */
+    document.documentElement.setAttribute('data-article-width', d < 0 ? 'narrow' : (d > 0 ? 'wide' : 'standard'));
     document.querySelectorAll('#widthGroup .asp-btn').forEach(btn => {
-        btn.classList.toggle('active', parseInt(btn.dataset.w, 10) === parseInt(delta, 10));
+        btn.classList.toggle('active', parseInt(btn.dataset.w, 10) === d);
     });
 }
 
@@ -1243,32 +1248,148 @@ function renderArticleFooter(url, cur) {
     footer.hidden = false;
 }
 
+/* ===== 相关阅读：标题语义相似度 =====
+
+ * 旧算法只看"同板块 + 在有序列表里离得近"，结果经常推出来同板块但主题完全
+ * 不相干的文章（《求是》"评论"板块下有 499 篇，评论的对象各不相同）。
+ *
+ * 新算法以**标题关键词重合度**为主信号：
+ *   1. 标题切成二元组（相邻两字），英文数字按单词切；
+ *   2. 用本刊全部标题算 IDF —— "中国""发展""建设"这类高频套话权重被压低，
+ *      真正体现主题的词（"反腐败""脱贫攻坚""从严治党"）权重高；
+ *   3. IDF 加权余弦相似度作主分，再叠加同板块、同作者、同期的附加分；
+ *   4. 标题本身没有信息量的条目（"本期导读""本期重点推荐""网站声明"）大幅降权。
+ */
+
+/* 标题取词：中文按相邻两字切，英文/数字按单词切。
+ * 不引入分词库 —— 党刊标题多为长句，二元组对主题词的区分度已经够用，且零依赖。 */
+function titleTokens(title) {
+    const raw = String(title || '').toLowerCase();
+    const tokens = [];
+    const words = raw.match(/[a-z][a-z0-9]{1,}/g);
+    if (words) {
+        for (let i = 0; i < words.length; i++) tokens.push(words[i]);
+    }
+    const chunks = raw.split(/[^一-龥]+/);
+    for (let i = 0; i < chunks.length; i++) {
+        const c = chunks[i];
+        if (!c) continue;
+        if (c.length === 1) { tokens.push(c); continue; }
+        for (let j = 0; j + 1 < c.length; j++) tokens.push(c.slice(j, j + 2));
+    }
+    return tokens;
+}
+
+/* 标题本身没有检索价值的标题（各期导语、声明之类），做推荐时要压下去 */
+const NOISE_TITLES = ['本期导读', '本期要目', '本期重点推荐', '网站声明', '目录', '征稿启事'];
+function isNoiseTitle(title) {
+    const s = String(title || '').replace(/[\s　 ]+/g, '');
+    return NOISE_TITLES.indexOf(s) >= 0;
+}
+
+/* 建标题的 TF-IDF 向量索引（按刊物缓存，只算一次） */
+function getTitleIndex(ms) {
+    if (!ms._titleIdx || ms._titleIdxLen !== ms.meta.length) {
+        const N = ms.meta.length;
+        const df = Object.create(null);
+        const vecs = new Array(N);
+        const cards = new Array(N);
+        for (let i = 0; i < N; i++) {
+            const toks = titleTokens(ms.meta[i].t);
+            const tf = Object.create(null);
+            for (let j = 0; j < toks.length; j++) tf[toks[j]] = (tf[toks[j]] || 0) + 1;
+            vecs[i] = tf;
+            cards[i] = toks.length;
+            for (const tk in tf) df[tk] = (df[tk] || 0) + 1;
+        }
+        const idf = Object.create(null);
+        for (const tk in df) idf[tk] = Math.log(1 + N / df[tk]);
+        const norms = new Array(N);
+        for (let i = 0; i < N; i++) {
+            const tf = vecs[i];
+            let sum = 0;
+            for (const tk in tf) {
+                const w = (1 + Math.log(tf[tk])) * idf[tk];
+                tf[tk] = w;
+                sum += w * w;
+            }
+            norms[i] = Math.sqrt(sum) || 1;
+        }
+        ms._titleIdx = { vecs: vecs, norms: norms, cards: cards };
+        ms._titleIdxLen = N;
+    }
+    return ms._titleIdx;
+}
+
+/* IDF 加权余弦相似度 */
+function titleSimilarity(idx, i, j) {
+    const A = idx.vecs[i];
+    const B = idx.vecs[j];
+    if (!A || !B) return 0;
+    /* 遍历 token 较少的一侧 */
+    const smallIsA = idx.cards[i] <= idx.cards[j];
+    const small = smallIsA ? A : B;
+    const large = smallIsA ? B : A;
+    let dot = 0;
+    for (const tk in small) {
+        const v = large[tk];
+        if (v !== undefined) dot += small[tk] * v;
+    }
+    return dot / (idx.norms[i] * idx.norms[j]);
+}
+
 function renderRelatedArticles(cur, pos, ordered) {
     const relEl = document.getElementById('articleRelated');
     if (!relEl || !cur) { if (relEl) relEl.hidden = true; return; }
 
-    const sameSec = [];
-    const sameAuthor = [];
-    for (let i = 0; i < ordered.length; i++) {
-        const a = ordered[i].a;
-        if (a.u === cur.u) continue;
-        const d = Math.abs(i - pos);
-        if (a.s && cur.s && a.s === cur.s) sameSec.push({ a: a, d: d });
-        else if (cur.a && a.a === cur.a) sameAuthor.push({ a: a, d: d });
-    }
-    sameSec.sort(function (x, y) { return x.d - y.d; });
-    sameAuthor.sort(function (x, y) { return x.d - y.d; });
+    const ms = getMagState();
+    const idx = ms ? getTitleIndex(ms) : null;
+    const curI = (ordered[pos] && ordered[pos].i >= 0) ? ordered[pos].i : -1;
 
-    const picks = sameSec.slice(0, 5);
-    for (let i = 0; i < sameAuthor.length && picks.length < 5; i++) {
-        if (picks.every(function (p) { return p.a.u !== sameAuthor[i].a.u; })) picks.push(sameAuthor[i]);
+    const curSec = normalizeSection(cur.s);
+    const curAuthor = cur.a || '';
+    const curYear = cur.y;
+    const curIssue = cur.i;
+
+    const scored = [];
+    for (let k = 0; k < ordered.length; k++) {
+        if (k === pos) continue;
+        const a = ordered[k].a;
+        if (isNoiseTitle(a.t)) continue;   /* "本期导读""网站声明"这类没有推荐价值 */
+        const sim = (idx && curI >= 0) ? titleSimilarity(idx, curI, ordered[k].i) : 0;
+        if (sim <= 0) continue;              /* 标题毫无重合，不算相关 */
+        /* 相似度是主信号（×10），板块/作者/期次只作次级信号 ——
+           否则同板块但主题完全不同的文章会挤掉真正相关的 */
+        let score = sim * 10;
+        const aSec = normalizeSection(a.s);
+        if (aSec === curSec && curSec !== OTHER_SECTION) score += 0.3;
+        if (curAuthor && a.a === curAuthor) score += 0.25;
+        if (a.y === curYear && a.i === curIssue) score += 0.2;
+        else if (a.y === curYear) score += 0.1;
+        scored.push({ a: a, score: score, sim: sim });
+    }
+    scored.sort(function (x, y) { return y.score - x.score; });
+
+    let picks = scored.slice(0, 5);
+
+    /* 标题完全无重合时兜底：补同板块里离得最近的几篇 */
+    if (picks.length < 5 && curSec !== OTHER_SECTION) {
+        const used = picks.map(function (p) { return p.a.u; });
+        for (let k = 0; k < ordered.length && picks.length < 5; k++) {
+            if (k === pos) continue;
+            const a = ordered[k].a;
+            if (normalizeSection(a.s) !== curSec) continue;
+            if (used.indexOf(a.u) >= 0) continue;
+            used.push(a.u);
+            picks.push({ a: a, score: 0, sim: 0 });
+        }
     }
     if (picks.length === 0) { relEl.hidden = true; return; }
 
     let html = '<div class="ap-related-title">相关阅读</div><div class="ap-related-list">';
     picks.forEach(function (x) {
         html += '<div class="ap-related-item" data-url="' + encodeURIComponent(x.a.u) + '">' +
-            '<span class="ap-related-meta">' + issueLabel(x.a) + '</span>' +
+            '<span class="ap-related-meta">' + issueLabel(x.a) + ' · ' + escHtml(normalizeSection(x.a.s)) + '</span>' +
             '<span class="ap-related-name">' + escHtml(x.a.t) + '</span></div>';
     });
     html += '</div>';
@@ -1485,10 +1606,30 @@ function renderMarkdown(md) {
 }
 
 /* ===== 板块视图 ===== */
+/* ===== 板块名归一化 =====
+
+ * 抓取时同一个板块可能写成三种样子：「目 录」（全角空格）、「目 录」（半角空格）、
+ * 「目 录」（不换行空格），页面里会渲染成三个重复的板块卡片；
+ * 另有一批文章根本没抓到板块名（空字符串），会渲染成一个没有名字的空白卡片。
+ *
+ * 这里统一规则：去掉所有空白字符后比较；去完后为空的统一归入「其他」。
+ * 归一化后的名字用作板块标识（URL 参数、筛选条件、相关阅读的同板块判断），
+ * 因此所有用到板块名的地方都必须走这个函数，不能直接读 meta 里的原始值。
+ */
+const OTHER_SECTION = '其他';
+
+function normalizeSection(name) {
+    const s = String(name == null ? '' : name).replace(/[\s　 ]+/g, '');
+    return s || OTHER_SECTION;
+}
+
 function renderSections() {
     const meta = getMeta();
     const counter = {};
-    meta.forEach(a => { counter[a.s] = (counter[a.s] || 0) + 1; });
+    meta.forEach(a => {
+        const key = normalizeSection(a.s);
+        counter[key] = (counter[key] || 0) + 1;
+    });
     const sorted = Object.entries(counter).sort((a, b) => b[1] - a[1]);
 
     const container = document.getElementById('sectionContent');
@@ -1504,9 +1645,9 @@ function renderSections() {
 
 /* ===== 板块文章页面 ===== */
 function showSectionPage(encName) {
-    const name = decodeURIComponent(encName);
+    const name = normalizeSection(decodeURIComponent(encName));
     const meta = getMeta();
-    const articles = meta.filter(a => a.s === name).sort((a, b) => b.y - a.y || a.i - b.i);
+    const articles = meta.filter(a => normalizeSection(a.s) === name).sort((a, b) => b.y - a.y || a.i - b.i);
 
     document.getElementById('sectionPageName').textContent = name;
     document.getElementById('sectionPageCount').textContent = `${articles.length} 篇文章`;
@@ -1566,9 +1707,9 @@ function renderSectionPageBody(articles, query) {
 
 function filterSectionPage() {
     const q = document.getElementById('sectionPageSearch').value.trim();
-    const name = document.getElementById('sectionPageName').textContent;
+    const name = normalizeSection(document.getElementById('sectionPageName').textContent);
     const meta = getMeta();
-    const articles = meta.filter(a => a.s === name).sort((a, b) => b.y - a.y || a.i - b.i);
+    const articles = meta.filter(a => normalizeSection(a.s) === name).sort((a, b) => b.y - a.y || a.i - b.i);
     renderSectionPageBody(articles, q);
 }
 

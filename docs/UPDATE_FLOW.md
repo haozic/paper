@@ -128,13 +128,13 @@ python scripts/check_data.py
 
 | 位置 | 查找 | 当前示例 |
 | --- | --- | --- |
-| `index.html` 第 12 行 | `<link rel="stylesheet" href="assets/css/style.css?v=...` | `?v=20261030d` |
-| `index.html` 第 13 行 | `<link rel="manifest" href="manifest.webmanifest?v=...` | `?v=20261030d` |
-| `index.html` 第 14 行 | `<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=...` | `?v=20261030d` |
-| `index.html` 第 420 行 | `<script src="assets/js/app.js?v=...` | `?v=20261030d` |
-| `assets/js/app.js` 第 4 行 | `const DATA_VERSION = ...` | `'20261030d'` |
+| `index.html` 第 12 行 | `<link rel="stylesheet" href="assets/css/style.css?v=...` | `?v=20261030f` |
+| `index.html` 第 13 行 | `<link rel="manifest" href="manifest.webmanifest?v=...` | `?v=20261030f` |
+| `index.html` 第 14 行 | `<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=...` | `?v=20261030f` |
+| `index.html` 第 427 行 | `<script src="assets/js/app.js?v=...` | `?v=20261030f` |
+| `assets/js/app.js` 第 4 行 | `const DATA_VERSION = ...` | `'20261030f'` |
 
-> `sw.js` 里还有两处 `'20261030d'` 兜底值（第 42、44 行）。正常情况下 SW 从自身 URL 的
+> `sw.js` 里还有两处 `'20261030f'` 兜底值（第 42、44 行）。正常情况下 SW 从自身 URL 的
 > `?v=` 参数取版本（注册时用 `sw.js?v=<DATA_VERSION>`），兜底值只在 SW 被直接访问时才会用到；
 > 但为了让"全仓库搜同一个版本号"的自查能一次搜干净，建议一并改。
 
