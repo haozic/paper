@@ -91,13 +91,15 @@ e:\cursor\xgkt\djyj
 ├── scripts/                        # 🛠 抓取与运维脚本
 │   ├── scrape_magazines.py         # 三刊抓取主脚本（详见 scripts/README.md）
 │   ├── check_data.py               # 数据体检：期号覆盖 / 重复 / 正文缺失
+│   ├── check_compat.py             # Chrome 69 兼容性体检：特性黑名单 + flex gap 兜底检查
 │   ├── repair_empty_urls.py        # 修复历史遗留的空 URL 条目
 │   └── README.md                   # 脚本使用、字段、URL 规律、踩坑记录
 │
 └── docs/                           # 📚 架构、流程、踩坑文档
     ├── ARCHITECTURE.md             # 系统架构、模块划分、数据流
     ├── UPDATE_FLOW.md              # 每月更新文章的标准操作流程
-    └── CHROME69_COMPAT.md          # 浏览器兼容性的处理清单
+    ├── CHROME69_COMPAT.md          # 浏览器兼容性的处理清单
+    └── UX_MODERNIZATION.md         # 阅读体验现代化与舒适度优化建议
 ```
 
 > **重要**：`data/` 是网站运行的**唯一依赖**。`articles/` 仅作原始备份，网站运行时只通过 `article_index.json` 指向它。如果你只需要把站点跑起来，不关心备份，可以 `git rm -r articles/` 后提交，仓库瞬间瘦身到 8 MB。
@@ -204,12 +206,20 @@ wrangler pages deploy . --project-name=djyj
 | iOS Safari | 12+ | 含底部安全区适配 |
 | Android Chrome | 90+ | |
 
-**Chrome 69 兼容**包括：
-- 移除 `oklch()` 颜色 → 改用 hex
-- 移除 `aspect-ratio` → 用 `padding-top` 兼容写法
-- 移除 `:has()` 选择器 → 用 `.checked` 类 + JS 同步
-- 移除 `gap` 属性 → 用 `> * + *` margin 兜底
-- 移除 JS 可选链 `?.` → 改写为 ES5 兼容写法
+**Chrome 69 兼容**采用渐进增强（`@supports` 兜底），现代浏览器走原生路径：
+- `oklch()` 颜色 → hex
+- `aspect-ratio` → `@supports not (aspect-ratio: …)` 里的 `padding-top` 兼容写法
+- `:has()` 选择器 → `.checked` 镜像类 + JS 同步
+- flex `gap` → `@supports` 兜底块里的 `> * + *` margin（现代浏览器仍走原生 `gap`）
+- `inset` 简写 → `top/right/bottom/left` 长写兜底
+- `accent-color` / `appearance` → 全浏览器自绘表单控件
+- JS 可选链 `?.` → 改写为 ES5 兼容写法
+
+改动 CSS / JS 后请跑一次体检：
+
+```bash
+python scripts/check_compat.py
+```
 
 详见 [`docs/CHROME69_COMPAT.md`](./docs/CHROME69_COMPAT.md)。
 
@@ -274,6 +284,7 @@ wrangler pages deploy . --project-name=djyj
 - [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — 系统架构、模块划分、数据流
 - [`docs/UPDATE_FLOW.md`](./docs/UPDATE_FLOW.md) — 每月更新文章的标准操作流程
 - [`docs/CHROME69_COMPAT.md`](./docs/CHROME69_COMPAT.md) — 浏览器兼容性的处理清单
+- [`docs/UX_MODERNIZATION.md`](./docs/UX_MODERNIZATION.md) — 阅读体验现代化与舒适度优化建议（排版/导航/性能，含优先级与路线图）
 - [`linxuan-beikao-zhinan/`](./linxuan-beikao-zhinan/) — 遴选备考专题页面
 
 ---
