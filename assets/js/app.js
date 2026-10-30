@@ -321,6 +321,17 @@ function getSearchScope() {
     return checked ? checked.value : 'all';
 }
 
+/* 同步搜索范围按钮的选中态。
+   Chrome 69 不支持 CSS :has()，需要用 .checked 类兜底；
+   现代浏览器同时保留 :has() 规则，两者结果一致。 */
+function syncScopeChecked() {
+    document.querySelectorAll('.scope-option').forEach(opt => {
+        const input = opt.querySelector('input[name="searchScope"]');
+        if (input && input.checked) opt.classList.add('checked');
+        else opt.classList.remove('checked');
+    });
+}
+
 function performSearch() {
     const input = document.getElementById('searchInput');
     const query = input.value.trim().toLowerCase();
@@ -1381,9 +1392,12 @@ async function init() {
     document.getElementById('bodyOnly').addEventListener('change', performSearch);
     document.querySelectorAll('input[name="searchScope"]').forEach(r => {
         r.addEventListener('change', () => {
+            syncScopeChecked();
             if (searchInput.value.trim()) performSearch();
         });
     });
+    // Chrome 69 不支持 :has()，用 .checked 类同步搜索范围选中态
+    syncScopeChecked();
 
     // 键盘
     document.addEventListener('keydown', e => {

@@ -483,6 +483,28 @@
       h2 { font-size: 1.25rem; }
       h3 { font-size: 1.05rem; }
     }
+
+    /* ============================================================
+       Chrome 69 兼容层
+       ------------------------------------------------------------
+       flex 的 gap 需 Chrome 84+，Chrome 69 上下面这些容器的间距会
+       整体消失。用 aspect-ratio（Chrome 88+）作为旧版浏览器标记：
+       Chrome 83- 直接用 margin 兜底，Chrome 84~87 先把 gap 归零再
+       用 margin，保证与 Chrome 69 的渲染结果一致。
+       ============================================================ */
+    @supports not (aspect-ratio: 1 / 1) {
+      /* 步骤卡片：可换行，横向与纵向间距都要兜 */
+      .framework-card .steps { gap: 0; }
+      .framework-card .steps > * + * { margin-right: 0.5rem; margin-bottom: 0.5rem; }
+      /* 热点徽标：当前只有文本，gap 实际不生效，仍归零保持一致 */
+      .hot-badge { gap: 0; }
+      /* 杂志卡片头部：图标 + 文字块 */
+      .magazine-card .mag-header { gap: 0; }
+      .magazine-card .mag-header > * + * { margin-left: 0.8rem; }
+      /* 原文链接：JS 动态创建，内容为「阅读原文」+ svg */
+      .article-link { gap: 0; }
+      .article-link svg { margin-left: 0.2rem; }
+    }
   </style>
 </head>
 <body>

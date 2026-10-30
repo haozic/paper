@@ -648,6 +648,8 @@ body.sidebar-collapsed .sidebar-expand-btn {
 
 .sidebar-backdrop {
   position: fixed;
+  /* Chrome 69 不支持 inset 简写（Chrome 87+），补长写兜底 */
+  top: 0; right: 0; bottom: 0; left: 0;
   inset: 0;
   background: rgba(0,0,0,0.35);
   z-index: 99;

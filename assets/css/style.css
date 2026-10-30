@@ -549,14 +549,51 @@ body.about-active { padding-bottom: 0; }
     border-radius: 4px;
     transition: all 0.15s var(--ease);
 }
-.scope-option input { width: 13px; height: 13px; cursor: pointer; accent-color: var(--mag-color, var(--primary)); margin: 0; }
+/* ===== 单选/复选框：自绘 =====
+   Chrome 69 不支持 accent-color（Chrome 93+），也不支持 appearance 简写（Chrome 84+），
+   故统一用 -webkit-appearance 自绘，各浏览器观感一致。 */
+.scope-option input[type="radio"],
+.filter-check input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    position: relative;
+    margin: 0;
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    background: var(--card);
+    border: 1.5px solid var(--text-3);
+    cursor: pointer;
+    transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease);
+}
+.scope-option input[type="radio"] { border-radius: 50%; }
+.filter-check input[type="checkbox"] { border-radius: 3px; }
+.scope-option input[type="radio"]:checked,
+.filter-check input[type="checkbox"]:checked {
+    background-color: var(--mag-color, var(--primary));
+    border-color: var(--mag-color, var(--primary));
+}
+.scope-option input[type="radio"]:checked {
+    background-image: radial-gradient(circle at center, #fff 0, #fff 4px, transparent 4.5px);
+}
+.filter-check input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2.5 7.2l3 3 6-6' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-size: 14px 14px;
+    background-repeat: no-repeat;
+}
 .scope-option.checked,
 .scope-option:has(input:checked) {
     background: var(--mag-color, var(--primary));
     color: white;
 }
-.scope-option.checked input,
-.scope-option:has(input:checked) input { accent-color: white; }
+.scope-option.checked input[type="radio"]:checked,
+.scope-option:has(input:checked) input[type="radio"]:checked {
+    background-color: #fff;
+    border-color: #fff;
+}
+.scope-option.checked input[type="radio"]:checked {
+    background-image: radial-gradient(circle at center, var(--mag-color, var(--primary)) 0, var(--mag-color, var(--primary)) 4px, transparent 4.5px);
+}
 .filter-check {
     font-size: 12px;
     color: var(--text-2);
@@ -566,7 +603,6 @@ body.about-active { padding-bottom: 0; }
     white-space: nowrap;
     cursor: pointer;
 }
-.filter-check input { width: 14px; height: 14px; cursor: pointer; accent-color: var(--mag-color, var(--primary)); }
 
 /* ===== Desktop Nav ===== */
 .nav-tabs {
@@ -578,6 +614,7 @@ body.about-active { padding-bottom: 0; }
     margin: 0 auto;
 }
 .nav-tab {
+    display: flex;
     flex: 1;
     padding: 10px 12px;
     border: none;
@@ -1820,6 +1857,8 @@ html[data-theme="dark"] .mag-cover { filter: brightness(0.85); }
 /* ===== 访问密码门 ===== */
 .gate {
     position: fixed;
+    /* Chrome 69 不支持 inset 简写（Chrome 87+），必须写长写兜底 */
+    top: 0; right: 0; bottom: 0; left: 0;
     inset: 0;
     z-index: 9999;
     display: flex;
@@ -1839,12 +1878,14 @@ html[data-theme="dark"] .mag-cover { filter: brightness(0.85); }
 }
 .gate-bg {
     position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
     inset: 0;
     overflow: hidden;
     pointer-events: none;
 }
 .gate-bg-pattern {
     position: absolute;
+    top: -50%; right: -50%; bottom: -50%; left: -50%;
     inset: -50%;
     width: 200%;
     height: 200%;
@@ -1893,6 +1934,7 @@ html[data-theme="dark"] .mag-cover { filter: brightness(0.85); }
 .gate-emblem::after {
     content: "";
     position: absolute;
+    top: -6px; right: -6px; bottom: -6px; left: -6px;
     inset: -6px;
     border-radius: 50%;
     border: 1px solid rgba(139, 0, 0, 0.25);
@@ -2038,66 +2080,112 @@ body.gate-active { overflow: hidden; }
     .gate-input-wrap.gate-shake { animation: none; }
 }
 
-/* ===== Chrome 69 Gap Fallback ===== */
-/* Chrome 69 gap fallback */
-magazine-grid > * + * { margin-top: 20px; }
-/* Chrome 69 gap fallback */
-guide-link-card > * + * { margin-left: 12px; }
-/* Chrome 69 gap fallback */
-sidebar-meta > * + * { margin-left: 8px; }
-/* Chrome 69 gap fallback */
-search-box > * + * { margin-left: 8px; }
-/* Chrome 69 gap fallback */
-search-status > * + * { margin-left: 4px; }
-/* Chrome 69 gap fallback */
-filters > * + * { margin-top: 10px; }
-/* Chrome 69 gap fallback */
-scope-group > * + * { margin-left: 2px; }
-/* Chrome 69 gap fallback */
-scope-option > * + * { margin-left: 3px; }
-/* Chrome 69 gap fallback */
-filter-check > * + * { margin-left: 4px; }
-/* Chrome 69 gap fallback */
-nav-tabs > * + * { margin-left: 4px; }
-/* Chrome 69 gap fallback */
-nav-tab > * + * { margin-left: 6px; }
-/* Chrome 69 gap fallback */
-bn-item > * + * { margin-top: 3px; }
-/* Chrome 69 gap fallback */
-results-list > * + * { margin-top: 10px; }
-/* Chrome 69 gap fallback */
-rc-meta > * + * { margin-left: 4px; }
-/* Chrome 69 gap fallback */
-section-list > * + * { margin-top: 10px; }
-/* Chrome 69 gap fallback */
-section-card > * + * { margin-left: 16px; }
-/* Chrome 69 gap fallback */
-catalog-list > * + * { margin-top: 10px; }
-/* Chrome 69 gap fallback */
-yb-right > * + * { margin-left: 10px; }
-/* Chrome 69 gap fallback */
-ir-right > * + * { margin-left: 8px; }
-/* Chrome 69 gap fallback */
-fh-count > * + * { margin-left: 6px; }
-/* Chrome 69 gap fallback */
-fh-actions > * + * { margin-left: 8px; }
-/* Chrome 69 gap fallback */
-ap-actions > * + * { margin-left: 6px; }
-/* Chrome 69 gap fallback */
-ap-back-btn > * + * { margin-left: 4px; }
-/* Chrome 69 gap fallback */
-asp-section > * + * { margin-top: 8px; }
-/* Chrome 69 gap fallback */
-asp-btn-group > * + * { margin-left: 4px; }
-/* Chrome 69 gap fallback */
-ab-back-btn > * + * { margin-left: 4px; }
-/* Chrome 69 gap fallback */
-about-link > * + * { margin-left: 6px; }
-/* Chrome 69 gap fallback */
-sp-title-row > * + * { margin-left: 10px; }
-/* Chrome 69 gap fallback */
-magazine-grid > * + * { margin-left: 28px; }
-/* Chrome 69 gap fallback */
-section-list > * + * { margin-left: 16px; }
-/* Chrome 69 gap fallback */
-sc-count > * + * { margin-left: 2px; }
+/* ============================================================
+   Chrome 69 兼容层
+   ------------------------------------------------------------
+   · flex 的 gap 需 Chrome 84+。Chrome 69 只支持 grid 的 gap（Chrome 66+），
+     因此**不能**用 `@supports not (gap: 1px)` 判断——Chrome 66~83 会被误判为
+     "已支持 flex gap"。这里统一用 aspect-ratio（Chrome 88+）作为旧版浏览器标记，
+     与文件上方的 `@supports not (aspect-ratio: 3 / 4)` 写法保持一致。
+   · 本块生效于 Chrome 87 及更早。其中 Chrome 84~87 其实已经支持 flex gap，
+     若只补 margin 就会与 gap 叠加成双倍间距；所以先把 gap 归零、间距一律
+     交给 margin，保证 Chrome 69 → 88+ 的渲染结果完全一致。
+   · grid 容器的 gap 自 Chrome 66 起就支持，不归零（见 .section-list）。
+   · inset 简写需 Chrome 87+，已在各处补 top/right/bottom/left 长写兜底。
+   · accent-color 需 Chrome 93+，已改为自绘单选/复选框（各浏览器观感一致）。
+   ============================================================ */
+@supports not (aspect-ratio: 3 / 4) {
+
+    /* ---- 横向排列：后续元素补左边距 ---- */
+    .guide-link-card { gap: 0; }
+    .guide-link-card > * + * { margin-left: 12px; }
+    .sidebar-meta { gap: 0; }
+    .sidebar-meta > * + * { margin-left: 8px; }
+    .search-box { gap: 0; }
+    .search-box > * + * { margin-left: 8px; }
+    .scope-group { gap: 0; }
+    .scope-group > * + * { margin-left: 2px; }
+    .nav-tabs { gap: 0; }
+    .nav-tabs > * + * { margin-left: 4px; }
+    .pagination { gap: 0; }
+    .pagination > * + * { margin-left: 4px; }
+    .rc-meta { gap: 0; }
+    .rc-meta > * + * { margin-left: 4px; }
+    .section-card { gap: 0; }
+    .section-card > * + * { margin-left: 16px; }
+    .yb-right { gap: 0; }
+    .yb-right > * + * { margin-left: 10px; }
+    .ir-right { gap: 0; }
+    .ir-right > * + * { margin-left: 8px; }
+    .fh-actions { gap: 0; }
+    .fh-actions > * + * { margin-left: 8px; }
+    .ap-back-btn { gap: 0; }
+    .ap-back-btn > * + * { margin-left: 4px; }
+    .ap-actions { gap: 0; }
+    .ap-actions > * + * { margin-left: 6px; }
+    .asp-btn-group { gap: 0; }
+    .asp-btn-group > * + * { margin-left: 4px; }
+    .sp-back-btn { gap: 0; }
+    .sp-back-btn > * + * { margin-left: 4px; }
+    .sp-title-row { gap: 0; }
+    .sp-title-row > * + * { margin-left: 10px; }
+    .ab-back-btn { gap: 0; }
+    .ab-back-btn > * + * { margin-left: 4px; }
+    .gate-submit { gap: 0; }
+    .gate-submit > * + * { margin-left: 8px; }
+
+    /* ---- 纵向排列：后续元素补上边距 ---- */
+    .magazine-grid { gap: 0; }
+    .magazine-grid > * + * { margin-top: 20px; }
+    .bn-item { gap: 0; }
+    .bn-item > * + * { margin-top: 3px; }
+    .results-list { gap: 0; }
+    .results-list > * + * { margin-top: 10px; }
+    .section-list { gap: 0; }
+    .section-list > * + * { margin-top: 10px; }
+    .catalog-list { gap: 0; }
+    .catalog-list > * + * { margin-top: 10px; }
+    .asp-section { gap: 0; }
+    .asp-section > * + * { margin-top: 8px; }
+    .gate-form { gap: 0; }
+    .gate-form > * + * { margin-top: 14px; }
+
+    /* ---- .filters 基础为横向（可换行） ---- */
+    .filters { gap: 0; }
+    .filters > * + * { margin-left: 10px; }
+
+    /* ---- 裸文本 / 伪元素是匿名 flex 项，> * + * 选不中，改为给前置元素补右边距 ---- */
+    .search-status { gap: 0; }
+    .search-status::before { margin-right: 4px; }
+    .nav-tab { gap: 0; }
+    .nav-tab .icon { margin-right: 6px; }
+    .nav-tab .fav-badge { margin-left: 8px; }   /* 原生 gap 6px + 徽标自带 2px */
+    .scope-option { gap: 0; }
+    .scope-option input[type="radio"] { margin-right: 3px; }
+    .filter-check { gap: 0; }
+    .filter-check input[type="checkbox"] { margin-right: 4px; }
+    .fh-count { gap: 0; }
+    .fh-count svg { margin-right: 6px; }
+    .about-link { gap: 0; }
+    .about-link svg { margin-right: 6px; }
+
+    /* ---- .sc-count 前置为裸文本，给后置 .sc-unit 补左边距 ---- */
+    .sc-count { gap: 0; }
+    .sc-count .sc-unit { margin-left: 2px; }
+
+    /* ---- 阅读设置面板：关闭按钮绝对定位，只有两个 .asp-section 参与纵向排列 ---- */
+    .ap-settings-panel { gap: 0; }
+    .ap-settings-panel > .asp-section + .asp-section { margin-top: 14px; }
+
+    /* ---- ≥768px 时方向/间距发生变化的容器 ---- */
+    @media (min-width: 768px) {
+        .magazine-grid { gap: 0; }
+        .magazine-grid > * + * { margin-top: 0; margin-left: 28px; }  /* 改为横向 */
+        .filters { gap: 0; }
+        .filters > * + * { margin-left: 0; margin-top: 12px; }        /* 改为纵向 */
+        .section-list { gap: 16px; }                                 /* 改为 grid，用 grid gap */
+        .section-list > * + * { margin-top: 0; }
+        .section-card { gap: 0; }
+        .section-card > * + * { margin-left: 0; margin-top: 0; }      /* 改为纵向且 gap: 0 */
+    }
+}
