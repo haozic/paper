@@ -99,6 +99,11 @@ python scripts\check_js_comments.py
 python scripts\check_js_comments.py --no-runtime   # 只跑词法扫描
 python scripts\check_js_comments.py --self-test    # 反向自检（8 条用例）
 
+# Service Worker 导航处理体检：防"首页入口打不开"（行为级，4 条用例）
+python scripts\check_sw_navigate.py
+python scripts\check_sw_navigate.py --list          # 列出用例
+python scripts\check_sw_navigate.py --self-test     # 反向自检（2 条用例）
+
 # 重新生成 PWA 图标（需要 Pillow；仅在改图标设计时才用）
 python scripts\make_icons.py
 ```
@@ -113,6 +118,7 @@ python scripts\make_icons.py
 | `check_compat.py` | 体检 Chrome 69 兼容性（特性黑名单 + flex gap 兜底缺失） | 改动 CSS / JS 后；详见 [`docs/CHROME69_COMPAT.md`](../docs/CHROME69_COMPAT.md) |
 | `test_check_compat.py` | `check_compat.py` 的反向自测（`@supports` 语义、兜底缺失、注释剥离） | 改动 `check_compat.py` 的解析逻辑后 |
 | `check_js_comments.py` | 体检 JS 注释层（块注释提前闭合）+ Service Worker 求值冒烟 | 改动任何 `.js` 后；详见 [`docs/CHROME69_COMPAT.md` §3.3](../docs/CHROME69_COMPAT.md) |
+| `check_sw_navigate.py` | 体检 SW 的导航处理（跳转 → opaque 过滤、只接管外壳路由、离线回落） | 改动 `sw.js` 后；首页入口打不开时；详见 [`docs/CHROME69_COMPAT.md` §4.10](../docs/CHROME69_COMPAT.md) |
 | `make_icons.py` | 生成 PWA 图标（192 / 512 / maskable-512 / apple-touch-icon） | 改图标设计时；需要 Pillow |
 
 ---
@@ -379,6 +385,43 @@ python scripts\refresh_sections.py --apply    # 写盘
 
 **边界**：求是 2019–2025 年 14 期（158 期）的栏目信息**在来源站已彻底下线**
 （实时目录页里 `│` = 0、红色标题 = 0），这批文章只能进"未分栏目"。
+
+### 9.8 首页底部的"备考指南/备考全书"打不开（空白、没有样式）
+
+**2026-10-30 用户报障查清的根因**（属于 **Service Worker 层**，不是文件缺失、
+也不是部署问题 —— 线上返回的字节与本地文件 MD5 完全一致）：
+
+1. Cloudflare Workers Static Assets 的 `html_handling` 会把 `.html` 路径
+   **308 重定向**到无扩展名路径（`/x/x.html` → `/x/x`）。
+2. SW 接管导航时，旧代码直接 `fetch(request)`。而在 Service Worker 里 fetch
+   一个 mode 为 `navigate` 的请求，**只要该地址发生跳转**，Fetch 规范就会把
+   响应过滤成 **opaque**：`status=0、ok=false、redirected=false`
+   （浏览器实测诊断输出：`BRANCH=not-ok / response.status=0 / response.redirected=false`）。
+3. 旧代码把 `!response.ok` 一律当成"断网"，于是回落到缓存的 `index.html`，
+   把**首页 HTML 塞到了子页面地址上**。
+4. `index.html` 的 `assets/css`、`assets/js` 都是**相对路径**，在
+   `/linxuan-beikao-zhinan/` 目录下全部 404 —— 样式没了、app 没启动、
+   body 几乎是空的 → 用户看到的就是**"打开了新页面，但空白、没有样式"**。
+5. 缓存里查不到 `index.html` 时 SW 返回 `Response.error()`，
+   浏览器直接 `net::ERR_FAILED`（`chrome-error://chromewebdata/`）。
+
+**处理**：
+
+```bash
+python scripts\check_sw_navigate.py          # 行为级体检（4 条用例）
+python scripts\check_sw_navigate.py --self-test   # 反向自检
+```
+
+**两条硬规则**（已写进 `sw.js` 注释）：
+
+- SW 里**不要**用 navigate 模式的请求去 `fetch`。要抓正文就用
+  `new Request(url, { mode: 'same-origin' })`，跳转才会被正常跟随。
+- SW **只接管应用外壳路由**（`/` 与 `/index.html`）；备考指南这类独立静态页
+  直接放行给网络，浏览器自己处理 308 重定向。
+
+**排查这类"线上空白"问题的通用顺序**：先比对线上与本地的字节
+（`curl -o 文件` + MD5），字节一致就说明**不是服务端问题**，再往客户端查
+（SW / 缓存 / 相对路径 404）。
 
 ---
 

@@ -105,6 +105,17 @@ python scripts/check_data.py
 若报出"空 URL"或"重复条目"，处理方式见 [§4.4 重复抓取同一期](#44-重复抓取同一期) 与
 [§4.6 空 URL 条目](#46-空-url-条目)。
 
+> 改动了 `sw.js`（或任何 `.js`）时，还要跑这几个体检：
+>
+> ```bash
+> python scripts/check_js_comments.py    # 注释层 + SW 求值冒烟
+> python scripts/check_sw_navigate.py    # SW 导航处理（行为级）
+> python scripts/check_compat.py        # Chrome 69 兼容性
+> ```
+>
+> `check_sw_navigate.py` 是 2026-10-30 新增的：那次"首页入口打不开"的根因就在
+> SW 的导航处理上（详见 [§4.9](#49-首页入口打不开空白没有样式)）。
+
 ### 2.5 同步 index.html
 
 打开 `index.html`，找到"关于本站 → 数据更新"区块（约 226 行）：
@@ -132,13 +143,13 @@ python scripts/check_data.py
 
 | 位置 | 查找 | 当前示例 |
 | --- | --- | --- |
-| `index.html` 第 12 行 | `<link rel="stylesheet" href="assets/css/style.css?v=...` | `?v=20261030g` |
-| `index.html` 第 13 行 | `<link rel="manifest" href="manifest.webmanifest?v=...` | `?v=20261030g` |
-| `index.html` 第 14 行 | `<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=...` | `?v=20261030g` |
-| `index.html` 第 427 行 | `<script src="assets/js/app.js?v=...` | `?v=20261030g` |
-| `assets/js/app.js` 第 4 行 | `const DATA_VERSION = ...` | `'20261030g'` |
+| `index.html` 第 12 行 | `<link rel="stylesheet" href="assets/css/style.css?v=...` | `?v=20261030h` |
+| `index.html` 第 13 行 | `<link rel="manifest" href="manifest.webmanifest?v=...` | `?v=20261030h` |
+| `index.html` 第 14 行 | `<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=...` | `?v=20261030h` |
+| `index.html` 第 427 行 | `<script src="assets/js/app.js?v=...` | `?v=20261030h` |
+| `assets/js/app.js` 第 4 行 | `const DATA_VERSION = ...` | `'20261030h'` |
 
-> `sw.js` 里还有两处 `'20261030g'` 兜底值（第 42、44 行）。正常情况下 SW 从自身 URL 的
+> `sw.js` 里还有两处 `'20261030h'` 兜底值（第 42、44 行）。正常情况下 SW 从自身 URL 的
 > `?v=` 参数取版本（注册时用 `sw.js?v=<DATA_VERSION>`），兜底值只在 SW 被直接访问时才会用到；
 > 但为了让"全仓库搜同一个版本号"的自查能一次搜干净，建议一并改。
 
@@ -379,6 +390,45 @@ python scripts\canonical_sections.py --check     # 只体检
 > **边界**：求是 2019–2025 年 14 期（158 期）的栏目信息**在来源站已彻底下线**
 > （实时目录页里 `│` = 0、红色标题 = 0），这批文章只能进"未分栏目"。
 > 彻底修正需要外部档案或第三方镜像。
+
+### 4.9 首页入口打不开（空白、没有样式）
+
+**症状**（2026-10-30 用户报障）：首页底部"遴选备考指南""荆楚遴选备考全书"两张卡片，
+点进去**打开了新页面，但空白、没有样式**；直接在新标签输 URL 也是一样。
+
+**排查顺序**（先证伪服务端，再查客户端）：
+
+```bash
+# 1) 线上字节是否与本地一致 —— 一致就说明不是服务端问题
+curl.exe -sS -o 线上.html "https://paper.zhouhao.cn/linxuan-beikao-zhinan/linxuan-beikao-zhinan"
+# 本地算 MD5 与线上比对
+
+# 2) 各路径变体的状态码（注意 .html 会 308 到无扩展名路径）
+curl.exe -sS -o NUL -w "%{http_code} %{content_type} %{size_download} -> %{redirect_url}" \
+  "https://paper.zhouhao.cn/linxuan-beikao-zhinan/linxuan-beikao-zhinan.html"
+```
+
+**根因**（在 SW 层）：
+
+1. Cloudflare 的 `html_handling` 把 `.html` **308 重定向**到无扩展名路径；
+2. SW 里直接 `fetch(导航请求)`，遇到跳转会按 Fetch 规范被过滤成 **opaque**
+   （`status=0、ok=false、redirected=false`）；
+3. 旧代码把 `!response.ok` 当成"断网"，回落到缓存的 `index.html`，
+   **把首页 HTML 塞到子页面地址上**；
+4. 首页的 `assets/` 是相对路径，在子目录下全部 404 → **空白 + 没有样式**；
+5. 缓存里查不到首页时返回 `Response.error()` → 浏览器 `net::ERR_FAILED`。
+
+**处理**：已在 `sw.js` 修掉（导航抓取改用 `mode: 'same-origin'`；SW 只接管
+`/` 与 `/index.html` 两个外壳路由，其余静态页放行给网络），并新增行为级体检：
+
+```bash
+python scripts\check_sw_navigate.py
+python scripts\check_sw_navigate.py --self-test
+```
+
+> 改 `sw.js` 后**一定要**跑这个体检：它会把线上 sw.js 放进 mock 的 SW 环境，
+> 用一个"按规范把重定向响应过滤成 opaque"的假 fetch 实跑导航，
+> 断言"首页正常联网""外壳路径拿到干净响应""非外壳路径不被接管""断网仍能回落"。
 
 ---
 

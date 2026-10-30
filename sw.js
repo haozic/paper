@@ -39,9 +39,9 @@
 var VERSION = (function () {
     try {
         var m = /[?&]v=([^&]+)/.exec(self.location.search);
-        return m ? decodeURIComponent(m[1]) : '20261030g';
+        return m ? decodeURIComponent(m[1]) : '20261030h';
     } catch (e) {
-        return '20261030g';
+        return '20261030h';
     }
 })();
 
@@ -182,6 +182,57 @@ function contentTypeMatches(path, response) {
     return true;
 }
 
+/* 应用外壳路由：只有首页由 SW 接管导航。
+   其余路径（备考指南等独立静态页）一律放行给网络，
+   浏览器自己处理 Cloudflare 的 .html -> 无扩展名 308 重定向。 */
+function isShellPath(pathname) {
+    return pathname === '/' || pathname === '/index.html';
+}
+
+/* 取一份可用于"导航响应"的正文；拿不到可用正文时返回 null。
+ *
+ * 两个必须绕开的坑：
+ *
+ * 1) 不能直接 fetch(导航请求)。在 Service Worker 里 fetch 一个 mode 为
+ *    navigate 的请求时，只要该地址发生跳转（Cloudflare Workers Static
+ *    Assets 会把 .html 308 重定向到无扩展名路径），Fetch 规范会把响应
+ *    过滤成 opaque：status=0、ok=false、redirected=false。
+ *    旧代码把 !response.ok 一律当成"断网"，于是回落到缓存的 index.html，
+ *    把首页 HTML 塞到子页面地址上；首页的 assets/ 是相对路径，
+ *    在子目录下全部 404 —— 用户看到的就是"打开新页面但空白、没有样式"。
+ *    所以这里改用 mode:'same-origin' 的普通 GET，跳转会被正常跟随，
+ *    拿到 status 200 的真实响应。
+ *
+ * 2) 跟随跳转后拿到的响应带 redirected 标记，部分浏览器不收这种导航响应。
+ *    所以再按最终地址补抓一次，拿到不带 redirected 的干净响应。
+ */
+function fetchShell(request) {
+    var plain;
+    try {
+        plain = new Request(request.url, {
+            method: 'GET',
+            mode: 'same-origin',
+            credentials: 'same-origin',
+            redirect: 'follow'
+        });
+    } catch (e) {
+        plain = request;
+    }
+    return fetch(plain).then(function (response) {
+        if (!response || !response.ok || response.status === 0) return null;
+        if (response.redirected && response.url) {
+            return fetch(response.url, { credentials: 'same-origin' })
+                .then(function (clean) {
+                    return (clean && clean.ok && clean.status !== 0) ? clean : response;
+                })
+                .catch(function () {
+                    return response;
+                });
+        }
+        return response;
+    });
+}
+
 /* 导航请求：优先联网拿最新版，断网时回落到缓存的首页 */
 function handleNavigate(request) {
     var key;
@@ -190,18 +241,15 @@ function handleNavigate(request) {
     } catch (e) {
         key = request;
     }
-    return fetch(request).then(function (response) {
-        if (response && response.ok) {
+    return fetchShell(request).then(function (response) {
+        if (response) {
             return putInRuntime(SHELL_CACHE, key, response, 9999).then(function () {
                 return response;
             });
         }
-        return caches.match(key).then(function (cached) {
-            if (cached) return cached;
-            return caches.match('./index.html').then(function (fallback) {
-                if (fallback) return fallback;
-                return response;
-            });
+        /* 没拿到正文：回落到缓存里的首页（仅限应用外壳路由） */
+        return caches.match('./index.html').then(function (fallback) {
+            return fallback || Response.error();
         });
     }).catch(function () {
         return caches.match('./index.html').then(function (fallback) {
@@ -254,6 +302,9 @@ self.addEventListener('fetch', function (event) {
     if (!isSameOrigin(url)) return;          /* 跨域请求不接管 */
 
     if (request.mode === 'navigate') {
+        /* 只有应用外壳路由才接管导航；备考指南等独立静态页放行给网络，
+           避免 SW 参与它们的 308 重定向处理（见 fetchShell 注释里的坑 1）。 */
+        if (!isShellPath(url.pathname)) return;
         event.respondWith(handleNavigate(request));
         return;
     }

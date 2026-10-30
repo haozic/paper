@@ -515,6 +515,70 @@ ReferenceError: sectionLabel is not defined
 补上"来源站兜底值'目录'也要归入未分栏目"这条。跑通后
 `top1 相似度中位数`仍是旧 0.0000 → 新 0.3211，说明算法本身没有被这次改动影响。
 
+### 4.10 ⚠️ Service Worker 里 fetch 导航请求，跳转会变成 opaque（2026-10-30）
+
+用户报"首页底部的备考指南和备考全书打不开"——点了之后**打开了新页面，
+但空白、没有样式**。
+
+**先排除服务端**：把线上响应 `curl -o` 下来和本地文件算 MD5，**完全一致**；
+各路径变体的状态码也逐一核对过（`.html` → 308，无扩展名 → 200 且字节正确）。
+所以**不是文件缺失、不是部署问题、也不是 308 本身有问题**。
+
+**真正的坑在 Service Worker**：
+
+1. Cloudflare Workers Static Assets 的 `html_handling` 把 `.html` **308 重定向**
+   到无扩展名路径。
+2. SW 接管导航时若直接 `fetch(request)`，而在 Service Worker 里 fetch 一个
+   mode 为 `navigate` 的请求，**只要该地址发生跳转**，Fetch 规范就会把响应
+   过滤成 **opaque**：`status=0、ok=false、redirected=false`。
+   浏览器实测（临时插桩打出诊断页）原文：
+
+   ```
+   BRANCH=not-ok
+   request.url=.../linxuan-beikao-zhinan/linxuan-beikao-zhinan.html
+   response.status=0
+   response.redirected=false
+   ```
+
+3. 旧代码把 `!response.ok` 一律当成"断网"，回落到缓存的 `index.html`，
+   **把首页 HTML 塞到了子页面地址上**。
+4. `index.html` 的 `assets/css`、`assets/js` 是**相对路径**，在
+   `/linxuan-beikao-zhinan/` 下全部 404 → 样式没了、app 没启动、body 几乎是空的
+   → **"空白页 + 没有样式"**。缓存里查不到 `index.html` 时 SW 返回
+   `Response.error()`，浏览器直接 `net::ERR_FAILED`。
+
+**教训**：
+
+1. **在 SW 里不能拿"导航请求"直接去 fetch。** 要抓正文就用
+   `new Request(url, { mode: 'same-origin' })`，跳转才会被正常跟随；
+   跟随后拿到的响应带 `redirected` 标记，再按最终地址补抓一次更干净。
+2. **SW 不该接管所有导航。** 现在只接管应用外壳路由（`/` 与 `/index.html`），
+   备考指南这类独立静态页直接放行给网络，让浏览器自己处理 308。
+3. **"服务端返回的字节"和"用户看到的页面"是两回事。** SW 可以把完全正确的
+   响应替换成完全错误的页面——而这次它替换的是首页 HTML，症状是"空白无样式"，
+   非常容易误判成前端 CSS 挂了。
+4. **排查线上空白问题的通用顺序**：先比对线上与本地的字节（MD5），
+   一致就说明不是服务端问题，再往客户端查（SW / 缓存 / 相对路径 404）。
+
+**配套体检**：`scripts/check_sw_navigate.py` —— 把仓库里真正的 `sw.js` 装进
+mock 的 Service Worker 环境，用一个"按 Fetch 规范在 navigate 模式下把重定向
+响应过滤成 opaque"的假 fetch，真的跑一遍导航，断言 4 件事：
+
+| 用例 | 断言 |
+| --- | --- |
+| T1 | 首页 `/` 正常联网 → 返回网络响应，不是缓存里的 index.html |
+| T2 | 外壳路径 `/index.html`（线上会 308）→ 返回**不带 redirected 标记**的干净响应 |
+| T3 | 非外壳路径 → SW **不接管**导航 |
+| T4 | 断网 → 回落到缓存里的 index.html（离线能力不能丢） |
+
+反向自检会把 `mode: 'same-origin'` 注入回 `mode: 'navigate'`（即事故形态），
+必须让 T2 失败——否则体检本身没有鉴别力。
+
+```bash
+python scripts\check_sw_navigate.py
+python scripts\check_sw_navigate.py --self-test
+```
+
 ---
 
 ## 5. 推荐做法
@@ -536,7 +600,10 @@ ReferenceError: sectionLabel is not defined
    它按名字抽取线上实现，前端加了新依赖就要同步补进抽取列表
 7. **改了板块名相关的代码或数据后**：跑 `python scripts/check_data.py`，
    它断言"没有兜底板块名（目 录/评论）、没有未归一的旧写法"
-8. **上线阶段**：在 `_headers` 加 `Vary: User-Agent` 不必要，但要监控错误日志
+8. **改了 sw.js 的导航处理后**：跑 `python scripts/check_sw_navigate.py`（§4.10），
+   它会把线上 sw.js 放进 mock 的 SW 环境实跑导航，断言"跳转不会被过滤成 opaque"
+   "只接管外壳路由""断网仍能回落首页"
+9. **上线阶段**：在 `_headers` 加 `Vary: User-Agent` 不必要，但要监控错误日志
 
 ### 5.3 工具
 
@@ -546,6 +613,7 @@ ReferenceError: sectionLabel is not defined
 - `browserslist`：声明目标浏览器范围
 - `scripts/check_compat.py`：本仓库自带的 Chrome 69 体检（零依赖）
 - `scripts/check_js_comments.py`：JS 注释层体检 + Service Worker 求值冒烟（零依赖）
+- `scripts/check_sw_navigate.py`：Service Worker 导航处理体检（行为级 + 反向自检，零依赖）
 - `scripts/check_reading_width.py`：阅读页宽度/页边距三档体检 + 反向自检（零依赖）
 - `scripts/check_related.js`：相关阅读算法体检（抽取 app.js 真实实现跑）
 - `scripts/check_data.py`：数据体检（分片覆盖 / 重复条目 / 兜底板块名 / 未归一旧写法）
