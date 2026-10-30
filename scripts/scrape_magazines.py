@@ -218,6 +218,17 @@ def find_catalog_url(mag_key, year, issue):
         if links:
             return links[0]
     elif mag_key == 'djyj':
+        # 党建研究目录页：不带零填充（如 /2026/7/），但文章内链带零填充（如 /2026/07/22/ARTI...）
+        # 两种写法都试一遍，兼容期号位数变化
+        for candidate in (f'https://djyj.12371.cn/{year}/{issue}/',
+                          f'https://djyj.12371.cn/{year}/{issue:02d}/'):
+            try:
+                r = requests.get(candidate, headers=HEADERS, timeout=15, verify=False)
+                r.encoding = r.apparent_encoding
+                if r.status_code == 200 and 'error.html' not in r.url and 'shtml' in r.text:
+                    return candidate
+            except Exception:
+                continue
         return f'https://djyj.12371.cn/{year}/{issue}/'
     return None
 
@@ -352,7 +363,8 @@ def parse_djyj_catalog(catalog_url, year, issue):
             current_section = el.get_text(strip=True)
         elif el.name == 'a' and 'shtml' in (el.get('href', '') or ''):
             href = el.get('href', '')
-            if f'/{year}/' in href and f'/{issue:02d}/' in href:
+            # 文章内链期号带零填充（/2026/07/22/...），同时兼容不带零填充的写法
+            if f'/{year}/' in href and (f'/{issue:02d}/' in href or f'/{issue}/' in href):
                 full_text = el.get_text(strip=True)
                 if '|' in full_text:
                     parts = full_text.split('|', 1)

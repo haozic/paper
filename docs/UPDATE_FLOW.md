@@ -44,7 +44,7 @@ python scripts\scrape_magazines.py --check
 检查杂志更新
 ============================================================
   求是: 本地 2026年第20期 | 网站 2026年第20期 | 已最新
-  红旗文稿: 本地 2026年第19期 | 网站 2026年第19期 | 已最新
+  红旗文稿: 本地 2026年第19期 | 网站 2026年第20期 | 有更新
   党建研究: 本地 2026年第9期 | 网站 2026年第10期 | 有更新
 ```
 
@@ -74,11 +74,24 @@ python scripts\scrape_magazines.py djyj 2026 10
 ### 2.4 验证数据
 
 ```bash
-# 用 Python 快速检查
-python -c "import json; d=json.load(open(r'e:\cursor\xgkt\djyj\data\meta.json',encoding='utf-8')); print('最新期:', max((a['y'],a['i']) for a in d)); print('总文章数:', len(d))"
+# 数据体检：期号覆盖 / 重复条目 / 正文缺失 / 索引一致性
+python scripts/check_data.py
 ```
 
-期望看到最新期号已更新。
+输出示例：
+
+```
+[hqwg] 红旗文稿
+    文章总数: 2265   唯一URL: 2265   重复条目: 0
+    期号范围: 2020年第01期 ~ 2026年第20期   共 165 期
+    无全文(h=0): 0 篇
+      2026年第20期: 13 篇
+```
+
+期望看到：**最新期号已更新、重复条目为 0、无"正文缺失"告警**。
+
+若报出"空 URL"或"重复条目"，处理方式见 [§4.4 重复抓取同一期](#44-重复抓取同一期) 与
+[§4.6 空 URL 条目](#46-空-url-条目)。
 
 ### 2.5 同步 index.html
 
@@ -87,10 +100,10 @@ python -c "import json; d=json.load(open(r'e:\cursor\xgkt\djyj\data\meta.json',e
 ```html
 <div class="about-section">
     <h2>数据更新</h2>
-    <p>最近一次数据采集更新时间：<strong>2026 年 10 月 16 日</strong></p>
-    <p>《党建研究》：2020 年第 12 期 至 2026 年第 9 期</p>
+    <p>最近一次数据采集更新时间：<strong>2026 年 10 月 30 日</strong></p>
+    <p>《党建研究》：2020 年第 12 期 至 2026 年第 10 期</p>
     <p>《求是》：2019 年第 1 期 至 2026 年第 20 期</p>
-    <p>《红旗文稿》：2020 年第 1 期 至 2026 年第 19 期</p>
+    <p>《红旗文稿》：2020 年第 1 期 至 2026 年第 20 期</p>
 </div>
 ```
 
@@ -107,9 +120,10 @@ python -c "import json; d=json.load(open(r'e:\cursor\xgkt\djyj\data\meta.json',e
 
 | 位置 | 查找 | 示例 |
 | --- | --- | --- |
-| `index.html` 第 12 行 | `<link rel="stylesheet" href="assets/css/style.css?v=...` | `?v=20261016a` |
-| `index.html` 第 303 行 | `<script src="assets/js/app.js?v=...` | `?v=20261016a` |
-| `assets/js/app.js` 第 4 行 | `const DATA_VERSION = ...` | `'20261016a'` |
+| `index.html` 第 12 行 | `<link rel="stylesheet" href="assets/css/style.css?v=...` | `?v=20261030a` |
+| `index.html` 第 359 行 | `<script src="assets/js/app.js?v=...` | `?v=20261030a` |
+| `assets/js/app.js` 第 4 行 | `const DATA_VERSION = ...` | `'20261030a'` |
+| `assets/css/style.css` | `cover_qs/hqwg/djyj.jpg?v=...`（封面更新时） | `?v=20261030a` |
 
 **版本号命名规则**：`YYYYMMDDx`，x 是当天的 a/b/c（如果同一天多次更新）。
 
@@ -206,24 +220,16 @@ session.mount('https://', HTTPAdapter(max_retries=Retry(total=3, backoff_factor=
 
 **问题**：`process_magazine` 是**追加**模式，同一 URL 会重复。
 
-**处理**：
+**处理**：直接用体检脚本自带的去重功能（先体检再写回，安全）：
 
-1. 简单的去重脚本：
-
-```python
-import json
-for f in ['data/meta.json', 'data/qs/meta.json', 'data/hqwg/meta.json']:
-    arr = json.load(open(f, encoding='utf-8'))
-    seen, uniq = set(), []
-    for a in arr:
-        if a['u'] not in seen:
-            seen.add(a['u'])
-            uniq.append(a)
-    json.dump(uniq, open(f, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
-    print(f'{f}: {len(arr)} -> {len(uniq)}')
+```bash
+python scripts/check_data.py --dedup
 ```
 
-2. 同样对 `data/article_index.json` 去重。
+它会对三刊的 `meta.json` 和 `data/article_index.json` 按 URL 去重，并打印 `原数量 -> 新数量`。
+
+> ⚠️ 早期数据里的"重复"多数是**空 URL**（见 §4.6），按 URL 去重会把它们合并成 1 条，
+> 而不是真正修复。发现 `唯一URL < 文章总数` 时先看 §4.6。
 
 ### 4.5 抓取后 git push 失败
 
@@ -236,6 +242,35 @@ git pull --rebase origin main
 # 解决冲突后
 git push origin main
 ```
+
+### 4.6 空 URL 条目
+
+**症状**：体检报"存在重复 URL N 条"，但逐条看会发现这些条目的 `u` 字段是空字符串。
+
+**原因**：《党建研究》目录页里，"贯彻落实全国组织部长会议精神""全国党建工作座谈会发言摘登"等板块
+只列标题和作者，**官网没有对应的单篇文章页面**（纯 `<span>` 文本，无链接）。早期解析器把它们也写进了
+`meta.json`，导致 `u` 为空。
+
+**危害**：前端用 `meta.findIndex(a => a.u === url)` 定位文章，空串会**匹配到第一条坏记录**，
+结果点任何一条都打开同一篇（错误）文章。
+
+**处理**：
+
+```bash
+python scripts/repair_empty_urls.py            # 预览
+python scripts/repair_empty_urls.py --apply    # 写回
+```
+
+脚本会重新抓取对应期号的目录页，**校验该标题确实出现在页面上**，然后给条目分配
+「该期目录页 + 标题片段」作为唯一地址（`h` 仍保持 0，正文页会诚实提示"该文章无全文内容"，
+"原文链接"可跳到官网目录页核对）。
+
+### 4.7 党建研究抓到 0 篇文章
+
+**原因**：党建研究的**目录页期号不补零**（`/2026/7/`），而**文章内链补零**（`/2026/07/22/ARTI*.shtml`）。
+目录页 URL 拼成 `/2026/07/` 会被 12371 重定向到 `error.html`，表现为"解析到 0 篇"。
+
+**处理**：`find_catalog_url()` 已同时尝试 `/年/期/` 与 `/年/0期/` 两种写法，手工排查时两种都试一下。
 
 ---
 

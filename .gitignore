@@ -12,6 +12,15 @@ Thumbs.db
 node_modules/
 npm-debug.log*
 
+# ===== Python =====
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# ===== 抓取脚本临时日志 =====
+.scrape_*.log
+
 # ===== Cloudflare Wrangler 部署临时目录 =====
 .wrangler/
 .uploads/

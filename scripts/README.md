@@ -54,6 +54,25 @@ python scripts\scrape_magazines.py qs
 
 合法 `杂志` 取值：`qs` / `hqwg` / `djyj`。
 
+### 2.1 辅助脚本
+
+```bash
+# 数据体检：期号覆盖、重复条目、正文缺失、索引一致性（只读）
+python scripts\check_data.py
+
+# 体检 + 就地去重（重复条目按 URL 去重）
+python scripts\check_data.py --dedup
+
+# 修复历史遗留的"空 URL"条目（默认预览，加 --apply 才写回）
+python scripts\repair_empty_urls.py
+python scripts\repair_empty_urls.py --apply
+```
+
+| 脚本 | 作用 | 何时用 |
+| --- | --- | --- |
+| `check_data.py` | 体检三刊的 meta / years / article_index 一致性 | 每次抓取后；怀疑数据异常时 |
+| `repair_empty_urls.py` | 修复 `u` 字段为空的条目 | 体检报出空 URL 时 |
+
 ---
 
 ## 3. 杂志数据源
@@ -72,6 +91,27 @@ python scripts\scrape_magazines.py qs
 | 党建研究 | `/01/` | `https://djyj.12371.cn/YYYY/NN/d_NNNNNN.shtml` 或 `https://djyj.12371.cn/YYYY/NN/<id>.shtml` |
 
 > **求是/红旗文稿**的发布日期通常为每月 1 日与 15 日。求是发布周期是半月刊，红旗文稿也是半月刊。
+
+### 3.1 党建研究的 URL 规律（易踩坑）
+
+| 位置 | 格式 | 示例 |
+| --- | --- | --- |
+| **目录页** | `/年/期/`（期号**不补零**） | `https://djyj.12371.cn/2026/7/` |
+| **文章页** | `/年/期/日/ARTI*.shtml`（期号**补零**） | `https://djyj.12371.cn/2026/07/22/ARTI1784712525709140.shtml` |
+
+> ⚠️ 目录页不补零、文章内链补零，两者不一致。拼目录页 URL 时若写成 `/2026/07/`，12371 会 302 到
+> `www.12371.cn/error.html`，表现为"抓取到 0 篇文章"。`find_catalog_url()` 已同时尝试两种写法。
+
+### 3.2 党建研究的部分板块没有单篇链接
+
+目录页中"贯彻落实全国组织部长会议精神""全国党建工作座谈会发言摘登"等板块，只列出**标题和作者**
+（纯 `<span>` 文本），没有指向单篇文章的链接——这些文章在官网确实不存在独立页面。
+
+早期解析器把这类条目也写进了 `meta.json`，导致 `u` 字段为空字符串。后果是前端
+`meta.findIndex(a => a.u === url)` 用空串匹配，**点任何一条都会打开第一条坏记录（错文章）**。
+
+修复方式（`scripts/repair_empty_urls.py`）：给这类条目分配「该期目录页 + 标题片段」作为唯一地址，
+既保证每条可单独寻址、"原文链接"能跳到官网目录页核对，又保持 `h=0` 诚实标注无全文。
 
 ---
 
@@ -263,7 +303,8 @@ meta = meta_uniq
 
 ### 10.2 抓取历史期号
 
-求是/红旗文稿历史期号需要走"年度汇总页"，参见 §9.1。党建研究直接 `https://djyj.12371.cn/YYYY/NN/` 即可。
+求是/红旗文稿历史期号需要走"年度汇总页"，参见 §9.1。党建研究直接 `https://djyj.12371.cn/YYYY/N/` 即可
+（期号不补零，参见 §3.1）。
 
 ### 10.3 加速抓取
 
@@ -294,8 +335,11 @@ python scripts\scrape_magazines.py qs 2026 21
 python scripts\scrape_magazines.py hqwg 2026 20
 python scripts\scrape_magazines.py djyj 2026 10
 
+# 2.5 体检数据（期号覆盖 / 重复 / 正文缺失）
+python scripts\check_data.py
+
 # 3. 同步 index.html 的"数据更新"区块
-#    改 "最近一次数据采集更新时间：2026 年 10 月 16 日"
+#    改 "最近一次数据采集更新时间：2026 年 10 月 30 日"
 #    改 《党建研究》：... 至 2026 年第 10 期
 #    改 《求是》：... 至 2026 年第 21 期
 #    改 《红旗文稿》：... 至 2026 年第 20 期
@@ -303,6 +347,7 @@ python scripts\scrape_magazines.py djyj 2026 10
 # 4. 同步缓存破坏三件套
 #    index.html: <link ... ?v=YYYYMMDDx> 和 <script ... ?v=YYYYMMDDx>
 #    assets/js/app.js: const DATA_VERSION = 'YYYYMMDDx';
+#    assets/css/style.css: 封面图 ?v=YYYYMMDDx（封面更新时）
 
 # 5. 提交
 git add -A
