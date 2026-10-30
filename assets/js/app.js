@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data/*.json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261030b';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261030c';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -12,7 +12,7 @@ const MAGAZINES = {
         color: '#8b0000',
         colorDark: '#8b0000',
         dataPath: 'data/qs',
-        yearsPath: 'data/qs/years',
+        issuesPath: 'data/qs/issues',
         source: 'https://www.qstheory.cn/qs/mulu.htm',
         desc: '中共中央委员会机关刊',
     },
@@ -22,7 +22,7 @@ const MAGAZINES = {
         color: '#8b0000',
         colorDark: '#8b0000',
         dataPath: 'data/hqwg',
-        yearsPath: 'data/hqwg/years',
+        issuesPath: 'data/hqwg/issues',
         source: 'https://www.qstheory.cn/hqwglist/mulu.htm',
         desc: '政治理论半月刊',
     },
@@ -32,7 +32,7 @@ const MAGAZINES = {
         color: '#8b0000',
         colorDark: '#8b0000',
         dataPath: 'data',
-        yearsPath: 'data/years',
+        issuesPath: 'data/issues',
         source: 'https://djyj.12371.cn/',
         desc: '党建理论与实践研究月刊',
     },
@@ -41,7 +41,7 @@ const MAGAZINES = {
 /* ===== 状态管理 ===== */
 const state = {
     currentMag: null,       // null=首页, 'qs'|'hqwg'|'djyj'
-    magCache: {},           // {qs: {meta, yearData, loadedYears, fullTextReady}, ...}
+    magCache: {},           // {qs: {meta, bodyText, loadedIssues, fullTextReady}, ...}
     favorites: [],
     currentMode: 'section',
     currentArticleUrl: null,
@@ -51,6 +51,7 @@ const state = {
     catalogExpanded: new Set(),
     isSearching: false,
     searchResults: [],
+    searchToken: 0,         // 递增令牌：查询词变化时让旧的正文搜索立即作废
     lastQuery: '',         // 最近一次已提交的搜索词
     currentPage: 1,
     pageSize: 20,
@@ -74,50 +75,59 @@ function svgIcon(name) {
 }
 
 /* ===== 当前杂志数据快捷访问 ===== */
+/* 正文按"期"分片加载，合并到扁平的 bodyText（URL → 正文）里，
+   这样无论哪一期加载完，都能 O(1) 取到任意文章的正文。 */
+function newMagState() {
+    return {
+        meta: [],
+        bodyText: {},              // URL → 正文（扁平）
+        loadedIssues: new Set(),   // 已加载的期次 "<年>-<期>"
+        loadingIssues: new Set(),  // 正在加载的期次
+        fullTextReady: false,      // 该刊全部期次是否都已加载完
+        articleIndex: null,
+        indexLoaded: false,
+    };
+}
+
 function getMagState() {
     if (!state.currentMag) return null;
     if (!state.magCache[state.currentMag]) {
-        state.magCache[state.currentMag] = {
-            meta: [],
-            yearData: {},
-            loadedYears: new Set(),
-            loadingYears: new Set(),
-            fullTextReady: false,
-            articleIndex: null,
-            indexLoaded: false,
-        };
+        state.magCache[state.currentMag] = newMagState();
     }
     return state.magCache[state.currentMag];
 }
 
 function getMeta() { var ms = getMagState(); return ms ? (ms.meta || []) : []; }
-function getYearData() { var ms = getMagState(); return ms ? (ms.yearData || {}) : {}; }
 
 /* ===== 首页：加载各杂志计数 ===== */
+/* 只取一个几十字节的 counts.json，不再为了三个数字下载 1.3 MB 的 meta.json */
 async function loadHomeCounts() {
+    let counts = null;
+    try {
+        const resp = await fetch(dataUrl('data/counts.json'));
+        if (resp.ok) counts = await resp.json();
+    } catch (e) {
+        console.warn('counts.json 加载失败，回退到 meta.json 统计:', e);
+    }
+    if (counts) {
+        for (const [key, c] of Object.entries(counts)) {
+            const countEl = document.getElementById(`${key}Count`);
+            const issuesEl = document.getElementById(`${key}Issues`);
+            if (countEl) countEl.textContent = c.articles;
+            if (issuesEl) issuesEl.textContent = c.issues;
+        }
+        return;
+    }
+    // 回退：老版本没有 counts.json 时仍能显示计数
     for (const [key, conf] of Object.entries(MAGAZINES)) {
         try {
             const resp = await fetch(dataUrl(`${conf.dataPath}/meta.json`));
             const meta = await resp.json();
-            // 缓存 meta 到 magCache，供收藏列表跨杂志查找
-            if (!state.magCache[key]) {
-                state.magCache[key] = {
-                    meta: [],
-                    yearData: {},
-                    loadedYears: new Set(),
-                    loadingYears: new Set(),
-                    fullTextReady: false,
-                    articleIndex: null,
-                    indexLoaded: false,
-                };
-            }
-            state.magCache[key].meta = meta;
             const countEl = document.getElementById(`${key}Count`);
             const issuesEl = document.getElementById(`${key}Issues`);
             if (countEl) countEl.textContent = meta.length;
             if (issuesEl) {
-                const issues = [...new Set(meta.map(a => `${a.y}-${a.i}`))].length;
-                issuesEl.textContent = issues;
+                issuesEl.textContent = [...new Set(meta.map(a => `${a.y}-${a.i}`))].length;
             }
         } catch (e) {
             console.error(`加载 ${key} 计数失败:`, e);
@@ -180,6 +190,22 @@ function goHome() {
     window.scrollTo(0, 0);
 }
 
+/* 按需加载某本杂志的 meta.json（首页不再预加载，收藏页/跨杂志跳转时才用） */
+async function loadMagMeta(magKey) {
+    if (!state.magCache[magKey]) state.magCache[magKey] = newMagState();
+    const ms = state.magCache[magKey];
+    if (ms.meta.length > 0) return ms.meta;
+    const conf = MAGAZINES[magKey];
+    if (!conf) return [];
+    try {
+        const resp = await fetch(dataUrl(`${conf.dataPath}/meta.json`));
+        ms.meta = await resp.json();
+    } catch (e) {
+        console.error(`加载 ${magKey} 元数据失败:`, e);
+    }
+    return ms.meta;
+}
+
 async function initMagazine(magKey) {
     const conf = MAGAZINES[magKey];
     const ms = getMagState();
@@ -217,7 +243,7 @@ async function initMagazine(magKey) {
 
     // 默认显示板块
     renderSections();
-    loadAllYearsBackground();
+    onMagazineDataReady();
     updateStickyOffsets();
 
     // 字体加载后重新测量（字体加载会改变 header 实际高度）
@@ -242,41 +268,63 @@ function updateStickyOffsets() {
 }
 
 /* ===== 数据加载 ===== */
-async function loadYearData(year, retry = 2) {
+/* 加载某一期的正文分片：data/<mag>/issues/<年>-<期>.json
+   单片约 200 KB（旧方案是整年 4~18 MB），合并进 ms.bodyText 扁平表。 */
+async function loadIssueData(year, issue, retry = 2) {
     const ms = getMagState();
     if (!ms) return false;
     const conf = MAGAZINES[state.currentMag];
-    year = String(year);
-    if (ms.loadedYears.has(year) || ms.loadingYears.has(year)) return ms.loadedYears.has(year);
-    ms.loadingYears.add(year);
+    if (!conf) return false;
+    const key = year + '-' + issue;
+    if (ms.loadedIssues.has(key)) return true;
+    if (ms.loadingIssues.has(key)) return false;     // 已在加载中，不重复发起
+    ms.loadingIssues.add(key);
+    let resp = null;
     try {
-        const resp = await fetch(dataUrl(`${conf.yearsPath}/${year}.json`));
+        resp = await fetch(dataUrl(`${conf.issuesPath}/${key}.json`));
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        ms.yearData[year] = await resp.json();
-        ms.loadedYears.add(year);
+        const obj = await resp.json();
+        for (const u in obj) ms.bodyText[u] = obj[u];
+        ms.loadedIssues.add(key);
         return true;
     } catch (e) {
-        console.error(`加载 ${year} 年数据失败:`, e);
-        if (retry > 0) {
+        // 整期无正文（如党建研究 2024 年第 8 期）会返回 404，属正常情况，不重试；
+        // 网络中断 / 5xx 属临时故障，退避 800ms 后重试。
+        if (retry > 0 && (!resp || resp.status !== 404)) {
             await new Promise(r => setTimeout(r, 800));
-            ms.loadingYears.delete(year);
-            return loadYearData(year, retry - 1);
+            ms.loadingIssues.delete(key);
+            return loadIssueData(year, issue, retry - 1);
         }
+        ms.loadedIssues.add(key);        // 标记为已处理，避免反复重试
         return false;
     } finally {
-        ms.loadingYears.delete(year);
+        ms.loadingIssues.delete(key);
     }
 }
 
-async function loadAllYearsBackground() {
+/* 列出某本杂志所有"有正文"的期次（按最新在前） */
+function listBodyIssues(ms) {
+    const seen = new Set();
+    const list = [];
+    for (const a of ms.meta) {
+        if (!a.h) continue;
+        const key = a.y + '-' + a.i;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        list.push({ y: a.y, i: a.i, key: key });
+    }
+    list.sort((x, y) => (y.y - x.y) || (y.i - x.i));
+    return list;
+}
+
+function onMagazineDataReady() {
     const ms = getMagState();
     if (!ms) return;
     const status = document.getElementById('searchStatus');
     status.className = 'search-status ready';
     status.textContent = '标题搜索就绪 · 正文搜索按需加载';
 
-    // 不再自动加载所有年份数据
-    // 正文搜索时按需加载对应年份
+    // 正文不再预加载：搜索时按期增量加载
     ms.fullTextReady = false;
     state.fullTextReady = false;
 
@@ -365,6 +413,8 @@ function performSearch() {
 
     // 记住本次查询词，供 Esc 失焦还原
     state.lastQuery = input.value;
+    // 使上一次尚未结束的正文搜索失效
+    state.searchToken++;
 
     const scope = getSearchScope();
     const bo = document.getElementById('bodyOnly').checked;
@@ -372,53 +422,42 @@ function performSearch() {
     // 标题搜索：立即执行
     let results;
     if (scope === 'title') {
-        results = ms.meta.filter(a => {
-            if (bo && !a.h) return false;
-            const metaData = (a.t + ' ' + a.a + ' ' + a.s).toLowerCase();
-            return metaData.includes(query);
-        });
-    } else if (scope === 'all') {
-        // 标题+正文：先搜标题，同时检查已加载的正文
-        results = ms.meta.filter(a => {
-            if (bo && !a.h) return false;
-            const metaData = (a.t + ' ' + a.a + ' ' + a.s).toLowerCase();
-            if (metaData.includes(query)) return true;
-            if (a.h) {
-                const yd = ms.yearData[String(a.y)];
-                if (yd && yd[a.u]) {
-                    if (yd[a.u].toLowerCase().includes(query)) return true;
-                }
-            }
-            return false;
-        });
-        // 如果正文数据未完全加载，提示用户
-        if (!ms.fullTextReady) {
-            performBodySearch(query, results, scope, bo);
-            return;
-        }
-    } else if (scope === 'body') {
-        // 仅正文：需要正文数据
-        if (!ms.fullTextReady) {
-            performBodySearch(query, [], scope, bo);
-            return;
-        }
-        results = ms.meta.filter(a => {
-            if (bo && !a.h) return false;
-            if (!a.h) return false;
-            const yd = ms.yearData[String(a.y)];
-            if (yd && yd[a.u]) {
-                return yd[a.u].toLowerCase().includes(query);
-            }
-            return false;
-        });
+        results = collectMatches(ms, query, scope, bo);
     } else {
-        results = ms.meta.filter(a => !bo || a.h);
+        // 正文相关范围：先给出当前已加载正文能命中的结果，再按期增量补全
+        results = collectMatches(ms, query, scope, bo);
+        if (!ms.fullTextReady) {
+            performBodySearch(query, results, scope, bo, state.searchToken);
+            return;
+        }
     }
 
     finishSearch(results, query, scope, input);
 }
 
-async function performBodySearch(query, initialResults, scope, bo) {
+/* 单篇文章是否命中查询 */
+function articleMatches(a, query, scope, ms) {
+    if (scope === 'title' || scope === 'all') {
+        const metaData = (a.t + ' ' + a.a + ' ' + a.s).toLowerCase();
+        if (metaData.includes(query)) return true;
+    }
+    if ((scope === 'body' || scope === 'all') && a.h) {
+        const body = ms.bodyText[a.u];
+        if (body && body.toLowerCase().includes(query)) return true;
+    }
+    return false;
+}
+
+/* 按已加载的正文收集命中结果 */
+function collectMatches(ms, query, scope, bo) {
+    return ms.meta.filter(a => {
+        if (bo && !a.h) return false;
+        return articleMatches(a, query, scope, ms);
+    });
+}
+
+/* 正文搜索：按"期"增量加载，每批加载完立刻刷新结果，而不是等全部下载完 */
+async function performBodySearch(query, initialResults, scope, bo, token) {
     const ms = getMagState();
     if (!ms) return;
     const input = document.getElementById('searchInput');
@@ -429,46 +468,40 @@ async function performBodySearch(query, initialResults, scope, bo) {
         state.searchResults = initialResults;
         state.currentPage = 1;
         const qDisplay = input.value.trim();
-        infoEl.textContent = `共 ${initialResults.length} 篇（标题匹配）· 正在加载正文数据搜索更多...`;
+        infoEl.textContent = `共 ${initialResults.length} 篇（标题匹配）· 正在按期加载正文搜索更多...`;
         renderSearchPage();
     } else {
-        infoEl.textContent = '正在加载正文数据用于搜索...';
+        infoEl.textContent = '正在按期加载正文用于搜索...';
         document.getElementById('searchResults').innerHTML = '<div class="loading"><div class="spinner"></div><div>加载正文数据中...</div></div>';
     }
 
-    // 并行加载所有未加载的年份
-    const years = [...new Set(ms.meta.filter(a => a.h).map(a => a.y))].sort((a, b) => b - a);
-    const loadPromises = [];
-    for (const y of years) {
-        if (!ms.loadedYears.has(String(y))) {
-            loadPromises.push(loadYearData(y));
-        }
+    const issues = listBodyIssues(ms);
+    const BATCH = 6;          // 每批并发的期次数
+    const qDisplay = input.value.trim();
+    const scopeLabel = scope === 'all' ? '标题+正文' : '仅正文';
+    let done = 0;
+
+    for (let k = 0; k < issues.length; k += BATCH) {
+        if (state.searchToken !== token) return;      // 查询词已变，放弃这次搜索
+        const batch = issues.slice(k, k + BATCH);
+        await Promise.all(batch.map(it => loadIssueData(it.y, it.i)));
+        // 等这一批的工夫里，用户可能已经改了关键词 / 换了范围 / 切了视图。
+        // 慢网下这一等可达数秒，不重新校验就会把过期结果写回界面
+        // （已用反向对照实测：撤掉本行会让"仅标题"被旧搜索覆盖成"仅正文"）。
+        if (state.searchToken !== token) return;
+        done += batch.length;
+
+        // 每批加载完立刻用最新的正文重新匹配并刷新结果
+        const results = collectMatches(ms, query, scope, bo);
+        state.searchResults = results;
+        infoEl.textContent = `共 ${results.length} 篇文章（关键词："${qDisplay}" ｜ 范围：${scopeLabel}） · 正文已加载 ${done}/${issues.length} 期`;
+        renderSearchPage();
     }
-    if (loadPromises.length > 0) {
-        await Promise.all(loadPromises);
-    }
+
+    if (state.searchToken !== token) return;
     ms.fullTextReady = true;
     state.fullTextReady = true;
     document.getElementById('searchStatus').textContent = '全文搜索就绪';
-
-    // 重新搜索
-    const results = ms.meta.filter(a => {
-        if (bo && !a.h) return false;
-        let matched = false;
-        if (scope === 'all') {
-            const metaData = (a.t + ' ' + a.a + ' ' + a.s).toLowerCase();
-            if (metaData.includes(query)) matched = true;
-        }
-        if (!matched && a.h) {
-            const yd = ms.yearData[String(a.y)];
-            if (yd && yd[a.u]) {
-                if (yd[a.u].toLowerCase().includes(query)) matched = true;
-            }
-        }
-        return matched;
-    });
-
-    finishSearch(results, query, scope, input);
 }
 
 function finishSearch(results, query, scope, input) {
@@ -516,8 +549,7 @@ function renderSearchPage() {
         if (query) {
             titleHtml = highlightText(a.t, query);
             if (a.h && (scope === 'body' || scope === 'all')) {
-                const yd = ms.yearData[String(a.y)];
-                const body = (yd && yd[a.u]) ? yd[a.u] : '';
+                const body = ms.bodyText[a.u] || '';
                 if (body) {
                     const lb = body.toLowerCase();
                     const pos = lb.indexOf(query);
@@ -708,10 +740,10 @@ async function showArticle(encUrl, replaceHist) {
         }
     }
 
-    // 回退到 year JSON 数据
-    if (!ms.loadedYears.has(String(a.y))) {
-        const ok = await loadYearData(a.y);
-        if (!ok) {
+    // 回退到该期的正文分片（文章没有 markdown 备份时）
+    if (!ms.loadedIssues.has(a.y + '-' + a.i)) {
+        const ok = await loadIssueData(a.y, a.i);
+        if (!ok && !ms.bodyText[url]) {
             bodyEl.innerHTML = `<div class="no-body">正文数据加载失败<br>
                 <small>可能是网络不稳定，请重试</small><br>
                 <button class="retry-btn" onclick="retryShowArticle('${encUrl}')">重新加载</button></div>`;
@@ -719,7 +751,7 @@ async function showArticle(encUrl, replaceHist) {
         }
     }
 
-    renderArticleBody(url, a.y, bodyEl);
+    renderArticleBody(url, bodyEl);
 }
 
 function updateArticleMeta(a, wordCount) {
@@ -739,12 +771,12 @@ function countWords(text) {
     return text.replace(/\s/g, '').length;
 }
 
-function renderArticleBody(url, year, bodyEl) {
+function renderArticleBody(url, bodyEl) {
     const ms = getMagState();
     if (!ms) return;
-    const yd = ms.yearData[String(year)];
-    if (yd && yd[url]) {
-        const body = yd[url].replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const text = ms.bodyText[url];
+    if (text) {
+        const body = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
         bodyEl.innerHTML = renderMarkdown(body);
         const a = ms.meta.find(x => x.u === url);
         if (a) {
@@ -785,10 +817,9 @@ async function retryShowArticle(encUrl) {
         } catch (e) {}
     }
 
-    // 回退到 year JSON
-    ms.loadedYears.delete(String(a.y));
-    delete ms.yearData[String(a.y)];
-    const ok = await loadYearData(a.y);
+    // 回退到该期的正文分片
+    ms.loadedIssues.delete(a.y + '-' + a.i);
+    const ok = await loadIssueData(a.y, a.i);
     if (!ok) {
         bodyEl.innerHTML = `<div class="no-body">加载仍然失败<br>
             <small>请检查网络后重试，或访问原文链接</small><br>
@@ -1664,13 +1695,15 @@ function toggleIssue(year, ik) {
             html += `</div>`;
         });
         body.innerHTML = html;
-        const ms = getMagState();
-        if (ms && !ms.loadedYears.has(String(year))) loadYearData(year);
+        // 不再预加载整年正文：文章页优先读单篇 markdown，
+        // 万一缺失时按需加载"该期"分片即可（约 200 KB）。
     }
 }
 
 /* ===== 收藏视图 ===== */
-function renderFavorites() {
+/* 收藏可能来自任意一本杂志，而首页现在只加载 counts.json（不再预载三本 meta.json），
+   所以这里在真正需要时才把对应杂志的 meta.json 补齐。 */
+async function renderFavorites() {
     const container = document.getElementById('favoritesContent');
     if (state.favorites.length === 0) {
         container.innerHTML = `<div class="fav-empty">
@@ -1680,14 +1713,20 @@ function renderFavorites() {
         </div>`;
         return;
     }
-    // 从所有已加载的杂志中查找收藏的文章
-    const allMeta = [];
-    for (const ms of Object.values(state.magCache)) {
-        allMeta.push(...ms.meta);
+
+    const collect = function () {
+        const allMeta = [];
+        for (const ms of Object.values(state.magCache)) allMeta.push(...ms.meta);
+        return state.favorites.map(url => allMeta.find(a => a.u === url)).filter(a => a);
+    };
+
+    let favArticles = collect();
+    if (favArticles.length < state.favorites.length) {
+        // 还有收藏没解析出来 —— 把三本杂志的 meta.json 补上
+        container.innerHTML = '<div class="loading"><div class="spinner"></div><div>正在加载收藏列表...</div></div>';
+        await Promise.all(Object.keys(MAGAZINES).map(k => loadMagMeta(k)));
+        favArticles = collect();
     }
-    const favArticles = state.favorites
-        .map(url => allMeta.find(a => a.u === url))
-        .filter(a => a);
 
     let html = `<div class="fav-header">
         <div class="fh-count">${svgIcon('i-star-fill')} 已收藏 ${favArticles.length} 篇</div>
@@ -1735,6 +1774,7 @@ function clearFavorites() {
 function switchMode(mode) {
     state.currentMode = mode;
     state.isSearching = false;
+    state.searchToken++;                 // 取消尚未结束的正文搜索
     document.getElementById('searchInput').value = '';
     document.querySelectorAll('.nav-tab, .bn-item').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.mode === mode);

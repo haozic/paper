@@ -42,7 +42,7 @@ MAGAZINES = {
         'name': '求是',
         'catalog_url': 'https://www.qstheory.cn/qs/mulu.htm',
         'meta_path': 'data/qs/meta.json',
-        'years_path': 'data/qs/years',
+        'issues_path': 'data/qs/issues',
         'articles_dir': 'articles/qs',
         'cover_path': 'assets/img/cover_qs.jpg',
     },
@@ -50,7 +50,7 @@ MAGAZINES = {
         'name': '红旗文稿',
         'catalog_url': 'https://www.qstheory.cn/hqwglist/mulu.htm',
         'meta_path': 'data/hqwg/meta.json',
-        'years_path': 'data/hqwg/years',
+        'issues_path': 'data/hqwg/issues',
         'articles_dir': 'articles/hqwg',
         'cover_path': 'assets/img/cover_hqwg.jpg',
     },
@@ -58,7 +58,7 @@ MAGAZINES = {
         'name': '党建研究',
         'catalog_url': 'https://djyj.12371.cn/01/',
         'meta_path': 'data/meta.json',
-        'years_path': 'data/years',
+        'issues_path': 'data/issues',
         'articles_dir': 'articles/djyj',
         'cover_path': 'assets/img/cover_djyj.jpg',
     },
@@ -179,6 +179,24 @@ def get_local_latest_issue(mag_key):
     if not year_issues:
         return None
     return max(year_issues)
+
+
+def write_counts():
+    """生成 data/counts.json —— 首页只靠它显示"多少篇 / 多少期"，不用下载 meta.json。"""
+    counts = {}
+    for mag_key, conf in MAGAZINES.items():
+        meta_path = os.path.join(BASE_DIR, conf['meta_path'])
+        try:
+            with open(meta_path, encoding='utf-8') as f:
+                meta = json.load(f)
+        except (OSError, ValueError):
+            continue
+        issues = set('%s-%s' % (a['y'], a['i']) for a in meta)
+        counts[mag_key] = {'articles': len(meta), 'issues': len(issues)}
+    out_path = os.path.join(BASE_DIR, 'data/counts.json')
+    with open(out_path, 'w', encoding='utf-8') as f:
+        json.dump(counts, f, ensure_ascii=False, separators=(',', ':'))
+    return counts
 
 def check_updates():
     """检查各杂志是否有更新"""
@@ -533,15 +551,19 @@ def process_magazine(mag_key, year, issue):
     with open(meta_path, 'w', encoding='utf-8') as f:
         json.dump(meta, f, ensure_ascii=False, separators=(',', ':'))
 
-    # 更新years数据文件
-    year_path = os.path.join(BASE_DIR, conf['years_path'], f'{year}.json')
-    with open(year_path, encoding='utf-8') as f:
-        yd = json.load(f)
+    # 更新该期的正文分片：data/<mag>/issues/<年>-<期>.json
+    issue_path = os.path.join(BASE_DIR, conf['issues_path'], f'{year}-{issue}.json')
+    os.makedirs(os.path.dirname(issue_path), exist_ok=True)
+    if os.path.exists(issue_path):
+        with open(issue_path, encoding='utf-8') as f:
+            shard = json.load(f)
+    else:
+        shard = {}
     for r in results:
         if r['content']:
-            yd[r['url']] = r['content']
-    with open(year_path, 'w', encoding='utf-8') as f:
-        json.dump(yd, f, ensure_ascii=False, separators=(',', ':'))
+            shard[r['url']] = r['content']
+    with open(issue_path, 'w', encoding='utf-8') as f:
+        json.dump(shard, f, ensure_ascii=False, separators=(',', ':'))
 
     # 更新article_index.json
     idx_path = os.path.join(BASE_DIR, 'data/article_index.json')
@@ -555,7 +577,11 @@ def process_magazine(mag_key, year, issue):
     with open(idx_path, 'w', encoding='utf-8') as f:
         json.dump(idx, f, ensure_ascii=False, separators=(',', ':'))
 
+    # 刷新首页计数（data/counts.json）
+    write_counts()
+
     print(f"\n  完成: {len(results)}篇 ({sum(1 for r in results if r['content'])}篇有全文)")
+    print(f"  正文分片: {conf['issues_path']}/{year}-{issue}.json")
     return results
 
 def main():
@@ -571,6 +597,14 @@ def main():
             local = get_local_latest_issue(mag_key)
             if local:
                 download_cover(mag_key, local[0], local[1])
+        return
+
+    if '--counts' in args:
+        # 只重建首页计数文件，不联网
+        counts = write_counts()
+        print("已重建 data/counts.json：")
+        for k, v in counts.items():
+            print(f"  {k}: {v['articles']} 篇 / {v['issues']} 期")
         return
 
     # 解析命令行参数：杂志 年份 期号

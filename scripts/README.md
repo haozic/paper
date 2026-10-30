@@ -1,12 +1,16 @@
 # 抓取脚本使用文档
 
-`scripts/scrape_magazines.py` 是本项目的数据采集入口，负责把三本中央级党刊（《求是》《党建研究》《红旗文稿》）从官方网站拉取到本地，**同时更新四类数据**：
+`scripts/scrape_magazines.py` 是本项目的数据采集入口，负责把三本中央级党刊（《求是》《党建研究》《红旗文稿》）从官方网站拉取到本地，**同时更新五类数据**：
 
 - `data/<mag>/meta.json` — 文章元数据
-- `data/<mag>/years/<year>.json` — 文章正文（按年拆分）
+- `data/<mag>/issues/<年>-<期>.json` — 文章正文（**按期分片**，2026-10 起）
+- `data/counts.json` — 首页计数（各刊文章数 / 期数，约 200 字节）
 - `data/article_index.json` — `URL → articles/<mag>/<file>.md` 路径映射
 - `assets/img/cover_<mag>.jpg` — 最新一期封面图
 - `articles/<mag>/<year>_<issue>_<title>.md` — 原始 Markdown 备份
+
+> 2026-10 之前正文按年存放在 `data/<mag>/years/<year>.json`（单文件 4~18 MB），
+> 现已由 `scripts/rebuild_data.py` 一次性重建为按期分片，旧目录已从仓库删除。
 
 ---
 
@@ -63,6 +67,13 @@ python scripts\check_data.py
 # 体检 + 就地去重（重复条目按 URL 去重）
 python scripts\check_data.py --dedup
 
+# 正文数据重建：years/<年>.json → issues/<年>-<期>.json 分片，并丢弃不可达正文
+python scripts\rebuild_data.py            # 预演，只报告不写盘
+python scripts\rebuild_data.py --apply    # 实际写盘（会重建 issues/ 与 article_index.json）
+
+# 只重建首页计数（离线，不联网）
+python scripts\scrape_magazines.py --counts
+
 # 修复历史遗留的"空 URL"条目（默认预览，加 --apply 才写回）
 python scripts\repair_empty_urls.py
 python scripts\repair_empty_urls.py --apply
@@ -77,7 +88,8 @@ python scripts\test_check_compat.py
 
 | 脚本 | 作用 | 何时用 |
 | --- | --- | --- |
-| `check_data.py` | 体检三刊的 meta / years / article_index 一致性 | 每次抓取后；怀疑数据异常时 |
+| `check_data.py` | 体检三刊的 meta / 正文分片 / counts / article_index 一致性 | 每次抓取后；怀疑数据异常时 |
+| `rebuild_data.py` | 把正文重分片为 `issues/<年>-<期>.json`，丢弃不可达正文，瘦身 article_index | 迁移到分片布局时；怀疑正文文件过大时 |
 | `repair_empty_urls.py` | 修复 `u` 字段为空的条目 | 体检报出空 URL 时 |
 | `check_compat.py` | 体检 Chrome 69 兼容性（特性黑名单 + flex gap 兜底缺失） | 改动 CSS / JS 后；详见 [`docs/CHROME69_COMPAT.md`](../docs/CHROME69_COMPAT.md) |
 | `test_check_compat.py` | `check_compat.py` 的反向自测（`@supports` 语义、兜底缺失、注释剥离） | 改动 `check_compat.py` 的解析逻辑后 |
@@ -143,10 +155,11 @@ python scripts\test_check_compat.py
               3. 逐篇抓取正文
               复用 process_magazine() 流程
                           ↓
-              4. 写入 4 个数据文件
-              ├─ data/<mag>/meta.json            (追加)
-              ├─ data/<mag>/years/<year>.json    (追加)
-              ├─ data/article_index.json         (追加)
+              4. 写入数据文件
+              ├─ data/<mag>/meta.json                    (追加)
+              ├─ data/<mag>/issues/<年>-<期>.json         (按期分片，写入本期)
+              ├─ data/article_index.json                 (追加)
+              ├─ data/counts.json                        (抓完自动刷新)
               └─ articles/<mag>/<year>_<issue>_<title>.md
                           ↓
               5. 下载封面图
@@ -185,9 +198,9 @@ python scripts\test_check_compat.py
 
 ---
 
-## 6. years/YYYY.json 字段约定
+## 6. issues/<年>-<期>.json 字段约定
 
-`data/qs/years/2026.json` 是 `{URL: 正文 Markdown}` 的纯字典：
+`data/qs/issues/2026-20.json` 是 `{URL: 正文 Markdown}` 的纯字典：
 
 ```json
 {
@@ -197,8 +210,22 @@ python scripts\test_check_compat.py
 
 - 键：原文 URL（与 `meta.json` 的 `u` 字段一一对应）
 - 值：抓取后清洗的 Markdown 文本
+- 文件名：`<年>-<期>.json`，期号不补零（如 `2026-20.json`、`2021-1.json`）
 
-**懒加载逻辑**（前端 `assets/js/app.js`）：用户首次搜索时只下载 `meta.json`（~1.5 MB）。当用户切换到"正文搜索"或点击文章页时，**才下载对应年份的 `years/YYYY.json`**，按需加载。
+**为什么按期分片**：按年拆分时 `data/years/2026.json` 单文件达 18.5 MB，正文搜索必须整年整年地下；
+按期分片后单片中位数约 200 KB，最大 0.31 MB，正文搜索可以**按期增量加载**，且能边下边出结果。
+
+**懒加载逻辑**（前端 `assets/js/app.js`）：
+
+| 场景 | 下载内容 | 体量 |
+| --- | --- | --- |
+| 打开首页 | `data/counts.json` | ~200 字节 |
+| 进入某本杂志 / 收藏页 | 该刊 `meta.json` | ~0.4~1.3 MB |
+| 切换到"正文搜索" | 对应期号的分片，每批 6 期 | 每批约 1.2 MB |
+| 点开单篇文章 | `articles/<mag>/*.md`（`article_index.json` 里的路径），失败则回退到该期分片 | 单篇 md |
+
+分片里**不再保留不可达正文**：键在对应 `meta.json` 里找不到同名文章的条目（历史污染、
+http/https 协议变体重复）已在 `rebuild_data.py` 重建时丢弃。
 
 ---
 
@@ -217,9 +244,10 @@ python scripts\test_check_compat.py
 ```
 
 - 用于**单篇加载**的 md 文件路径
-- 文章详情页直接 `fetch(articles/qs/2026_20_xxx.md)`，避免把全量正文塞进 `years/YYYY.json`
+- 文章详情页直接 `fetch(articles/qs/2026_20_xxx.md)`，避免把全量正文塞进分片文件
+- 2026-10 起已重建：只保留 `meta.json` 里能寻址到的条目（13975 → 7086 条）
 
-> 如果把 `articles/` 从仓库删除，只需要保证 `data/years/YYYY.json` 里仍有正文（站点会自动回退到该数据源渲染文章）。
+> 如果把 `articles/` 从仓库删除，只需要保证 `data/<mag>/issues/<年>-<期>.json` 里仍有正文（站点会自动回退到该数据源渲染文章）。
 
 ---
 
@@ -227,7 +255,7 @@ python scripts\test_check_compat.py
 
 | 函数 | 位置 | 作用 |
 | --- | --- | --- |
-| `MAGAZINES` | 顶部 | 三本杂志的配置字典（catalog_url / meta_path / years_path / articles_dir / cover_path） |
+| `MAGAZINES` | 顶部 | 三本杂志的配置字典（catalog_url / meta_path / issues_path / articles_dir / cover_path） |
 | `clean_text(text)` | 工具 | 清洗抓取后残留的"视频代码""repaste.body.begin"等模板字符串 |
 | `element_to_md(el, base_url)` | 工具 | 把 BeautifulSoup 元素递归转 Markdown |
 | `get_latest_issue(mag_key)` | 检查 | 解析目录页找出最新一期号 |
@@ -344,8 +372,11 @@ python scripts\scrape_magazines.py qs 2026 21
 python scripts\scrape_magazines.py hqwg 2026 20
 python scripts\scrape_magazines.py djyj 2026 10
 
-# 2.5 体检数据（期号覆盖 / 重复 / 正文缺失）
+# 2.5 体检数据（期号覆盖 / 重复 / 正文缺失 / 分片与 counts 一致性）
 python scripts\check_data.py
+
+# 2.6 首页计数（抓取脚本会自动刷新，手动重建用这条；离线不联网）
+python scripts\scrape_magazines.py --counts
 
 # 3. 同步 index.html 的"数据更新"区块
 #    改 "最近一次数据采集更新时间：2026 年 10 月 30 日"

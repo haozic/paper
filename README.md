@@ -71,14 +71,15 @@ e:\cursor\xgkt\djyj
 │
 ├── data/                           # ⭐ 网站运行依赖
 │   ├── article_index.json          # URL → articles/.../*.md 路径映射
+│   ├── counts.json                 # 首页计数：各刊文章数 / 期数（~200 字节）
 │   ├── meta.json                   # 党建研究全部文章元数据（标题/作者/期号/URL）
-│   ├── years/2020..2026.json       # 党建研究按年拆分的正文（懒加载）
+│   ├── issues/2020-12..2026-10.json# 党建研究按期分片的正文（懒加载）
 │   ├── qs/
 │   │   ├── meta.json               # 求是全部文章元数据
-│   │   └── years/2019..2026.json   # 求是按年拆分的正文
+│   │   └── issues/2019-1..2026-20.json # 求是按期分片的正文
 │   └── hqwg/
 │       ├── meta.json               # 红旗文稿全部文章元数据
-│       └── years/2020..2026.json   # 红旗文稿按年拆分的正文
+│       └── issues/2020-1..2026-20.json # 红旗文稿按期分片的正文
 │
 ├── articles/                       # 📦 原始 Markdown 备份（git 体积大但方便人工查阅）
 │   ├── djyj/                       # 党建研究，命名格式：YYYY_NN_<标题>.md
@@ -90,7 +91,8 @@ e:\cursor\xgkt\djyj
 │
 ├── scripts/                        # 🛠 抓取与运维脚本
 │   ├── scrape_magazines.py         # 三刊抓取主脚本（详见 scripts/README.md）
-│   ├── check_data.py               # 数据体检：期号覆盖 / 重复 / 正文缺失
+│   ├── rebuild_data.py             # 正文重分片（years/<年> → issues/<年>-<期>）+ 去污染 + 索引瘦身
+│   ├── check_data.py               # 数据体检：期号覆盖 / 重复 / 正文缺失 / 分片与 counts 一致性
 │   ├── check_compat.py             # Chrome 69 兼容性体检：特性黑名单 + flex gap 兜底检查
 │   ├── repair_empty_urls.py        # 修复历史遗留的空 URL 条目
 │   └── README.md                   # 脚本使用、字段、URL 规律、踩坑记录
@@ -164,7 +166,7 @@ git remote add origin https://github.com/你的用户名/djyj.git
 git push -u origin main
 ```
 
-> **关于 `articles/`**：`articles/` 文件夹有 7000+ 个 Markdown 文件，git 推送较慢。如果不需要保留原始备份（线上站点并不依赖它），可以在 `.gitignore` 中加 `articles/`，`git rm -r --cached articles/` 后再推送。`data/` 仍可保留，因为文章正文也存了 `data/years/2026.json` 里的精简版。
+> **关于 `articles/`**：`articles/` 文件夹有 7000+ 个 Markdown 文件，git 推送较慢。如果不需要保留原始备份（线上站点并不依赖它），可以在 `.gitignore` 中加 `articles/`，`git rm -r --cached articles/` 后再推送。`data/` 仍可保留，因为文章正文也存了 `data/<mag>/issues/<年>-<期>.json` 分片里。
 
 ### 第二步：Cloudflare Pages 部署
 
@@ -270,7 +272,7 @@ python scripts/check_compat.py
 #### 4. `articles/` 目录太大
 
 - 临时排除：在 `.gitignore` 加 `articles/`，执行 `git rm -r --cached articles/`
-- 永久排除：从本地磁盘删除 `articles/`，但保留 `data/years/`（线上站点只依赖 data/）
+- 永久排除：从本地磁盘删除 `articles/`，但保留 `data/<mag>/issues/`（线上站点只依赖 data/）
 
 #### 5. 想自定义主题色
 

@@ -74,7 +74,7 @@ python scripts\scrape_magazines.py djyj 2026 10
 ### 2.4 验证数据
 
 ```bash
-# 数据体检：期号覆盖 / 重复条目 / 正文缺失 / 索引一致性
+# 数据体检：期号覆盖 / 重复条目 / 正文缺失 / 分片与 counts 一致性
 python scripts/check_data.py
 ```
 
@@ -83,12 +83,20 @@ python scripts/check_data.py
 ```
 [hqwg] 红旗文稿
     文章总数: 2265   唯一URL: 2265   重复条目: 0
-    期号范围: 2020年第01期 ~ 2026年第20期   共 165 期
+    期号范围: 2020年第01期 ~ 2026年第20期   共 164 期
     无全文(h=0): 0 篇
+    正文分片: 164 个   整期无正文: 0 期
       2026年第20期: 13 篇
+
+[counts.json] 校验
+    红旗文稿: 文章 2265 篇 / 期 164 期  一致
 ```
 
-期望看到：**最新期号已更新、重复条目为 0、无"正文缺失"告警**。
+期望看到：**最新期号已更新、重复条目为 0、无"正文缺失"告警、counts 与 meta 一致**。
+
+> 正文数据自 2026-10 起按期分片存放在 `data/<mag>/issues/<年>-<期>.json`，
+> 体检脚本会逐片核对"meta 标了有正文的文章在对应分片里确实存在"，
+> 并报告"孤儿分片"（磁盘上有分片但 meta 里没有该期次）。
 
 若报出"空 URL"或"重复条目"，处理方式见 [§4.4 重复抓取同一期](#44-重复抓取同一期) 与
 [§4.6 空 URL 条目](#46-空-url-条目)。
@@ -120,10 +128,10 @@ python scripts/check_data.py
 
 | 位置 | 查找 | 示例 |
 | --- | --- | --- |
-| `index.html` 第 12 行 | `<link rel="stylesheet" href="assets/css/style.css?v=...` | `?v=20261030b` |
-| `index.html` 第 359 行 | `<script src="assets/js/app.js?v=...` | `?v=20261030b` |
-| `assets/js/app.js` 第 4 行 | `const DATA_VERSION = ...` | `'20261030b'` |
-| `assets/css/style.css` | `cover_qs/hqwg/djyj.jpg?v=...`（封面更新时） | `?v=20261030b` |
+| `index.html` 第 12 行 | `<link rel="stylesheet" href="assets/css/style.css?v=...` | `?v=20261030c` |
+| `index.html` 第 414 行 | `<script src="assets/js/app.js?v=...` | `?v=20261030c` |
+| `assets/js/app.js` 第 4 行 | `const DATA_VERSION = ...` | `'20261030c'` |
+| `assets/css/style.css` | `cover_qs/hqwg/djyj.jpg?v=...`（封面更新时） | `?v=20261030c` |
 
 **版本号命名规则**：`YYYYMMDDx`，x 是当天的 a/b/c（如果同一天多次更新）。
 
@@ -140,7 +148,7 @@ git add -A
 git status
 ```
 
-应该看到新增的文件（在 `data/`、`articles/`）和修改的文件（`index.html`、`assets/js/app.js`）。
+应该看到新增的文件（在 `data/<mag>/issues/`、`articles/`）和修改的文件（`index.html`、`assets/js/app.js`）。
 
 ```bash
 git commit -m "更新党建研究2026年第10期"

@@ -22,8 +22,9 @@
 ┌────────────────────────────────────────────────────────┐
 │  data/                                                      │
 │  ├─ article_index.json   URL → md 文件路径映射            │
+│  ├─ counts.json          各刊文章数 / 期数（首页计数）      │
 │  ├─ <mag>/meta.json      全部文章元数据                    │
-│  └─ <mag>/years/YYYY.json  按年拆分的全文（懒加载）          │
+│  └─ <mag>/issues/<年>-<期>.json  按期分片的全文（懒加载）     │
 └────────────────────────────────────────────────────────┘
             ↓ 读 articles/
 ┌────────────────────────────────────────────────────────┐
@@ -45,20 +46,23 @@
 
 | 行号 | 区块 | 职责 |
 | --- | --- | --- |
-| 1–60 | 全局配置 | `DATA_VERSION`、`MAGAZINES`、`state`、`FAV_KEY` |
-| 60–110 | 辅助函数 | SVG 渲染、状态机 getter/meta 访问 |
-| 110–220 | 首页与杂志应用 | 杂志切换、首页计数、动态 sticky 偏移量 |
-| 240–290 | 数据加载 | 按需加载年份 JSON，懒加载机制 |
-| 290–320 | 收藏 | `localStorage` 持久化、徽标同步 |
-| 320–600 | 搜索与高亮 | 标题/作者/正文搜索，关键词高亮，分页 |
-| 600–770 | 文章详情 | 优先加载 md 文件，回退到 year JSON |
-| 770–850 | 阅读设置 | 字号 / 主题切换 |
-| 850–900 | 关于页 | 关于页面切换 |
-| 900–940 | 阅读进度 | 进度环 SVG 动画 |
-| 940–1130 | Markdown 渲染 | 清洗、标题识别、白名单过滤 |
-| 1130–1240 | 板块 / 目录 | 板块卡片、目录树形展开 |
-| 1240–1300 | 收藏视图 | 跨杂志查找收藏文章 |
-| 1340–1460 | 路由 / 初始化 | hash 路由解析、初始化事件绑定 |
+| 1–68 | 全局配置 | `DATA_VERSION`、`MAGAZINES`、`state`、`FAV_KEY` |
+| 68–100 | 辅助函数 | SVG 渲染、按刊状态 `newMagState` / `getMagState` |
+| 100–190 | 首页与杂志应用 | 首页计数（`counts.json`）、进入杂志、动态 sticky 偏移量 |
+| 190–270 | 数据加载 | 按刊 `meta.json` 按需加载、初始化杂志 |
+| 270–334 | 正文分片加载 | `loadIssueData`（按期分片 + 重试）、`listBodyIssues`、`onMagazineDataReady` |
+| 334–370 | 收藏 | `localStorage` 持久化、徽标同步 |
+| 370–515 | 搜索与高亮 | 标题/作者/正文搜索、**正文按期增量加载**、关键词高亮、分页 |
+| 515–640 | 搜索结果渲染 | 结果卡片、正文命中上下文片段 |
+| 640–790 | 文章详情 | 优先加载 md 文件，回退到该期分片 |
+| 790–1090 | 阅读设置 | 字号 / 行距 / 页宽 / 缩进 / 纸张底色 / 主题 |
+| 1090–1165 | 阅读位置 | 进度记录、"上次读到 N%"提示条、"继续阅读" |
+| 1165–1280 | 上下篇与相关阅读 | 按（年,期,抓取顺序）排序的邻居计算与渲染 |
+| 1280–1340 | 复制链接 / 搜索聚焦 | `copyArticleLink`、`focusSearch` |
+| 1340–1482 | 关于页 / 阅读进度 / Markdown 渲染 | 清洗、标题识别、白名单过滤 |
+| 1482–1700 | 板块 / 目录 | 板块卡片、目录树形展开 |
+| 1700–1790 | 收藏视图 | 跨杂志查找收藏文章（按需补 meta） |
+| 1790–1900 | 路由 / 初始化 | hash 路由解析、键盘快捷键、初始化事件绑定 |
 
 ### 关键设计
 
@@ -87,20 +91,23 @@ const state = {
 #### 2.2 懒加载策略
 
 ```
-点击杂志 → 加载 meta.json（~1.5 MB）
+打开首页 → 加载 counts.json（~200 字节）
+    ↓
+点击杂志 / 进入收藏页 → 加载该刊 meta.json（~0.4–1.3 MB，按需）
     ↓
 触发搜索（仅标题/作者）→ 立即返回结果
     ↓
-用户切换到"正文搜索" 或 阅读文章
+用户切换到"正文搜索"
     ↓
-后台并发加载对应年份的 years/YYYY.json
+按期增量加载 issues/<年>-<期>.json（每批 6 期），每批加载完立即刷新结果
     ↓
-重新搜索 / 渲染文章
+阅读文章 → 加载 articles/<mag>/*.md，失败则回退到该期分片
 ```
 
-- meta.json：~1.5 MB，单刊 0.4–0.6 MB，必加载
-- years/YYYY.json：4–6 MB / 刊，仅按需加载
-- article_index.json：~2 MB，文章详情用，单篇 < 50 KB
+- counts.json：~200 字节，首页首屏只下这一个
+- meta.json：单刊 0.4–1.3 MB，进入该刊时必加载
+- issues/<年>-<期>.json：单片中位数 ~200 KB、最大 0.31 MB，正文搜索时按期增量加载
+- article_index.json：~1.2 MB，文章详情用，单篇 < 50 KB
 
 #### 2.3 数据版本缓存破坏
 
@@ -151,7 +158,7 @@ function dataUrl(p) { return p + '?v=' + DATA_VERSION; }
 
 **数组**（不是字典），按抓取时间顺序追加。
 
-### 3.3 `data/<mag>/years/YYYY.json`
+### 3.3 `data/<mag>/issues/<年>-<期>.json`
 
 ```json
 {
@@ -161,9 +168,23 @@ function dataUrl(p) { return p + '?v=' + DATA_VERSION; }
 ```
 
 **字典**，键 = URL，值 = Markdown 文本。
-按年拆分（一个 JSON 文件 ~5 MB）。
+按**期**拆分（单片 ~200 KB，最大 0.31 KB 级），文件名 `<年>-<期>.json`、期号不补零。
 
-### 3.4 `articles/<mag>/<year>_<issue>_<title>.md`
+> 2026-10 之前正文按年存放于 `data/<mag>/years/YYYY.json`（单文件 4–18 MB）。
+> `scripts/rebuild_data.py` 已把全部正文重建为分片，并丢弃了 `meta.json` 里
+> 找不到对应文章的**不可达条目**（历史跨刊污染 + http/https 协议变体重复）。
+
+### 3.4 `data/counts.json`
+
+```json
+{"qs":{"articles":3402,"issues":188},"hqwg":{"articles":2265,"issues":164},"djyj":{"articles":1748,"issues":71}}
+```
+
+首页只需要三个数字。为此单独准备了这个 ~200 字节的小文件，
+避免为了计数下载合计 1.3 MB 的三份 `meta.json`。
+抓取脚本每次跑完会自动刷新，也可用 `python scripts/scrape_magazines.py --counts` 离线重建。
+
+### 3.5 `articles/<mag>/<year>_<issue>_<title>.md`
 
 文件命名规则：`年_期号_标题（≤60字符，去除特殊符号）.md`。
 **重名时**追加 `_<index>` 后缀。
@@ -246,7 +267,7 @@ MAGAZINES 配置字典
 ├─ find_issue_url_in_year(mag, year, issue)  # 新增
 ├─ parse_qs_hqwg_catalog / parse_djyj_catalog
 ├─ fetch_article_content(url, mag_type)
-├─ process_magazine(mag, year, issue)         # 协调：写 meta/years/index
+├─ process_magazine(mag, year, issue)         # 协调：写 meta/issues/index + 刷新 counts
 └─ download_cover(mag, year, issue)           # 写 assets/img/
 
 main()  CLI 调度
@@ -287,7 +308,7 @@ main()  CLI 调度
 | --- | --- |
 | 首次加载（仅首页） | ~2 MB（HTML + meta + CSS + JS） |
 | 搜索响应 | < 100 ms（仅标题） |
-| 搜索响应（正文） | 1–2 s（首次 + 年份加载） |
+| 搜索响应（正文） | 1–2 s（首次 + 分片按期增量加载） |
 | 文章渲染 | < 200 ms（md 加载 + 渲染） |
 | Lighthouse 性能分 | 90+（桌面），80+（移动） |
 | 总数据量 | ~150 MB（不含 articles/ 约 8 MB） |
