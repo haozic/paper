@@ -1,7 +1,7 @@
 'use strict';
 
-/* ===== 全局缓存版本号（与 index.html 一致，用于 data/*.json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261030c';
+/* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261030d';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -1833,6 +1833,50 @@ function parseHash() {
 }
 
 /* ===== 初始化 ===== */
+/* ===== PWA：Service Worker / 离线提示 / 新版本提示（P2-1） ===== */
+function updateOnlineStatus() {
+    if (navigator.onLine) document.body.classList.remove('is-offline');
+    else document.body.classList.add('is-offline');
+}
+
+/* 离线状态监听放在顶层：密码门阶段就该提示离线，而不是等进入系统后 */
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+function showUpdateToast() {
+    const toast = document.getElementById('updateToast');
+    if (!toast || toast.classList.contains('show')) return;
+    toast.classList.add('show');
+    toast.addEventListener('click', () => { location.reload(); }, { once: true });
+}
+
+function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    // Service Worker 仅在安全上下文可用（https 或 localhost）
+    const host = location.hostname;
+    const secure = location.protocol === 'https:' ||
+        host === 'localhost' || host === '127.0.0.1' || host === '[::1]';
+    if (!secure) return;
+
+    // 用版本号注册：版本一变就装上新的 Service Worker，由它清掉旧缓存，
+    // 保证不会把上一期的 meta / 索引当新数据用（版本常量与 index.html 共用同一个）
+    navigator.serviceWorker.register('sw.js?v=' + DATA_VERSION).then(reg => {
+        reg.addEventListener('updatefound', () => {
+            const sw = reg.installing;
+            if (!sw) return;
+            sw.addEventListener('statechange', () => {
+                // 已有旧 SW 在控制页面、且新 SW 装好 → 提示用户刷新
+                if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+                    showUpdateToast();
+                }
+            });
+        });
+    }).catch(e => {
+        console.warn('Service Worker 注册失败：', e);
+    });
+}
+
 async function init() {
     loadFavorites();
     updateFavBadges();
@@ -1955,6 +1999,9 @@ async function init() {
 
     // 加载首页计数
     loadHomeCounts();
+
+    // 注册 Service Worker（离线阅读）
+    registerServiceWorker();
 
     // URL 路由
     const route = parseHash();

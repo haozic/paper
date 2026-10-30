@@ -1,0 +1,52 @@
+{
+  "name": "党内刊物检索",
+  "short_name": "党刊检索",
+  "description": "《求是》《红旗文稿》《党建研究》三本党刊的全文检索与阅读，支持离线查看已读文章。",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fbf6f3",
+  "theme_color": "#8b0000",
+  "categories": ["books", "education", "news"],
+  "icons": [
+    {
+      "src": "assets/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/img/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "求是",
+      "short_name": "求是",
+      "url": "./index.html#m=qs"
+    },
+    {
+      "name": "红旗文稿",
+      "short_name": "红旗文稿",
+      "url": "./index.html#m=hqwg"
+    },
+    {
+      "name": "党建研究",
+      "short_name": "党建研究",
+      "url": "./index.html#m=djyj"
+    }
+  ]
+}

@@ -84,6 +84,14 @@ python scripts\check_compat.py --list
 
 # 体检脚本自身的判定逻辑反向自测（15 条用例）
 python scripts\test_check_compat.py
+
+# JS 注释层体检：防"块注释被提前闭合"+ Service Worker 求值冒烟
+python scripts\check_js_comments.py
+python scripts\check_js_comments.py --no-runtime   # 只跑词法扫描
+python scripts\check_js_comments.py --self-test    # 反向自检（8 条用例）
+
+# 重新生成 PWA 图标（需要 Pillow；仅在改图标设计时才用）
+python scripts\make_icons.py
 ```
 
 | 脚本 | 作用 | 何时用 |
@@ -93,6 +101,8 @@ python scripts\test_check_compat.py
 | `repair_empty_urls.py` | 修复 `u` 字段为空的条目 | 体检报出空 URL 时 |
 | `check_compat.py` | 体检 Chrome 69 兼容性（特性黑名单 + flex gap 兜底缺失） | 改动 CSS / JS 后；详见 [`docs/CHROME69_COMPAT.md`](../docs/CHROME69_COMPAT.md) |
 | `test_check_compat.py` | `check_compat.py` 的反向自测（`@supports` 语义、兜底缺失、注释剥离） | 改动 `check_compat.py` 的解析逻辑后 |
+| `check_js_comments.py` | 体检 JS 注释层（块注释提前闭合）+ Service Worker 求值冒烟 | 改动任何 `.js` 后；详见 [`docs/CHROME69_COMPAT.md` §3.3](../docs/CHROME69_COMPAT.md) |
+| `make_icons.py` | 生成 PWA 图标（192 / 512 / maskable-512 / apple-touch-icon） | 改图标设计时；需要 Pillow |
 
 ---
 
@@ -384,10 +394,14 @@ python scripts\scrape_magazines.py --counts
 #    改 《求是》：... 至 2026 年第 21 期
 #    改 《红旗文稿》：... 至 2026 年第 20 期
 
-# 4. 同步缓存破坏三件套
-#    index.html: <link ... ?v=YYYYMMDDx> 和 <script ... ?v=YYYYMMDDx>
-#    assets/js/app.js: const DATA_VERSION = 'YYYYMMDDx';
-#    assets/css/style.css: 封面图 ?v=YYYYMMDDx（封面更新时）
+# 4. 同步缓存破坏五件套（版本号必须一致）
+#    index.html 第 12 行: <link rel="stylesheet" ... ?v=YYYYMMDDx>
+#    index.html 第 13 行: <link rel="manifest" ... ?v=YYYYMMDDx>
+#    index.html 第 14 行: <link rel="apple-touch-icon" ... ?v=YYYYMMDDx>
+#    index.html 第 420 行: <script src="assets/js/app.js?v=YYYYMMDDx">
+#    assets/js/app.js 第 4 行: const DATA_VERSION = 'YYYYMMDDx';
+#    （sw.js 的注册 URL 用的是 DATA_VERSION，不用另外改）
+#    assets/css/style.css: 封面图 ?v=...（封面更新时，三本各自独立）
 
 # 5. 提交
 git add -A
@@ -395,7 +409,8 @@ git commit -m "更新求是2026年第21期、红旗文稿2026年第20期、党�
 git push origin main
 ```
 
-> 缓存破坏三件套缺一不可，否则 Cloudflare 的 `immutable` 缓存会让用户看不到新内容。
+> 缓存破坏五件套缺一不可，否则 Cloudflare 的 `immutable` 缓存会让用户看不到新内容。
+> 详细说明见 [`docs/UPDATE_FLOW.md` §2.6](../docs/UPDATE_FLOW.md)。
 
 ---
 

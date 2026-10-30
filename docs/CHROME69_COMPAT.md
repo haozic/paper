@@ -302,7 +302,37 @@ npx --yes csstree-validator@3 assets/css/style.css
 # 已知误报：env()、text-justify: inter-ideograph（csstree 词表过时，浏览器无害）
 ```
 
-### 3.3 兜底等效性验证（重要）
+### 3.3 注释层体检（防"块注释提前闭合"）
+
+**语法校验查不出一类 bug：块注释被提前闭合。**
+
+JS 的块注释不嵌套，注释里一旦出现 `*/` 注释就提前结束，后面的注释文字会被当成代码解析。
+这类 bug **语法完全合法**（acorn / node --check / eslint 一律通过），只在**运行期**抛错。
+
+本仓库在 `sw.js` 上真实踩过一次：文件头注释里写了 `data/**/issues/*.json`，
+其中的 `*/` 提前闭合了注释 → `issues` 变成未定义标识符 → Service Worker
+`script evaluation failed` → 整个离线能力静默失效。
+
+```bash
+# 词法扫描：报出块注释内部出现 "/*" 的位置（本项目约定：注释里不写带 "/*" 的路径）
+python scripts/check_js_comments.py
+
+# 只跑词法扫描（不跑求值冒烟）
+python scripts/check_js_comments.py --no-runtime
+
+# 求值冒烟 + 词法扫描（含反向自检，证明检查确实有鉴别力）
+python scripts/check_js_comments.py --self-test
+```
+
+求值冒烟会在 mock 的 Service Worker 全局环境里真正求值 `sw.js`，
+捕获求值期异常，并检查 `install` / `activate` / `fetch` / `message` 四个监听器都注册了。
+没有 node 时会自动跳过这一步并明确说明。
+
+> **反向自检**里有一组对照：把真实事故形态注入 `sw.js` 副本 → 求值必须失败
+> （`ReferenceError: issues is not defined`）；正常 `sw.js` → 求值必须通过。
+> 没有这组对照，就无法证明这个检查抓得住真问题。
+
+### 3.4 兜底等效性验证（重要）
 
 兜底块在现代浏览器里默认不生效，无法直接看到。验证办法是**翻转标记强制启用**：
 
@@ -313,7 +343,7 @@ npx --yes csstree-validator@3 assets/css/style.css
 
 判断标准：**翻转前后渲染一致**（唯一差异是人为注入的标记边框）。这一步能证明兜底块是等价实现，而不是"看起来差不多"。
 
-### 3.4 浏览器实际测试
+### 3.5 浏览器实际测试
 
 1. 用 Chrome 69（或更早版本）打开站点
 2. 重点测试：
@@ -323,7 +353,7 @@ npx --yes csstree-validator@3 assets/css/style.css
    - 文章页：能否加载并阅读
 3. 用 DevTools Console 检查 JS 错误
 
-### 3.5 性能数据
+### 3.6 性能数据
 
 | 浏览器 | 首屏加载 | 搜索响应 |
 | --- | --- | --- |
@@ -369,6 +399,36 @@ magazine-grid > * + * { margin-top: 20px; }
 
 只补 margin 不归零 gap，会让 Chrome 84~87（已支持 flex gap）出现双倍间距。**兜底块必须先 `gap: 0` 归零**。
 
+### 4.7 ⚠️ 注释里的路径让整个 Service Worker 静默失效（2026-10-30）
+
+`sw.js` 文件头注释里写了 `data/**/issues/*.json`：
+
+```js
+/* ... (data/**/issues/*.json) ... */
+```
+
+JS 的块注释不嵌套，里面的 `*/` **提前闭合了注释**，于是：
+
+1. `issues` 变成一个未定义的标识符 → 求值阶段 `ReferenceError`
+2. 后面的 `/*` 又开启了新注释，把 `'use strict'` 也吞了进去
+3. Service Worker `script evaluation failed`，**离线能力完全失效，且没有任何语法报错**
+
+**为什么没被拦住**：`npx acorn --ecma2019 sw.js` 退出码 0 —— 因为这段文本被解析成了
+合法的（但语义错误的）JS。**语法正确 ≠ 运行正确**，语法校验对这类 bug 完全无能为力。
+
+**怎么发现的**：浏览器 Console 里的 `Service Worker 注册失败：… script evaluation failed`。
+这类"注册失败但页面照常工作"的假象很危险 —— 页面上完全看不出异常，
+只有真断网时才会发现离线是坏的。
+
+**教训**：
+
+1. **JS 注释里不要写带 `/*` 的路径**（`articles/*.md`、`data/**/issues` 都不行）。
+   本仓库把这条定为硬规则，由 `scripts/check_js_comments.py` 强制。
+2. **新增 Service Worker / Worker 脚本后，必须做一次"真的把它加载起来"的验证**，
+   不能只看语法检查通过。`scripts/check_js_comments.py` 的求值冒烟就是干这个的。
+3. **功能必须有独立于 UI 的可见信号**。这次是因为 Console 里恰好有一条注册失败警告
+   才被发现；如果连警告都没有，这个 bug 会一路带到线上。
+
 ---
 
 ## 5. 推荐做法
@@ -381,8 +441,10 @@ magazine-grid > * + * { margin-top: 20px; }
 
 1. **设计阶段**：在 caniuse 上查兼容
 2. **写代码阶段**：默认用现代特性，但加 `@supports` 兜底
-3. **测试阶段**：跑 `python scripts/check_compat.py` + 兜底等效性验证（§3.3）
-4. **上线阶段**：在 `_headers` 加 `Vary: User-Agent` 不必要，但要监控错误日志
+3. **测试阶段**：跑 `python scripts/check_compat.py` + 兜底等效性验证（§3.4）
+4. **改 JS 后**：跑 `python scripts/check_js_comments.py`（§3.3），它会真的把
+   Service Worker 脚本加载起来求值一遍
+5. **上线阶段**：在 `_headers` 加 `Vary: User-Agent` 不必要，但要监控错误日志
 
 ### 5.3 工具
 
@@ -391,6 +453,7 @@ magazine-grid > * + * { margin-top: 20px; }
 - `core-js`：JS polyfill
 - `browserslist`：声明目标浏览器范围
 - `scripts/check_compat.py`：本仓库自带的 Chrome 69 体检（零依赖）
+- `scripts/check_js_comments.py`：JS 注释层体检 + Service Worker 求值冒烟（零依赖）
 
 ### 5.4 未来规划
 

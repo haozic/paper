@@ -35,6 +35,7 @@
 | 移动适配 | 移动端底部 tab + 桌面端顶部 tab，自适应响应式 |
 | Markdown 渲染 | 自动渲染粗体、标题、链接、图片、对齐，保留版式 |
 | 跨刊跳转 | 收藏的文章跨杂志自动切换 |
+| 离线阅读 | Service Worker 缓存应用外壳与已读正文，断网仍可打开并继续阅读 |
 | Chrome 69 兼容 | 站点对 2018 年的 Chrome 69 仍可正常使用 |
 
 ---
@@ -59,6 +60,8 @@ e:\cursor\xgkt\djyj
 ├── README.md                       # 你正在阅读的文件
 ├── wrangler.jsonc                  # Cloudflare Pages 部署配置
 ├── _headers                        # 自定义 HTTP 头（缓存策略）
+├── sw.js                           # Service Worker：离线阅读（PWA）
+├── manifest.webmanifest            # PWA 清单：应用名 / 图标 / 快捷方式
 ├── .nojekyll                       # 禁用 GitHub Pages 的 Jekyll 处理
 ├── .gitignore
 │
@@ -67,7 +70,7 @@ e:\cursor\xgkt\djyj
 │   │   └── style.css               # 移动优先响应式样式（含 Chrome 69 兼容补丁）
 │   ├── js/
 │   │   └── app.js                  # 核心逻辑（搜索/收藏/懒加载/路由）
-│   └── img/                        # 杂志封面图（cover_qs/hqwg/djyj.jpg）
+│   └── img/                        # 杂志封面图（cover_qs/hqwg/djyj.jpg）+ PWA 图标
 │
 ├── data/                           # ⭐ 网站运行依赖
 │   ├── article_index.json          # URL → articles/.../*.md 路径映射
@@ -95,6 +98,7 @@ e:\cursor\xgkt\djyj
 │   ├── check_data.py               # 数据体检：期号覆盖 / 重复 / 正文缺失 / 分片与 counts 一致性
 │   ├── check_compat.py             # Chrome 69 兼容性体检：特性黑名单 + flex gap 兜底检查
 │   ├── repair_empty_urls.py        # 修复历史遗留的空 URL 条目
+│   ├── make_icons.py               # 生成 PWA 图标（192 / 512 / maskable / apple-touch）
 │   └── README.md                   # 脚本使用、字段、URL 规律、踩坑记录
 │
 └── docs/                           # 📚 架构、流程、踩坑文档
@@ -125,8 +129,9 @@ python scripts\scrape_magazines.py hqwg 2026 20
 python scripts\scrape_magazines.py djyj 2026 10
 
 # 3. 同步 index.html 的"数据更新"区块（修改日期 + 各刊期号范围）
-# 4. 把 index.html / assets/css/style.css / assets/js/app.js 中的 ?v=YYYYMMDDx 同步升级
+# 4. 把 index.html / assets/js/app.js 中的 ?v=YYYYMMDDx 同步升级
 #    同时把 assets/js/app.js 顶部的 DATA_VERSION 常量一并升级
+#    （封面图的 ?v= 各自独立，只在换封面时才改）
 
 # 5. 提交并推送
 git add -A
@@ -134,7 +139,10 @@ git commit -m "更新求是2026年第21期、红旗文稿2026年第20期"
 git push origin main
 ```
 
-> **缓存破坏三件套**：`index.html` 的 `?v=`、`app.js` 的 `?v=`、`DATA_VERSION` 常量。这三个值必须同步改动，否则用户会看到旧版（因为 CSS/JS/JSON 都用 `immutable` 缓存）。
+> **缓存破坏五件套**：`index.html` 的 style.css `?v=`、`manifest` `?v=`、`apple-touch-icon` `?v=`、
+> `app.js` `?v=`、`DATA_VERSION` 常量。
+> 这五个值必须同步改动，否则用户会看到旧版（因为 CSS/JS/JSON 都用 `immutable` 缓存）。
+> 详细的更新流程与 Service Worker 验证步骤见 [`docs/UPDATE_FLOW.md`](./docs/UPDATE_FLOW.md)。
 
 ---
 
@@ -236,6 +244,8 @@ python scripts/check_compat.py
 | `/data/*` | `max-age=31536000, immutable` | 数据文件很大，URL 携带 `?v=YYYYMMDDx` 版本号，更新即失效 |
 | `/assets/*` | `max-age=0, must-revalidate` | CSS/JS 修改后必须立即生效 |
 | `/*.html` | `max-age=0, must-revalidate` | 入口文件，确保更新及时 |
+| `/sw.js` | `max-age=0, must-revalidate` | SW 必须每次回源校验，否则离线缓存停在旧版 |
+| `/manifest.webmanifest` | `max-age=0, must-revalidate` | 桌面安装信息需随发版更新 |
 
 ### 关键性能数据
 
@@ -248,7 +258,7 @@ python scripts/check_compat.py
 
 - 站点为纯静态 HTML，**无构建步骤**，可直接部署
 - 单页应用（SPA-like）通过 History API 实现路由
-- 支持 service-worker 离线（未来计划）
+- 已支持 Service Worker 离线阅读：应用外壳预缓存，已读正文运行时缓存，断网仍可打开文章
 
 ---
 

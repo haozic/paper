@@ -10,3 +10,11 @@
 # HTML 文件不缓存（确保更新及时）
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
+
+# Service Worker 必须每次回源校验，否则浏览器拿不到新版 SW，离线缓存不会更新
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+# PWA manifest 同上
+/manifest.webmanifest
+  Cache-Control: public, max-age=0, must-revalidate

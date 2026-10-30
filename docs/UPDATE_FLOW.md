@@ -124,22 +124,46 @@ python scripts/check_data.py
 
 **这是最容易遗漏的关键步骤**。如果不同步，用户会因为 `immutable` 缓存而看不到新内容。
 
-需要同步更新以下 3 处：
+需要同步更新以下 5 处（**五处必须一致**）：
 
-| 位置 | 查找 | 示例 |
+| 位置 | 查找 | 当前示例 |
 | --- | --- | --- |
-| `index.html` 第 12 行 | `<link rel="stylesheet" href="assets/css/style.css?v=...` | `?v=20261030c` |
-| `index.html` 第 414 行 | `<script src="assets/js/app.js?v=...` | `?v=20261030c` |
-| `assets/js/app.js` 第 4 行 | `const DATA_VERSION = ...` | `'20261030c'` |
-| `assets/css/style.css` | `cover_qs/hqwg/djyj.jpg?v=...`（封面更新时） | `?v=20261030c` |
+| `index.html` 第 12 行 | `<link rel="stylesheet" href="assets/css/style.css?v=...` | `?v=20261030d` |
+| `index.html` 第 13 行 | `<link rel="manifest" href="manifest.webmanifest?v=...` | `?v=20261030d` |
+| `index.html` 第 14 行 | `<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=...` | `?v=20261030d` |
+| `index.html` 第 420 行 | `<script src="assets/js/app.js?v=...` | `?v=20261030d` |
+| `assets/js/app.js` 第 4 行 | `const DATA_VERSION = ...` | `'20261030d'` |
+
+> `sw.js` 里还有两处 `'20261030d'` 兜底值（第 42、44 行）。正常情况下 SW 从自身 URL 的
+> `?v=` 参数取版本（注册时用 `sw.js?v=<DATA_VERSION>`），兜底值只在 SW 被直接访问时才会用到；
+> 但为了让"全仓库搜同一个版本号"的自查能一次搜干净，建议一并改。
+
+**封面图版本号是独立的**，不要跟着上面的日期走：
+
+| 文件 | 版本号 |
+| --- | --- |
+| `assets/img/cover_qs.jpg` | `?v=20260920a` |
+| `assets/img/cover_hqwg.jpg` | `?v=20261030a` |
+| `assets/img/cover_djyj.jpg` | `?v=20261030a` |
+
+封面图在 `assets/css/style.css` 里引用，**只有换封面图时才改**，且三本各自独立。
 
 **版本号命名规则**：`YYYYMMDDx`，x 是当天的 a/b/c（如果同一天多次更新）。
 
-**为什么是 3 处？**
+**为什么是 5 处？**
 
-- HTML 的 `?v=` 决定浏览器是否会重新下载 `style.css` 和 `app.js`
+- HTML 的 `?v=` 决定浏览器是否会重新下载 `style.css`、`manifest` 与 `app.js`
 - `app.js` 的 `DATA_VERSION` 决定 `dataUrl()` 给数据 URL 加什么参数，从而决定浏览器是否会重新下载 `data/*.json`
-- 三者必须保持一致
+- manifest 的 `?v=` 保证浏览器不会用旧 manifest
+- `sw.js` 用同一个版本号注册，版本一变 → 浏览器装新 SW → 新 SW 的 `activate` 清掉旧的外壳与数据缓存
+- 五者必须保持一致
+
+**自查**：
+
+```bash
+# 全仓库搜旧版本号（把 20261030c 换成上一次的版本号），应当搜不到任何结果
+git grep -n "20261030c" -- ':!docs/UPDATE_FLOW.md'
+```
 
 ### 2.7 提交
 
@@ -171,6 +195,38 @@ curl -s https://your-domain.pages.dev/data/meta.json | head -c 200
 ```
 
 或者直接打开浏览器**强制刷新**（Ctrl+Shift+R / Cmd+Shift+R），进入"关于本站"查看"数据更新"是否变成最新日期。
+
+### 2.10 验证 Service Worker（离线能力）
+
+站点自 2026-10-30 起带 Service Worker（`sw.js`），发版后多了一步验证：
+
+```bash
+# 确认 SW 能取到，且响应头是 must-revalidate
+curl -I https://your-domain.pages.dev/sw.js
+# 期望：Cache-Control: public, max-age=0, must-revalidate
+```
+
+浏览器端检查：
+
+1. **DevTools → Application → Service Workers**：状态应为 `activated and is running`
+2. **DevTools → Application → Cache Storage**：应看到 `djyj-shell-<版本号>`、`djyj-rt-<版本号>`、`djyj-md` 三个缓存
+3. **离线验证**：DevTools → Network 勾选 `Offline`，然后**普通刷新**（不是强制刷新）——
+   页面应照常渲染（样式完整、三刊计数正确），已读过的文章正文可继续打开
+4. **新版本提示**：改动版本号并部署后，页面底部应弹出"新版本已就绪，点击刷新"
+
+> **注意**：强制刷新（Ctrl+Shift+R）会绕过 Service Worker，看到的是"永远最新"的联网结果，
+> 不能用来验证离线能力。要验证离线请用 Network 面板的 Offline 开关，或停掉本地服务器。
+
+**Service Worker 与版本号的关系**：
+
+| 缓存 | 键规则 | 跨版本 |
+| --- | --- | --- |
+| `djyj-shell-<v>` | index.html 按路径；CSS/JS/manifest/计数/meta/索引按完整 URL（含 `?v=`） | ❌ 随版本清空 |
+| `djyj-rt-<v>` | 正文分片按路径；meta/索引按完整 URL | ❌ 随版本清空 |
+| `djyj-md` | `articles/**/*.md` 按路径 | ✅ 永久保留（正文不可变） |
+
+正文 md 缓存跨版本保留，所以**每次发版不会重下 85 MB 正文**；而 meta / 索引会随版本清空重下，
+保证不会把上一期的目录当成本期。
 
 ---
 

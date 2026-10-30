@@ -17,6 +17,7 @@
 ┌────────────────────────────────────────────────────────┐
 │  index.html  +  assets/css/style.css  +  assets/js/app.js│
 │  ── 单页应用入口（首页 / 杂志 / 文章 / 板块 / 目录 / 收藏）  │
+│  sw.js  +  manifest.webmanifest  ── PWA 外壳与离线缓存     │
 └────────────────────────────────────────────────────────┘
             ↓ fetch (JSON)
 ┌────────────────────────────────────────────────────────┐
@@ -232,16 +233,51 @@ CDN 边缘节点（全球 200+ 节点）
 ### 5.2 缓存策略（`_headers`）
 
 ```text
-/data/*     Cache-Control: public, max-age=31536000, immutable
-/assets/*   Cache-Control: public, max-age=0, must-revalidate
-/*.html     Cache-Control: public, max-age=0, must-revalidate
+/data/*               Cache-Control: public, max-age=31536000, immutable
+/assets/*             Cache-Control: public, max-age=0, must-revalidate
+/*.html               Cache-Control: public, max-age=0, must-revalidate
+/sw.js                Cache-Control: public, max-age=0, must-revalidate
+/manifest.webmanifest Cache-Control: public, max-age=0, must-revalidate
 ```
 
 - `data/` 一年不可变，URL 携带 `?v=YYYYMMDDx` 触发更新
 - `assets/` 必须 revalidate，避免用户看到旧版 CSS/JS
 - HTML 永不缓存，确保 index.html 立即生效
+- `sw.js` 必须 revalidate，否则浏览器拿不到新版 SW，离线缓存会永远停在旧版
+- `manifest.webmanifest` 同理，否则桌面安装信息不更新
 
-### 5.3 域名配置
+### 5.3 Service Worker（`sw.js`）
+
+自 2026-10-30 起引入，提供离线阅读能力。Service Worker 自 Chrome 40+ 支持，
+Chrome 69 完全可用（Chrome 72 前不认 manifest，只影响"安装到桌面"，不影响离线阅读）。
+
+**版本绑定**：注册时用 `sw.js?v=<DATA_VERSION>`，SW 从自身 URL 的 `?v=` 取版本号。
+版本一变 → 浏览器装上新 SW → 新 SW 的 `activate` 清掉旧版本的外壳与数据缓存，
+保证不会把上一期的 meta / 索引当成本期数据用。
+
+**三套缓存**：
+
+| 缓存名 | 内容 | 键规则 | 跨版本 |
+| --- | --- | --- | --- |
+| `djyj-shell-<v>` | index.html、CSS/JS、manifest、图标、封面、counts | index/图片按路径；CSS/JS/manifest/counts 按完整 URL（含 `?v=`） | ❌ 随版本清空 |
+| `djyj-rt-<v>` | 各刊 meta、article_index、正文分片 | meta/索引按完整 URL；分片按路径 | ❌ 随版本清空 |
+| `djyj-md` | `articles/**/*.md` 正文 | 按路径 | ✅ 永久保留（正文不可变） |
+
+**分流策略**：
+
+- 导航请求（`request.mode === 'navigate'`）：**network-first**，断网回落缓存的 `index.html`
+- 其余同源 GET：**cache-first**，运行时写入对应缓存
+- 跨域请求不接管
+
+**容量控制**：运行时缓存 `MAX_RT_ENTRIES = 200`、`MAX_MD_ENTRIES = 250`，超出后按插入顺序 FIFO 淘汰。
+
+**内容类型守卫**：Cloudflare Pages 的 SPA 回退会把 404 变成 200 的 `index.html`。
+若照单全收，HTML 会被缓存到 `.json` / `.md` 的键上，文章页就会把整页 HTML 当正文渲染。
+因此写入缓存前校验 `content-type`：`.json` 必须是 JSON，且不能是 `text/html`。
+
+**更新提示**：页面发现新 SW 装好且已有旧 SW 在控制时，底部弹出"新版本已就绪，点击刷新"。
+
+### 5.4 域名配置
 
 - 默认域：`xxx.pages.dev`
 - 自定义域：在 Cloudflare Pages 设置中加 CNAME，自动签发 SSL
@@ -340,6 +376,7 @@ main()  CLI 调度
 
 ## 10. 变更日志
 
+- 2026-10-30：新增 PWA / 离线阅读（`sw.js`、`manifest.webmanifest`、图标），正文数据改为按期分片
 - 2026-10-16：文档体系重构，新增 `docs/` 目录
 - 2026-09-27：完成 Chrome 69 兼容性适配
 - 2026-09-27：遴选备考指南新增三大专题

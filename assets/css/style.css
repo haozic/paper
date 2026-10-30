@@ -2402,3 +2402,41 @@ html[data-theme="dark"] .asp-section--light-only { display: none; }
         .section-card > * + * { margin-left: 0; margin-top: 0; }      /* 改为纵向且 gap: 0 */
     }
 }
+
+/* ===== PWA：离线提示条 / 新版本提示（P2-1） ===== */
+.offline-bar {
+    display: none;
+    position: fixed;
+    top: var(--header-h, 56px);
+    left: 0;
+    right: 0;
+    z-index: 190;
+    padding: 9px 16px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: center;
+}
+body.is-offline .offline-bar { display: block; }
+
+.update-toast {
+    display: none;
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 195;
+    max-width: calc(100% - 32px);
+    padding: 10px 18px;
+    border: 1px solid var(--border-2);
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: center;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .16);
+    transform: translateX(-50%);
+    cursor: pointer;
+}
+.update-toast.show { display: block; }
