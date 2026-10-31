@@ -123,11 +123,6 @@ python scripts\clean_meta_authors.py
 python scripts\clean_meta_authors.py --apply
 python scripts\clean_meta_authors.py --self-test
 
-# 生成 file:// 模式的数据副本（拷到单机电脑后双击 index.html 就能用）
-python scripts\prepare_file_mode.py
-python scripts\prepare_file_mode.py --check           # 只体检不生成
-python scripts\prepare_file_mode.py --clean           # 删掉 file-mode/
-
 # 重新生成 PWA 图标（需要 Pillow；仅在改图标设计时才用）
 python scripts\make_icons.py
 ```
@@ -148,7 +143,6 @@ python scripts\make_icons.py
 | `make_icons.py` | 生成 PWA 图标（192 / 512 / maskable-512 / apple-touch-icon） | 改图标设计时；需要 Pillow |
 | `fix_catalog_order.py` | 按官网目录页顺序重排 meta，并把顺序存成 `data/catalog_order.json` 快照 | 站内目录顺序与官网对不上时；新增期次后刷新快照 |
 | `clean_meta_authors.py` | 清洗 meta 里被网页页脚（发布时间 / 扫码提示 / 网站声明 / 评论引导）污染的"作者"字段 | 目录里出现长串乱码作者时 |
-| `prepare_file_mode.py` | 把 `data/` 下的 json 另存成 `file-mode/` 下的 `.js`，供 `file://` 直接双击打开 | 把站点拷到不联网的单机电脑后 |
 
 ---
 

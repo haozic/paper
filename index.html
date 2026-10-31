@@ -103,14 +103,6 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 <div class="offline-bar" id="offlineBar">当前处于离线状态 · 已缓存的文章仍可继续阅读</div>
 <div class="update-toast" id="updateToast" role="status">新版本已就绪，点击刷新</div>
 
-<!-- ===== 本地文件模式提示（仅在 file:// 下读取数据失败时出现） ===== -->
-<div class="file-notice" id="fileNotice" role="alert">
-    <div class="file-notice-inner">
-        <strong>本地文件方式打开，读不到杂志数据</strong>
-        <span class="file-notice-tip">浏览器禁止网页直接读取本地数据文件。请在站点根目录执行一次 <code>python3 scripts/prepare_file_mode.py</code>，然后刷新本页；也可以改用本地服务访问（<code>bash start-local-server.sh</code>）。</span>
-    </div>
-</div>
-
 <!-- ===== 首页（三杂志导航） ===== -->
 <div id="homePage" class="home-page">
     <header class="home-header">

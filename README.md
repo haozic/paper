@@ -15,7 +15,6 @@
 - [项目结构](#项目结构)
 - [更新文章：抓取脚本使用流程](#更新文章抓取脚本使用流程)
 - [本地开发](#本地开发)
-- [拷到单机电脑后怎么用](#拷到单机电脑后怎么用)
 - [部署到 GitHub + Cloudflare Pages](#部署到-github--cloudflare-pages)
 - [浏览器兼容性](#浏览器兼容性)
 - [性能与缓存策略](#性能与缓存策略)
@@ -90,12 +89,6 @@ e:\cursor\xgkt\djyj
 │   ├── qs/                         # 求是
 │   └── hqwg/                       # 红旗文稿
 │
-├── file-mode/                      # 📁 本地文件模式的数据副本（.gitignore，不进版本库）
-│                                   #    由 scripts/prepare_file_mode.py 生成，
-│                                   #    让 file:// 直接双击 index.html 也能用
-│
-├── start-local-server.sh           # 🚀 一键起本机静态服务（Linux / macOS），只监听 127.0.0.1
-│
 ├── linxuan-beikao-zhinan/          # 🎓 遴选备考专题（独立 HTML 子页）
 │   └── linxuan-beikao-zhinan.html
 │
@@ -106,7 +99,6 @@ e:\cursor\xgkt\djyj
 │   ├── check_compat.py             # Chrome 69 兼容性体检：特性黑名单 + flex gap 兜底检查
 │   ├── fix_catalog_order.py        # 按官网目录页顺序重排 meta（带自检与顺序快照）
 │   ├── clean_meta_authors.py       # 清洗 meta 里被网页页脚污染的"作者"字段
-│   ├── prepare_file_mode.py        # 生成 file:// 模式用的数据副本（本地单机部署用）
 │   ├── repair_empty_urls.py        # 修复历史遗留的空 URL 条目
 │   ├── make_icons.py               # 生成 PWA 图标（192 / 512 / maskable / apple-touch）
 │   └── README.md                   # 脚本使用、字段、URL 规律、踩坑记录
@@ -169,45 +161,6 @@ python -m http.server 8765
 也可以用任何静态服务器（`npx serve .`、`php -S localhost:8000` 等）。
 
 > **不要直接 `file://` 打开 `index.html`**：浏览器对 `file://` 协议下的 `fetch()` 有限制，跨域读取 JSON 会失败。务必通过 HTTP 服务访问。
-> 如果这台机器上不方便起服务，看下一节「拷到单机电脑后怎么用」。
-
----
-
-## 拷到单机电脑后怎么用
-
-把整个仓库拷到一台不联网的机器上照常用，有两条路。**两条路都不需要联网。**
-
-### 路线一：一次准备，之后双击 `index.html` 就能用（推荐）
-
-```bash
-cd <站点根目录>
-python3 scripts/prepare_file_mode.py
-# 完成后双击 index.html（或在浏览器里打开它）
-```
-
-**为什么需要这一步**：浏览器在 `file://` 下把每个本地文件都当成独立来源，会拦掉 `fetch()`，
-所以直接双击 `index.html` 时三个杂志都是空的（Console 里是 `TypeError: Failed to fetch`）。
-但 `<script src="...">` 不受这条限制——同目录下的 `.js` 能正常载入。
-`prepare_file_mode.py` 把 `data/` 下的 json 另存成 `file-mode/` 下的同名 `.js`（约 87 MB），
-站点检测到 `file://` 就改用 `<script>` 读它们，页面外观和功能与线上一致。
-
-- 产物在 `file-mode/`，已在 `.gitignore` 里，不进版本库；数据更新后重跑一次即可。
-- `python3 scripts/prepare_file_mode.py --check` 只体检不生成；`--clean` 删掉 `file-mode/`。
-- 正文不用另存一份：期次分片（`data/*/issues/*.json`）里本来就带正文，
-  `file://` 下打开单篇文章会加载整期分片（约 200～400 KB）而不是单个 markdown 备份。
-- 极少数正文不在分片里的文章，`prepare_file_mode.py` 会单独转出它的 markdown 副本。
-
-### 路线二：起一个只监听本机的静态服务
-
-```bash
-bash start-local-server.sh
-```
-
-脚本会自动找一个空闲端口（8765 起顺延）、只监听 `127.0.0.1`、并打开浏览器。
-按 `Ctrl+C` 停止。这一路与线上完全一致，不需要生成 `file-mode/`。
-
-> 两条路的取舍：路线一适合"拷过去就不用再管"；路线二适合"这台机器上还能随时更新数据"。
-> 无论走哪条路，**都要把 `data/` 整个目录一起拷过去**——文章正文都在里面。
 
 ---
 

@@ -21,10 +21,6 @@ venv/
 # ===== 抓取脚本临时日志 =====
 .scrape_*.log
 
-# ===== 本地文件模式（file://）生成的数据副本 =====
-# 由 scripts/prepare_file_mode.py 生成，不进版本库
-file-mode/
-
 # ===== Cloudflare Wrangler 部署临时目录 =====
 .wrangler/
 .uploads/

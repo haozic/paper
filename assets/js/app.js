@@ -4,105 +4,6 @@
 const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261031a';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
-/* ===== 数据加载层 =====
-   浏览器在 file:// 下把每个本地文件都当成独立来源，会拦掉 fetch()/XHR，
-   所以「拷贝文件夹到单机电脑 → 双击 index.html」时三个杂志一条数据都读不出来
-   （Console 里是 TypeError: Failed to fetch）。
-
-   但 <script src="..."> 不受这条限制：同目录下的 .js 能正常载入。
-   scripts/prepare_file_mode.py 会把 data/ 下的 json 另存成 file-mode/ 下的同名 .js，
-   file:// 下就改用 <script> 把数据读回来；HTTP 访问时仍走原来的 fetch。
-   两条路共用同一批调用点，站点其余逻辑完全一致。 */
-const IS_FILE_PROTOCOL = (typeof location !== 'undefined' && location.protocol === 'file:');
-const FILE_DATA_GLOBAL = '__DJYJ_FILE_DATA__';
-const FILE_MODE_PREFIX = 'file-mode/';
-
-/* 本地文件方式打开时给 body 挂一个标记，页面底部的提示条据此显示 */
-if (IS_FILE_PROTOCOL && typeof document !== 'undefined' && document.body) {
-    document.body.classList.add('is-file-protocol');
-}
-
-function fileDataStore() {
-    if (!window[FILE_DATA_GLOBAL]) window[FILE_DATA_GLOBAL] = {};
-    return window[FILE_DATA_GLOBAL];
-}
-
-/* data/qs/meta.json -> file-mode/data/qs/meta.js */
-function fileModeScriptUrl(p) {
-    return FILE_MODE_PREFIX + p.replace(/\.json$/, '.js');
-}
-
-/* 载入一个 .js 数据文件；文件不存在等价于 HTTP 404（站点据此判定"整期无正文"） */
-function loadScriptFile(url) {
-    return new Promise(function(resolve, reject) {
-        var s = document.createElement('script');
-        s.src = url;
-        s.onload = function() { resolve(); };
-        s.onerror = function() {
-            var err = new Error('无法加载 ' + url);
-            err.status = 404;
-            reject(err);
-        };
-        document.head.appendChild(s);
-    });
-}
-
-/* 统一的数据读取入口：HTTP 用 fetch，file:// 用 <script> */
-async function loadJsonData(p) {
-    if (!IS_FILE_PROTOCOL) {
-        const resp = await fetch(dataUrl(p));
-        if (!resp.ok) {
-            const err = new Error('HTTP ' + resp.status + ' ' + p);
-            err.status = resp.status;
-            throw err;
-        }
-        return await resp.json();
-    }
-    const store = fileDataStore();
-    if (Object.prototype.hasOwnProperty.call(store, p)) return store[p];
-    await loadScriptFile(fileModeScriptUrl(p));
-    if (!Object.prototype.hasOwnProperty.call(store, p)) {
-        const err = new Error('缺少 ' + fileModeScriptUrl(p));
-        err.status = 404;
-        throw err;
-    }
-    return store[p];
-}
-
-/* file:// 模式下，有几篇文章的正文不在期次分片里（HTTP 下靠 articles 目录下的 .md 兜底）。
-   prepare_file_mode.py 会把它们的 markdown 单独转成 .js，并写一张对应关系表。 */
-let FILE_MODE_MISSING_MAP = null;
-async function getFileModeMissingMap() {
-    if (!FILE_MODE_MISSING_MAP) {
-        try {
-            FILE_MODE_MISSING_MAP = await loadJsonData('missing_bodies.json');
-        } catch (e) {
-            FILE_MODE_MISSING_MAP = {};
-        }
-    }
-    return FILE_MODE_MISSING_MAP;
-}
-
-/* file:// 下读取数据失败：把页面底部的提示条亮出来，说清原因和补救办法 */
-function showFileModeError() {
-    if (!IS_FILE_PROTOCOL) return;
-    if (document.body) document.body.classList.add('is-file-error');
-}
-
-/* 读一篇 markdown 正文的 .js 副本 */
-async function loadFileModeText(p) {
-    const store = fileDataStore();
-    const key = 'text:' + p;
-    if (Object.prototype.hasOwnProperty.call(store, key)) return store[key];
-    await loadScriptFile(FILE_MODE_PREFIX + p + '.js');
-    if (!Object.prototype.hasOwnProperty.call(store, key)) {
-        const err = new Error('缺少 ' + FILE_MODE_PREFIX + p + '.js');
-        err.status = 404;
-        throw err;
-    }
-    return store[key];
-}
-
 /* ===== 杂志配置 ===== */
 const MAGAZINES = {
     qs: {
@@ -203,10 +104,10 @@ function getMeta() { var ms = getMagState(); return ms ? (ms.meta || []) : []; }
 async function loadHomeCounts() {
     let counts = null;
     try {
-        counts = await loadJsonData('data/counts.json');
+        const resp = await fetch(dataUrl('data/counts.json'));
+        if (resp.ok) counts = await resp.json();
     } catch (e) {
         console.warn('counts.json 加载失败，回退到 meta.json 统计:', e);
-        showFileModeError();
     }
     if (counts) {
         for (const [key, c] of Object.entries(counts)) {
@@ -220,7 +121,8 @@ async function loadHomeCounts() {
     // 回退：老版本没有 counts.json 时仍能显示计数
     for (const [key, conf] of Object.entries(MAGAZINES)) {
         try {
-            const meta = await loadJsonData(`${conf.dataPath}/meta.json`);
+            const resp = await fetch(dataUrl(`${conf.dataPath}/meta.json`));
+            const meta = await resp.json();
             const countEl = document.getElementById(`${key}Count`);
             const issuesEl = document.getElementById(`${key}Issues`);
             if (countEl) countEl.textContent = meta.length;
@@ -296,7 +198,8 @@ async function loadMagMeta(magKey) {
     const conf = MAGAZINES[magKey];
     if (!conf) return [];
     try {
-        ms.meta = await loadJsonData(`${conf.dataPath}/meta.json`);
+        const resp = await fetch(dataUrl(`${conf.dataPath}/meta.json`));
+        ms.meta = await resp.json();
     } catch (e) {
         console.error(`加载 ${magKey} 元数据失败:`, e);
     }
@@ -309,16 +212,12 @@ async function initMagazine(magKey) {
 
     if (ms.meta.length === 0) {
         try {
-            ms.meta = await loadJsonData(`${conf.dataPath}/meta.json`);
+            const resp = await fetch(dataUrl(`${conf.dataPath}/meta.json`));
+            ms.meta = await resp.json();
         } catch (e) {
             console.error('加载元数据失败:', e);
-            showFileModeError();
             document.getElementById('sectionContent').innerHTML =
-                IS_FILE_PROTOCOL
-                    ? '<div class="loading"><div>本地文件模式读取不到数据</div>' +
-                      '<div class="loading-hint">请在站点根目录执行一次：<code>python3 scripts/prepare_file_mode.py</code><br>' +
-                      '（浏览器在 file:// 下禁止 fetch()，必须先把 data/ 转成可被 &lt;script&gt; 载入的 .js）</div></div>'
-                    : '<div class="loading"><div>数据加载失败，请刷新重试</div></div>';
+                '<div class="loading"><div>数据加载失败，请刷新重试</div></div>';
             return;
         }
     }
@@ -326,17 +225,12 @@ async function initMagazine(magKey) {
     // 后台加载文章索引（不阻塞）
     if (!ms.indexLoaded) {
         ms.indexLoaded = true;
-        if (IS_FILE_PROTOCOL) {
-            // file:// 下取不到 articles/*.md 备份，正文一律从期次分片读，
-            // 所以不必加载 article_index.json（省掉 1 MB）。
-            ms.articleIndex = null;
-        } else {
-            loadJsonData('data/article_index.json')
-                .then(idx => {
-                    if (idx) ms.articleIndex = idx[magKey] || {};
-                })
-                .catch(() => {});
-        }
+        fetch(dataUrl('data/article_index.json'))
+            .then(r => r.ok ? r.json() : null)
+            .then(idx => {
+                if (idx) ms.articleIndex = idx[magKey] || {};
+            })
+            .catch(() => {});
     }
 
     document.getElementById('totalCount').textContent = ms.meta.length;
@@ -385,15 +279,18 @@ async function loadIssueData(year, issue, retry = 2) {
     if (ms.loadedIssues.has(key)) return true;
     if (ms.loadingIssues.has(key)) return false;     // 已在加载中，不重复发起
     ms.loadingIssues.add(key);
+    let resp = null;
     try {
-        const obj = await loadJsonData(`${conf.issuesPath}/${key}.json`);
+        resp = await fetch(dataUrl(`${conf.issuesPath}/${key}.json`));
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const obj = await resp.json();
         for (const u in obj) ms.bodyText[u] = obj[u];
         ms.loadedIssues.add(key);
         return true;
     } catch (e) {
         // 整期无正文（如党建研究 2024 年第 8 期）会返回 404，属正常情况，不重试；
         // 网络中断 / 5xx 属临时故障，退避 800ms 后重试。
-        if (retry > 0 && (!e.status || e.status !== 404)) {
+        if (retry > 0 && (!resp || resp.status !== 404)) {
             await new Promise(r => setTimeout(r, 800));
             ms.loadingIssues.delete(key);
             return loadIssueData(year, issue, retry - 1);
@@ -821,19 +718,12 @@ async function showArticle(encUrl, replaceHist) {
     bodyEl.innerHTML = '<div class="article-loading"><div class="spinner"></div><div>加载正文...</div></div>';
 
     // 优先从 markdown 文件加载（轻量，单文件按需加载）
-    const mdPath = IS_FILE_PROTOCOL
-        ? (await getFileModeMissingMap())[url]
-        : (ms.articleIndex ? ms.articleIndex[url] : undefined);
+    const mdPath = ms.articleIndex ? ms.articleIndex[url] : undefined;
     if (mdPath) {
         try {
-            let md = null;
-            if (IS_FILE_PROTOCOL) {
-                md = await loadFileModeText(mdPath);
-            } else {
-                const resp = await fetch(mdPath);
-                if (resp.ok) md = await resp.text();
-            }
-            if (md != null) {
+            const resp = await fetch(mdPath);
+            if (resp.ok) {
+                let md = await resp.text();
                 // 统一换行符：CRLF -> LF，避免 Windows 行尾导致分隔符检测失败
                 md = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
                 // 去掉 markdown 头部的元信息（# 标题到 --- 分隔线之间的内容）
@@ -912,19 +802,12 @@ async function retryShowArticle(encUrl) {
     bodyEl.innerHTML = '<div class="article-loading"><div class="spinner"></div><div>重新加载中...</div></div>';
 
     // 优先重试 markdown 文件
-    const mdPath = IS_FILE_PROTOCOL
-        ? (await getFileModeMissingMap())[url]
-        : (ms.articleIndex ? ms.articleIndex[url] : undefined);
+    const mdPath = ms.articleIndex ? ms.articleIndex[url] : undefined;
     if (mdPath) {
         try {
-            let md = null;
-            if (IS_FILE_PROTOCOL) {
-                md = await loadFileModeText(mdPath);
-            } else {
-                const resp = await fetch(mdPath + '?t=' + Date.now());
-                if (resp.ok) md = await resp.text();
-            }
-            if (md != null) {
+            const resp = await fetch(mdPath + '?t=' + Date.now());
+            if (resp.ok) {
+                let md = await resp.text();
                 md = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
                 let bodyMd = md;
                 const sepIdx = md.indexOf('\n---\n');
@@ -2374,7 +2257,7 @@ window.__app_init__ = init;
         var hint = document.getElementById('gateHint');
         if (!hint) return;
         hint.textContent = text;
-        hint.className = 'gate-hint' + (ok === true ? ' gate-hint--ok' : (ok === false ? ' gate-hint--err' : ' gate-hint--info'));
+        hint.className = 'gate-hint' + (ok ? ' gate-hint--ok' : ' gate-hint--err');
     }
 
     function bind() {
@@ -2436,11 +2319,6 @@ window.__app_init__ = init;
         }
         bind();
         openGate();
-        // 本地文件方式打开：先说清楚为什么三个杂志会是空的，别让人一头雾水
-        if (typeof IS_FILE_PROTOCOL !== 'undefined' && IS_FILE_PROTOCOL) {
-            showHint('当前是本地文件方式打开（file://）。浏览器会拦截数据读取，' +
-                     '请先在站点根目录执行一次 python3 scripts/prepare_file_mode.py', undefined);
-        }
     }
 
     // 把 init() 调用包在密码门之后
