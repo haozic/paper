@@ -28,6 +28,7 @@ BASE_DIR = os.path.dirname(SCRIPT_DIR)
 
 sys.path.insert(0, SCRIPT_DIR)
 from canonical_sections import ALIASES    # noqa: E402  板块名归一表（改名合并）
+from refresh_sections import url_key     # noqa: E402  URL 匹配键（忽略协议与年份段）
 
 MAGAZINES = [
     ('qs', '求是', 'data/qs/meta.json', 'data/qs/issues'),
@@ -166,6 +167,42 @@ def check_one(key, name, meta_path, issues_dir):
     }
 
 
+def check_catalog_order():
+    """目录顺序体检：meta 里每一期的文章顺序，必须与官网目录页的顺序一致。
+
+    基准是 data/catalog_order.json —— 由 scripts/fix_catalog_order.py 从官网
+    目录页抓下来的顺序快照（o = 官网列出的顺序，x = 官网没列出的部分）。
+    快照存在才查这条：没有快照时只提示，不算失败。
+    """
+    print('\n[catalog_order] 目录顺序（对照官网目录页快照）')
+    snap = load('data/catalog_order.json')
+    if snap is None:
+        print('    缺少快照 data/catalog_order.json，跳过（跑一次 scripts/fix_catalog_order.py --apply 生成）')
+        return 0
+    bad = 0
+    for key, name, meta_path, _ in MAGAZINES:
+        meta = load(meta_path) or []
+        groups = {}
+        for a in meta:
+            groups.setdefault('%d-%d' % (a['y'], a['i']), []).append(url_key(a['u']))
+        snap_mag = snap.get(key) or {}
+        checked = 0
+        for slug, rec in snap_mag.items():
+            want = list(rec.get('o') or []) + list(rec.get('x') or [])
+            have = groups.get(slug) or []
+            if have != want:
+                bad += 1
+                if len(have) != len(want):
+                    print(f'    !! {name} {slug} 条数不符：本地 {len(have)} / 快照 {len(want)}')
+                else:
+                    print(f'    !! {name} {slug} 顺序与官网目录页不一致')
+                continue
+            checked += 1
+        print(f'    {name}: 校验 {checked}/{len(snap_mag)} 期顺序一致')
+    print('    目录顺序不一致的期数: %d' % bad)
+    return bad
+
+
 def main():
     dedup = '--dedup' in sys.argv
 
@@ -210,6 +247,8 @@ def main():
     alias_total = sum(sum((st.get('alias_leaks') or {}).values()) for st in stats.values())
     print(f'\n合计文章数: {total_before}   重复条目: {total_dup}')
     print(f'板块名体检: 兜底值 {ph_total} 条   未归一旧写法 {alias_total} 条')
+
+    order_bad = check_catalog_order()
 
     if dedup and total_dup:
         print('\n开始去重...')

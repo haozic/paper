@@ -2089,6 +2089,7 @@ html[data-theme="dark"] .mag-cover { filter: brightness(0.85); }
 }
 .gate-hint--err { color: #c0392b; font-weight: 600; }
 .gate-hint--ok  { color: #2a7a3b; font-weight: 600; }
+.gate-hint--info { color: #8a6a1e; font-weight: 600; }
 .gate-footer {
     margin-top: 24px;
     font-size: 12px;
@@ -2451,6 +2452,69 @@ html[data-theme="dark"] .asp-section--light-only { display: none; }
     text-align: center;
 }
 body.is-offline .offline-bar { display: block; }
+
+/* ===== 本地文件模式提示 =====
+   file:// 下浏览器禁止网页用 fetch 读取本地数据，直接双击 index.html 时
+   三个杂志都是空的。这条提示把原因和补救办法一次说清楚。 */
+.file-notice {
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 260;
+    background: #fff8e8;
+    border-top: 1px solid #e6c98a;
+    color: #5b4a20;
+    font-size: 13px;
+    line-height: 1.7;
+}
+body.is-file-protocol.is-file-error .file-notice { display: block; }
+.file-notice-inner {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 10px 16px;
+    text-align: center;
+}
+.file-notice strong { font-weight: 600; }
+.file-notice-text { margin-left: 6px; }
+.file-notice-tip {
+    display: block;
+    margin-top: 2px;
+    color: #7a6431;
+}
+.file-notice code,
+.loading-hint code {
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Courier New", monospace;
+    font-size: 12px;
+    background: rgba(0, 0, 0, .06);
+    border-radius: 3px;
+    padding: 1px 5px;
+}
+@media (max-width: 767px) {
+    /* 让开移动端底部导航 */
+    .file-notice { bottom: var(--bottom-h); }
+}
+/* 出错时给页面底部留出空间，别让提示条压住最后一屏内容 */
+body.is-file-protocol.is-file-error { padding-bottom: 108px; }
+@media (prefers-color-scheme: dark) {
+    .file-notice {
+        background: #352c1c;
+        border-top-color: #6b5a33;
+        color: #e9dfc6;
+    }
+    .file-notice-tip { color: #c6b78f; }
+    .file-notice code,
+    .loading-hint code { background: rgba(255, 255, 255, .09); }
+}
+
+/* 读取失败时的补充说明（file:// 模式下提示跑准备脚本） */
+.loading-hint {
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--text-3);
+}
 
 .update-toast {
     display: none;

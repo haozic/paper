@@ -112,13 +112,29 @@ python scripts\check_essays.py --self-test    # 反向自检（1 正对照 + 12 
 python scripts\check_mianshi.py
 python scripts\check_mianshi.py --self-test    # 反向自检（1 正对照 + 13 条注入用例 + 1 条例外用例）
 
+# 目录顺序修正：按官网目录页顺序重排 meta（默认预演，加 --apply 才写盘）
+python scripts\fix_catalog_order.py
+python scripts\fix_catalog_order.py --apply           # 写回 meta.json + data/catalog_order.json
+python scripts\fix_catalog_order.py --check           # 离线体检（对照顺序快照，不联网）
+python scripts\fix_catalog_order.py --self-test       # 重排逻辑自检（13 条用例，含反向自检）
+
+# 清洗 meta 里被网页页脚污染的"作者"字段（默认预演，加 --apply 才写盘）
+python scripts\clean_meta_authors.py
+python scripts\clean_meta_authors.py --apply
+python scripts\clean_meta_authors.py --self-test
+
+# 生成 file:// 模式的数据副本（拷到单机电脑后双击 index.html 就能用）
+python scripts\prepare_file_mode.py
+python scripts\prepare_file_mode.py --check           # 只体检不生成
+python scripts\prepare_file_mode.py --clean           # 删掉 file-mode/
+
 # 重新生成 PWA 图标（需要 Pillow；仅在改图标设计时才用）
 python scripts\make_icons.py
 ```
 
 | 脚本 | 作用 | 何时用 |
 | --- | --- | --- |
-| `check_data.py` | 体检三刊的 meta / 正文分片 / counts / article_index 一致性 | 每次抓取后；怀疑数据异常时 |
+| `check_data.py` | 体检三刊的 meta / 正文分片 / counts / article_index 一致性 + 目录顺序（对照官网快照） | 每次抓取后；怀疑数据异常时 |
 | `rebuild_data.py` | 把正文重分片为 `issues/<年>-<期>.json`，丢弃不可达正文，瘦身 article_index | 迁移到分片布局时；怀疑正文文件过大时 |
 | `repair_empty_urls.py` | 修复 `u` 字段为空的条目 | 体检报出空 URL 时 |
 | `refresh_sections.py` | 只抓目录页刷新板块名（不重下正文、不重建分片） | 板块页出现"目录/评论"假板块，或整期无板块时 |
@@ -130,6 +146,9 @@ python scripts\make_icons.py
 | `check_essays.py` | 体检《备考全书》第十章第六节八篇大作文范例的字面合规（结构 / 分论点同构 / 字数 / 重复段落 / 英文夹杂 / Markdown 残留 / 乱码 / 体例 / 批注数字自证） | 改动大作文范例后；详见 [§9.9](#99-大作文范例字面体检) |
 | `check_mianshi.py` | 体检《湖北省直遴选面试指南》的结构与字面合规（章节 / 目录锚点 / 标题层级 / 英文夹杂 / 乱码 / 体例 / 重复段落 / 关键事实锚点） | 改动面试指南正文后；详见 [§9.10](#910-面试指南结构与字面体检) |
 | `make_icons.py` | 生成 PWA 图标（192 / 512 / maskable-512 / apple-touch-icon） | 改图标设计时；需要 Pillow |
+| `fix_catalog_order.py` | 按官网目录页顺序重排 meta，并把顺序存成 `data/catalog_order.json` 快照 | 站内目录顺序与官网对不上时；新增期次后刷新快照 |
+| `clean_meta_authors.py` | 清洗 meta 里被网页页脚（发布时间 / 扫码提示 / 网站声明 / 评论引导）污染的"作者"字段 | 目录里出现长串乱码作者时 |
+| `prepare_file_mode.py` | 把 `data/` 下的 json 另存成 `file-mode/` 下的 `.js`，供 `file://` 直接双击打开 | 把站点拷到不联网的单机电脑后 |
 
 ---
 
