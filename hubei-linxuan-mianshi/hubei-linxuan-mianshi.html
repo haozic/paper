@@ -1,0 +1,2166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>湖北省直遴选面试指南</title>
+<style>
+@font-face {
+  font-family: 'Lora';
+  src: url('./_shared/fonts/Lora-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Lora';
+  src: url('./_shared/fonts/Lora-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'WorkSans';
+  src: url('./_shared/fonts/WorkSans-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'WorkSans';
+  src: url('./_shared/fonts/WorkSans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+:root {
+  --bg: #FAFAF7;
+  --bg2: #FFFFFF;
+  --ink: #1A1A1A;
+  --muted: #6B6B6B;
+  --rule: #E0DDD5;
+  --accent: #8B1A1A;
+  --accent2: #C4A35A;
+  --accent-light: rgba(139, 26, 26, 0.06);
+  --accent2-light: rgba(196, 163, 90, 0.08);
+  --serif: 'Lora', 'Noto Serif SC', 'Source Han Serif SC', 'STSong', 'SimSun', serif;
+  --sans: 'WorkSans', 'Noto Sans SC', 'Source Han Sans SC', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  --mono: 'Cascadia Code', 'Consolas', monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: margin-left 0.25s ease;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Cover */
+.cover {
+  text-align: center;
+  padding: 100px 24px 80px;
+  background: linear-gradient(135deg, var(--accent) 0%, #6B1414 100%);
+  color: #FFFFFF;
+  margin-bottom: 0;
+}
+.cover .cover-tag {
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 24px;
+}
+.cover h1 {
+  font-family: var(--serif);
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+.cover .cover-sub {
+  font-size: 18px;
+  opacity: 0.85;
+  margin-bottom: 40px;
+}
+.cover .cover-line {
+  width: 60px;
+  height: 3px;
+  background: var(--accent2);
+  margin: 0 auto 40px;
+}
+.cover .cover-meta {
+  font-size: 14px;
+  opacity: 0.7;
+  line-height: 2;
+}
+
+/* TOC */
+.toc {
+  background: var(--bg2);
+  padding: 48px 24px;
+  border-bottom: 1px solid var(--rule);
+}
+.toc-inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.toc h2 {
+  font-family: var(--serif);
+  font-size: 24px;
+  color: var(--accent);
+  margin-bottom: 28px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--accent);
+}
+.toc-section {
+  margin-bottom: 24px;
+}
+.toc-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent2);
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.toc ol {
+  list-style: none;
+  counter-reset: toc-counter;
+}
+.toc ol > li {
+  counter-increment: toc-counter;
+  padding: 6px 0 6px 40px;
+  position: relative;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.toc ol > li::before {
+  content: counter(toc-counter, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 6px;
+  font-family: var(--serif);
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 700;
+}
+.toc ol > li a {
+  color: var(--ink);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.toc ol > li a:hover {
+  color: var(--accent);
+}
+.toc ol > li .toc-sub {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* Part dividers */
+.part-divider {
+  text-align: center;
+  padding: 60px 24px 40px;
+  background: var(--bg2);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  margin-top: 40px;
+}
+.part-divider .part-tag {
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  color: var(--accent2);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.part-divider h2 {
+  font-family: var(--serif);
+  font-size: 28px;
+  color: var(--accent);
+}
+
+/* Chapter content */
+.chapter {
+  padding: 48px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.chapter:last-child {
+  border-bottom: none;
+}
+
+h2.chapter-title {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+.chapter-intro {
+  font-size: 15px;
+  color: var(--muted);
+  font-style: italic;
+  margin-bottom: 32px;
+  padding-left: 16px;
+  border-left: 3px solid var(--accent2);
+  line-height: 1.7;
+}
+
+h3.section-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-top: 40px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+
+h4.subsection-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-top: 28px;
+  margin-bottom: 12px;
+}
+
+p {
+  margin-bottom: 14px;
+  text-align: justify;
+}
+
+ul, ol {
+  margin-bottom: 14px;
+  padding-left: 24px;
+}
+ul li, ol li {
+  margin-bottom: 6px;
+  line-height: 1.75;
+}
+
+strong {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Tables */
+.table-wrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 600px;
+  margin: 20px 0;
+  border-radius: 4px;
+  border: 1px solid var(--rule);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.6;
+}
+thead {
+  background: var(--accent);
+  color: #FFFFFF;
+}
+thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+}
+tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+tbody tr:nth-child(even) {
+  background: var(--accent-light);
+}
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Callouts */
+.callout {
+  padding: 16px 20px;
+  margin: 18px 0;
+  border-radius: 4px;
+  font-size: 15px;
+  line-height: 1.7;
+  border-left: 4px solid;
+}
+.callout strong {
+  display: inline-block;
+  margin-right: 4px;
+}
+.callout-tip {
+  background: rgba(76, 175, 80, 0.07);
+  border-left-color: #4CAF50;
+}
+.callout-tip strong {
+  color: #2E7D32;
+}
+.callout-warning {
+  background: rgba(244, 67, 54, 0.07);
+  border-left-color: #F44336;
+}
+.callout-warning strong {
+  color: #C62828;
+}
+.callout-key {
+  background: var(--accent2-light);
+  border-left-color: var(--accent2);
+}
+.callout-key strong {
+  color: #8D6E1A;
+}
+
+/* Example boxes */
+.example-box {
+  background: var(--bg2);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 20px 24px;
+  margin: 20px 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.example-box .example-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 10px;
+  letter-spacing: 0.05em;
+}
+.example-box p:last-child {
+  margin-bottom: 0;
+}
+
+/* Sources footer */
+footer {
+  background: var(--bg2);
+  padding: 48px 24px;
+  border-top: 2px solid var(--accent);
+  margin-top: 40px;
+}
+footer .footer-inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+footer h2 {
+  font-family: var(--serif);
+  font-size: 20px;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+footer .sources ol {
+  padding-left: 1.2rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+footer .sources li {
+  margin-bottom: 0.5rem;
+  overflow-wrap: break-word;
+  word-break: break-all;
+}
+footer .sources .src-title {
+  color: var(--ink);
+  word-break: normal;
+}
+footer .sources .src-url {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.82rem;
+  color: var(--accent);
+  word-break: break-all;
+}
+footer .sources a {
+  word-break: break-all;
+}
+sup a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.75em;
+  font-weight: 600;
+}
+sup a:hover {
+  text-decoration: underline;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 244px;
+  height: 100vh;
+  background: var(--bg2);
+  border-right: 1px solid var(--rule);
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 100;
+  display: none;
+  font-size: 13px;
+  transition: transform 0.25s ease;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 2px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+.sidebar-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 244px;
+  height: 3px;
+  background: var(--rule);
+  z-index: 101;
+  display: none;
+  transition: transform 0.25s ease;
+}
+.sidebar-progress-bar {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.15s ease;
+}
+
+.sidebar-header {
+  padding: 18px 20px 14px;
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+  border-bottom: 1px solid var(--rule);
+  position: sticky;
+  top: 0;
+  background: var(--bg2);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sidebar-header-text {
+  flex: 1;
+}
+.sidebar-header .sidebar-header-sub {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
+  margin-top: 2px;
+  letter-spacing: 0.02em;
+}
+.sidebar-collapse-btn {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  line-height: 1;
+}
+.sidebar-collapse-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Collapsed state (desktop) */
+body.sidebar-collapsed .sidebar {
+  transform: translateX(-244px);
+}
+body.sidebar-collapsed .sidebar-progress {
+  transform: translateX(-244px);
+}
+body.sidebar-collapsed {
+  margin-left: 0 !important;
+}
+
+/* Expand button when collapsed */
+.sidebar-expand-btn {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 28px;
+  height: 100vh;
+  background: var(--bg2);
+  border-right: 1px solid var(--rule);
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--muted);
+  z-index: 100;
+  transition: all 0.2s;
+}
+.sidebar-expand-btn:hover {
+  color: var(--accent);
+  background: var(--accent-light);
+}
+body.sidebar-collapsed .sidebar-expand-btn {
+  display: flex;
+}
+
+.sidebar-nav-list {
+  padding: 6px 0 60px;
+}
+
+.sidebar-part {
+  padding: 10px 20px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--accent2);
+  text-transform: uppercase;
+}
+
+.sidebar-chapter {
+  margin-bottom: 1px;
+}
+
+.sidebar-chapter-link {
+  display: flex;
+  align-items: flex-start;
+  padding: 7px 12px 7px 16px;
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 600;
+  line-height: 1.5;
+  transition: background 0.15s, color 0.15s;
+  border-left: 3px solid transparent;
+}
+.sidebar-chapter-link:hover {
+  background: var(--accent-light);
+}
+.sidebar-chapter-link.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.sidebar-ch-num {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  text-align: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-family: var(--serif);
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+.sidebar-chapter-link.active .sidebar-ch-num {
+  box-shadow: 0 0 0 3px var(--accent2-light);
+}
+
+.sidebar-ch-title {
+  flex: 1;
+  font-size: 12.5px;
+  padding-top: 1px;
+}
+
+.sidebar-sections {
+  list-style: none;
+  padding: 0 0 4px 0;
+  margin: 0;
+}
+.sidebar-sections li { margin: 0; }
+
+.sidebar-section-link {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  padding: 4px 12px 4px 49px;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.45;
+  transition: color 0.15s, background 0.15s;
+  border-left: 3px solid transparent;
+  overflow: hidden;
+}
+.sidebar-section-link:hover {
+  color: var(--ink);
+  background: var(--accent-light);
+}
+.sidebar-section-link.active {
+  color: var(--accent);
+  border-left-color: var(--accent2);
+  background: var(--accent2-light);
+  font-weight: 600;
+}
+
+.sidebar-toggle {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  z-index: 200;
+  display: none;
+  box-shadow: 0 2px 12px rgba(139,26,26,0.3);
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+}
+.sidebar-toggle:hover {
+  background: #6B1414;
+  transform: scale(1.05);
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  /* Chrome 69 不支持 inset 简写（Chrome 87+），补长写兜底 */
+  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 99;
+  display: none;
+}
+
+/* scroll offset for anchor jumps */
+.chapter, .section-title {
+  scroll-margin-top: 20px;
+}
+
+/* ===== 模拟练习：可折叠的参考答案 =====
+   用原生 details/summary（Chrome 12+ 起支持，Chrome 69 无碍），
+   不引脚本，答案默认收起，点"参考答案"即展开。 */
+.practice-answer {
+  margin-top: 12px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--bg2);
+  overflow: hidden;
+}
+.practice-answer > summary {
+  cursor: pointer;
+  padding: 10px 16px;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+  list-style: none;
+}
+.practice-answer > summary::-webkit-details-marker {
+  display: none;
+}
+.practice-answer > summary::after {
+  content: "点击展开";
+  float: right;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.practice-answer[open] > summary::after {
+  content: "点击收起";
+}
+.practice-answer-body {
+  padding: 2px 16px 16px;
+  border-top: 1px solid var(--rule);
+}
+.practice-answer-body p {
+  margin-top: 10px;
+}
+.practice-points {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-left: 3px solid var(--accent2);
+  background: var(--accent2-light);
+  font-size: 15px;
+}
+
+/* Desktop: show sidebar, shift content right */
+@media (min-width: 1100px) {
+  .sidebar { display: block; }
+  .sidebar-progress { display: block; }
+  body { margin-left: 244px; }
+  .sidebar-progress { width: 244px; }
+}
+
+/* Mobile/tablet: sidebar as overlay */
+@media (max-width: 1099px) {
+  .sidebar-toggle { display: flex; }
+  .sidebar.sidebar-open {
+    display: block;
+    box-shadow: 2px 0 16px rgba(0,0,0,0.18);
+  }
+  .sidebar-backdrop.show { display: block; }
+}
+
+/* Print: hide sidebar */
+@media print {
+  .sidebar, .sidebar-toggle, .sidebar-backdrop, .sidebar-progress {
+    display: none !important;
+  }
+  body { margin-left: 0 !important; }
+}
+
+/* Original Print */
+@media print {
+  .cover {
+    page-break-after: always;
+  }
+  .toc {
+    page-break-after: always;
+  }
+  .part-divider {
+    page-break-before: always;
+  }
+  .chapter {
+    page-break-inside: auto;
+  }
+  body {
+    font-size: 12pt;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+  .cover h1 {
+    font-size: 28px;
+  }
+  h2.chapter-title {
+    font-size: 24px;
+  }
+  h3.section-title {
+    font-size: 19px;
+  }
+  h4.subsection-title {
+    font-size: 16px;
+  }
+  body {
+    font-size: 15px;
+  }
+  .table-wrap {
+    max-height: 400px;
+  }
+  table {
+    min-width: 600px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar Backdrop (mobile) -->
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<!-- Sidebar Progress Bar -->
+<div class="sidebar-progress"><div class="sidebar-progress-bar" id="progressBar"></div></div>
+
+<!-- Sidebar Expand Button (when collapsed, desktop only) -->
+<div class="sidebar-expand-btn" id="sidebarExpandBtn" title="展开导航">&#9654;</div>
+
+<!-- Sidebar Navigation -->
+<aside class="sidebar" id="sidebarNav"></aside>
+
+<!-- Sidebar Toggle Button (mobile) -->
+<button class="sidebar-toggle" id="sidebarToggle" aria-label="打开目录导航">&#9776;</button>
+
+<!-- Cover -->
+<div class="cover">
+  <div class="cover-tag">湖北省直机关公开遴选公务员考试</div>
+  <h1>湖北省直遴选<br>面试指南</h1>
+  <div class="cover-line"></div>
+  <div class="cover-sub">考制解读 · 题型图谱 · 真题解剖 · 答题方法 · 考场纪律 · 备考路线 · 模拟练习</div>
+  <div class="cover-meta">
+    依据省委组织部公开公告与面试公告编写<br>
+    含2020年以来20道省直真题逐题拆解<br>
+    2026年备考版
+  </div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <div class="toc-inner">
+    <h2>目 录</h2>
+
+    <div class="toc-section">
+      <div class="toc-section-title">上编 · 考情认知篇</div>
+      <ol>
+        <li><a href="#ch1">面试在遴选全局中的位置</a><span class="toc-sub">公告解读 · 六条硬约束 · 资格身份 · 全流程时间轴</span></li>
+        <li><a href="#ch2">考情全景：形式、组织、时间与考场</a><span class="toc-sub">结构化为主 · 同题通用 · 20分钟4题 · 考场实况 · 当日流程</span></li>
+      </ol>
+    </div>
+
+    <div class="toc-section">
+      <div class="toc-section-title">中编 · 真题与方法篇</div>
+      <ol>
+        <li><a href="#ch3">题型图谱：五类题型与出题规律</a><span class="toc-sub">五类释义 · 顺序演变 · 热点词表</span></li>
+        <li><a href="#ch4">真题解剖：20道省直真题逐题拆解</a><span class="toc-sub">2020—2024 · 考点定位 · 易踩的坑 · 答题骨架</span></li>
+        <li><a href="#ch5">答题方法论：五类题型的结构</a><span class="toc-sub">通用四步 · 综合分析 · 应急应变 · 组织协调 · 人际关系 · 自我认知</span></li>
+      </ol>
+    </div>
+
+    <div class="toc-section">
+      <div class="toc-section-title">下编 · 上场与备考篇</div>
+      <ol>
+        <li><a href="#ch6">考场纪律与细节清单</a><span class="toc-sub">规则八条 · 读题控速 · 表达细节 · 进场清单</span></li>
+        <li><a href="#ch7">备考路线图</a><span class="toc-sub">三阶段倒排 · 素材库三层 · 真题训练法 · 八大误区</span></li>
+        <li><a href="#ch8">模拟练习：八道仿真题与参考答案</a><span class="toc-sub">五类题型各两题 · 答案默认折叠 · 自评要点</span></li>
+        <li><a href="#ch9">附录：依据清单与使用说明</a><span class="toc-sub">来源清单 · 可靠性分级 · 免责声明</span></li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<main class="container">
+
+<!-- Part: 考情认知篇 -->
+<div class="part-divider">
+  <div class="part-tag">上编</div>
+  <h2>考情认知篇</h2>
+</div>
+<p>在湖北省直遴选的整套流程里，面试不是笔试之后的附加环节，而是决定一半分数的主战场。这一点在公告里有明确的数字：依据《湖北省2026年度省直机关公开遴选公务员公告》，不组织专业测试的职位，综合成绩等于综合知识测试成绩乘以0.5加面试成绩乘以0.5；组织专业测试的职位，综合成绩等于综合知识测试成绩乘以0.4加专业测试成绩乘以0.2加面试成绩乘以0.4。也就是说，面试权重与笔试相当，在有专业测试的职位中甚至略高于笔试的一半。</p>
+
+<p>但面试与笔试考的根本不是一件事。笔试考的是你记住了多少：理论掌握得牢不牢、政策理解得准不准、文字表达是否顺畅。公告对面试的表述只有一句话，却把这道题的性质说透了——"面试主要测试履行职责所要求的基本能力素质"。它测的不是知识存量，而是履职能力：面对一个具体情境，你能不能站到岗位上看问题、能不能把事情办成、能不能在限定时间内把思路讲清楚。</p>
+
+<p>这决定了备考的路径。笔试可以靠刷题和背诵积累，面试不能。面试是"在压力下、在倒计时里、用语言把一套完整的办事逻辑交付给一群陌生的考官"。任何只背模板、不练控速、不建素材的做法，都会在考场上失效。</p>
+
+<p>本指南按"是什么—怎么考—考什么—怎么答—怎么练—怎么上场"的顺序展开，共七章加一个附录：第一章从公告读懂面试的位置与约束，第二章还原考情全景，第三章画出题型图谱，第四章逐题解剖2020年以来20道省直真题，第五章给出五类题型的答题结构，第六章讲考场纪律与细节，第七章给出备考路线图，附录列出全部依据来源。</p>
+
+<div class="callout callout-key"><strong>使用说明：</strong>第一章、第二章、第六章的内容全部来自省委组织部与湖北省人力资源和社会保障厅公开发布的公告、面试公告和考场规则，属于"硬信息"，可以直接作为行动依据；第三章的出题顺序与热点统计来自培训机构对历年真题的样本分析，属于"规律参考"，文中已标明出处与样本口径；第五章的答题结构为备考归纳，官方从未公布面试评分表，文中亦已声明。请按这三类信息各自的可靠性程度使用，不要把归纳当成标准答案。</div>
+
+<!-- ==================== 第一章 ==================== -->
+<section class="chapter" id="ch1">
+<h2 class="chapter-title">第一章 面试在遴选全局中的位置</h2>
+
+<p>很多人把面试当成"最后一关"，这种理解会让人在笔试阶段拼尽全力、在面试阶段临时抱佛脚。事实上，面试从公告发布那一刻就已经开始决定了：你的报名资格、你的职位竞争比、你的考试时长、你的答题顺序，都在进入考场之前被前置条件框定了。本章先把公告里的硬信息读透，再把面试放回整条遴选链路中看。</p>
+
+<h3 class="section-title">第一节 从公告读懂面试</h3>
+
+<h4 class="subsection-title">一、公告对面试的五句定语</h4>
+
+<p>翻遍近年省直遴选公告，涉及面试的表述高度稳定。把2026年度公告与2025、2024年度公告对照，面试条款几乎逐字一致，可以提炼出五组关键词：</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>维度</th><th>公告表述</th><th>备考含义</th></tr>
+</thead>
+<tbody>
+<tr><td>测查内容</td><td>主要测试履行职责所要求的基本能力素质</td><td>考履职能力，不是考记忆量</td></tr>
+<tr><td>分值</td><td>满分100分</td><td>与笔试同一分值刻度</td></tr>
+<tr><td>时间</td><td>面试时间另行通知</td><td>不与笔试同日，必须单独盯公告</td></tr>
+<tr><td>公告渠道</td><td>面试公告在湖北省人事考试网统一发布</td><td>唯一权威信息源是省人事考试网</td></tr>
+<tr><td>参加凭证</td><td>凭笔试准考证和有效身份证，到指定地点参加面试</td><td>两件东西丢了就进不了场</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-tip"><strong>依据：</strong>《湖北省2026年度省直机关公开遴选公务员公告》"四、考试"第4项"面试"。2025、2024年度公告同一条款表述一致，可作历年通用口径。</div>
+
+<p>五个关键词里，最容易被忽略的是"面试时间另行通知"和"统一发布"这两句。它们意味着两件事：其一，面试安排与笔试完全脱钩，笔试考完那天并不是面试日期，考完就走人等于主动弃权；其二，所有关于面试时间、地点、抽签安排、考场规则的信息，只在湖北省人事考试网发布，培训机构、微信群、往届考生口头相传的信息都不能作为依据。</p>
+
+<h4 class="subsection-title">二、面试在综合成绩里的权重</h4>
+
+<p>面试的权重取决于该职位是否组织专业测试。公告给出了两组算式，考生可以据此倒推"我的面试要考多少分才安全"：</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>职位类型</th><th>综合成绩构成</th><th>面试权重</th><th>若面试得80分</th></tr>
+</thead>
+<tbody>
+<tr><td>不组织专业测试</td><td>笔试×0.5 ＋ 面试×0.5</td><td>50%</td><td>综合成绩中面试贡献40分</td></tr>
+<tr><td>组织专业测试</td><td>笔试×0.4 ＋ 专业测试×0.2 ＋ 面试×0.4</td><td>40%</td><td>综合成绩中面试贡献32分</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-warning"><strong>算错了会很吃亏：</strong>很多考生把"面试满分100"当成"面试占一半"，在专业测试职位上按50%去估自己的安全线，实际上那里的容错空间要小一成。备考前先翻职位表确认自己是否需要专业测试，再决定给面试留多少复习时间。</div>
+
+<h3 class="section-title">第二节 公告里六条容易被忽略的硬约束</h3>
+
+<p>公告里有几条规定平时很少被提起，但每一条都可能在关键时刻决定成败。它们共同传递出一个信号：遴选不是一次考试，而是从资格到试用的一整条链条，每个环节都有代价。</p>
+
+<h4 class="subsection-title">一、1人面试的80分门槛</h4>
+
+<p>公告规定："面试公告发布后，考生放弃面试的，取消其面试资格，不再进行递补。因考生放弃面试导致该职位达不到规定竞争比例的，该职位可正常开考，对只有1名考生参加面试的职位，考生面试成绩达到80分以上，方可列为考察和体检对象。"</p>
+
+<p>这条规则的现实后果是：在1对1的职位上，考70分和考0分在"能不能进考察"这个意义上没有区别，都是出局。80分在这里不是"优秀"的标准，而是"及格线"。它同时也解释了为什么公告强调"因考生放弃面试导致该职位达不到规定竞争比例的，该职位可正常开考"——岗位还是要人，不能因为没人来就空着。</p>
+
+<h4 class="subsection-title">二、放弃面试不再递补</h4>
+
+<p>面试公告发布之后，考生放弃面试的，直接取消资格，<strong>不再进行递补</strong>。这句话只有四个字的分量，但它意味着：资格复审阶段还按笔试成绩从高到低依次递补，一旦面试公告落地，这个通道就关闭了。</p>
+
+<p>与之配套的是报名阶段的约束：通过资格初审的报名人员一般不得放弃，有特殊原因的应在考试前3天向组织部门提出书面申请，经同意后方可放弃；无故放弃的，3年内不能参加各级公开遴选，并记入诚信档案。遴选考察的是"能不能担当"，弃考本身就是一种回答。</p>
+
+<h4 class="subsection-title">三、专业测试在面试之前，由遴选单位自行组织</h4>
+
+<p>有专业测试的职位，按5:1的比例进行资格复审和专业测试。专业测试由各遴选单位组织，<strong>在面试前完成</strong>，满分100分。人数达不到5:1的按实际人数进行，但最低比例不低于3:1。专业测试结束后，按照"综合知识测试成绩×0.4＋专业测试成绩×0.2"的折算成绩之和，从高分到低分3:1确定面试人员。</p>
+
+<p>这条安排有两个实务含义：一是专业测试是进入面试的门票而非加分项，没有通过就轮不到面试；二是面试资格是按折算成绩排出来的，专业测试的分值会实打实地影响你能不能坐到考场里。</p>
+
+<h4 class="subsection-title">四、"防止简单地以分取人"</h4>
+
+<p>公告在"研究决定"一节写道："确定拟试用人员时，要把考察情况与考察对象的德才条件、一贯表现、人岗相适等情况进行综合分析，防止简单地以分取人。"</p>
+
+<p>这是公告里唯一一处直接谈"用人标准"的表述，值得反复读。它意味着面试分数高只是拿到入场券，最后能不能被选上，还要看考察环节考察出来的德才表现与一贯口碑是否与这个岗位匹配。对考生的直接启示是：面试里那些关于"我过去怎么做的""我有过什么经历"的表述是能被考察核实的，编造的经历在考察阶段会付出代价，所以宁可讲得朴素，也不必讲得漂亮。</p>
+
+<h4 class="subsection-title">五、进入考察后、调动前，不得晋升职级</h4>
+
+<p>公告规定："报名人员进入考察后、调动前，不得晋升职级。"这条写在"试用与任职"一节，看似与面试无关，却是很多考生容易忽略的"隐性成本"——在等待考察、调动这段窗口期里，原单位不能给你提职级。所以是否参加、何时推进到考察，与个人的职业节奏是直接相关的。</p>
+
+<h4 class="subsection-title">六、试用6个月，考核不合格回原单位</h4>
+
+<p>对拟试用人员实行试用期制，试用期一般为6个月；试用期内，人事工资关系和待遇不变；试用期满由各遴选单位考核，考核合格的报省委组织部审批，办理调动和任职手续，考核不合格的回原单位工作。另外，拟试用人员在湖北省人事考试网公示，公示期5个工作日。</p>
+
+<p>把"考试—考察—公示—试用"连起来看，就明白面试的定位了：它不是终点，而是这条链条上一个权重极高、但只占其中一环的环节。备考时既要把面试当成主战场来投入，也要理解自己最终要交付的是"一个能被长期使用的干部"，而不只是"一个高分考生"。</p>
+
+<div class="callout callout-key"><strong>本章小结：</strong>面试在湖北遴选里占50%（或40%）的综合成绩权重，测的是履职能力，安排在笔试之后由省人事考试网单独公告。真正需要背下来的不是分值，而是四条硬约束：1人面试的80分门槛、面试公告后放弃不再递补、专业测试在面试之前且由遴选单位自行组织、考察阶段防止简单地以分取人。这四条决定了"什么时放弃""什么分数才安全""面试之外还要准备什么"。</div>
+
+<h3 class="section-title">第三节 面试的"上游"：你是以什么身份进考场的</h3>
+
+<p>备考讨论通常从题型开始，但决定你能答什么的是你的身份。2026年度公告的资格条件里有几项硬杠，决定了考官期待你是什么样的答卷：</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>资格条件</th><th>公告表述（要点）</th><th>对面试的直接影响</th></tr>
+</thead>
+<tbody>
+<tr><td>基层经历</td><td>具有2年以上基层工作经历</td><td>考官默认你有基层一线经验，"基层工作有汗水、有泪水"这类题目你有话可说</td></tr>
+<tr><td>本级机关年限</td><td>一般应当在本级机关工作2年以上</td><td>你熟悉本单位业务，答"组织协调"不能停留在空话</td></tr>
+<tr><td>年度考核</td><td>近3年年度考核没有基本称职以下等次</td><td>你的工作表现是被组织认可过的，经历题可以讲实绩</td></tr>
+<tr><td>年龄</td><td>一般38周岁以下（1987年9月以后出生）</td><td>对应届生的年龄焦虑在这里不成立</td></tr>
+<tr><td>学历</td><td>大学本科以上</td><td>理论水平有底线要求，笔试不设限但面试要有</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>把资格条件翻译成考场语言，就是一句话：<strong>考官不是在考一个"懂得很多的人"，而是在考一个"已经在基层办过事的人"</strong>。这决定了答题的姿态——少讲"应该怎么做"，多讲"我见过什么、我做过什么、我会怎么做"。湖北历年真题里，"结合自身谈一段经历"的题反复出现，正是这个逻辑的体现。</p>
+
+<h3 class="section-title">第四节 全流程时间轴：以2026年度为例</h3>
+
+<p>把公告里的日期串成一条线，能看出面试在整个流程中的位置，也能看出哪些时间点是"不可逆节点"。</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>阶段</th><th>时间</th><th>关键动作与不可逆点</th></tr>
+</thead>
+<tbody>
+<tr><td>公告发布</td><td>2026年9月18日</td><td>省委组织部发布遴选公告，43家省直单位105个职位165个计划</td></tr>
+<tr><td>组织推荐与报名</td><td>推荐材料9月28日17:00前报送；网上报名10月8日9:00至10月11日17:00</td><td>10月11日17:00后不能再改信息或职位</td></tr>
+<tr><td>资格初审</td><td>10月8日9:00至10月12日16:00</td><td>各遴选单位网上审核并反馈</td></tr>
+<tr><td>缴费确认</td><td>10月13日9:00至10月14日17:00</td><td>未按期缴费视为自动放弃；确认人数比例一般不低于5:1，最低不低于3:1</td></tr>
+<tr><td>改报窗口</td><td>10月16日8:00至14:00</td><td>职位被取消的已缴费人员可改报，逾期视为自动放弃并退费</td></tr>
+<tr><td>打印准考证</td><td>10月28日9:00至10月31日9:00</td><td>自行下载打印</td></tr>
+<tr><td>笔试</td><td>2026年10月31日（周六）9:00—12:00</td><td>《综合知识测试》一科；全省13个市州设考点</td></tr>
+<tr><td>查笔试成绩</td><td>11月中旬</td><td>登录湖北省人事考试网查询</td></tr>
+<tr><td>资格复审</td><td>笔试成绩公布后</td><td>除有专业测试的职位外按3:1确定复审人员，名单在省人事考试网统一公布</td></tr>
+<tr><td>专业测试</td><td>面试前</td><td>有专业测试的职位按5:1，由各遴选单位组织</td></tr>
+<tr><td><strong>面试</strong></td><td><strong>另行通知</strong></td><td><strong>面试公告在湖北省人事考试网统一发布</strong></td></tr>
+<tr><td>考察与体检</td><td>2026年12月中旬前完成</td><td>差额考察，一般2:1，遴选4人以上的可1.5:1；名单在省人事考试网发布</td></tr>
+<tr><td>研究决定与公示</td><td>考察体检后</td><td>防止简单地以分取人；公示期5个工作日</td></tr>
+<tr><td>试用与任职</td><td>试用期一般6个月</td><td>试用期内人事工资关系、待遇不变；不合格回原单位</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-tip"><strong>依据：</strong>《湖北省2026年度省直机关公开遴选公务员公告》。时间轴只列公告中明确的日期；面试日、考察对象名单等以省人事考试网后续公告为准。</div>
+
+<div class="callout callout-warning"><strong>最容易踩的坑：</strong>笔试结束到面试之间可能有数周甚至更长的空档，这段时间是流失最严重的阶段。备考的连续性不能靠"等面试公告出来再复习"，必须按公告发布日就启动面试专项。</div>
+</section>
+
+<!-- ==================== 第二章 ==================== -->
+<section class="chapter" id="ch2">
+<h2 class="chapter-title">第二章 考情全景：形式、组织、时间与考场</h2>
+
+<p>第一章讲的是"面试在制度里的位置"，这一章讲的是"考场里到底是什么样子"。考情信息的来源分两类：一类是官方公告与面试公告，能确定形式、程序、纪律；另一类是第三方机构对历年真题的统计，能反映题型分布与时长规律。两者在正文中分别标注，不可混为一谈——官方口径是规则，机构统计是样本，样本不等于全样本。</p>
+
+<h3 class="section-title">第一节 面试形式：结构化面试为主</h3>
+
+<p>结合往年考试情况，湖北省直、市州直遴选面试多采取<strong>结构化面试</strong>的形式。但这不是"一律如此"，公告体系下留有变式空间：个别年份、个别单位采取其他考察方式。</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>形式</th><th>出现情况</th><th>时间结构</th></tr>
+</thead>
+<tbody>
+<tr><td>结构化面试</td><td>湖北省直、市州直的常规形式</td><td>省直多为20分钟4题，每题单独计时</td></tr>
+<tr><td>无领导小组</td><td>2024年3月31日孝感市直遴选面试</td><td>多选题，个人陈述3分钟＋自由讨论30分钟＋总结发言3分钟</td></tr>
+<tr><td>无领导小组＋演讲</td><td>2022年3月31日武汉市直遴选面试</td><td>在无领导小组基础上增加个人演讲环节</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-tip"><strong>依据：</strong>第三方遴选培训机构《2025年度湖北省直机关遴选面试考情分析》《2024年湖北省市州直遴选面试考情分析》对历年面试形式的归纳。变式均为市州直案例，省直近年未见。</div>
+
+<p>对省直考生来说，结论是明确的：把结构化面试练到能随时上考场，不必为无领导小组分散精力。但这条结论有一个例外——公告里"不排除极少数特殊单位自行出题的可能"。因此在报考特殊职位（比如专业性极强、单位自设面试的岗位）时，仍应提前向遴选单位了解面试组织方式。</p>
+
+<h3 class="section-title">第二节 组织形式：集中统一面试，且同题</h3>
+
+<p>省直机关遴选面试的组织方式有三个特点，每一条都有备考含义。</p>
+
+<p><strong>第一，大部分单位集中统一面试。</strong>所有人在同一套组织流程下完成考试，公平性有保障，也意味着不能指望"抽到熟悉的题"。</p>
+
+<p><strong>第二，部分遴选人数较多的单位单独组织面试，但与集中面试采用同一套题目。</strong>这一条常被误解成"单独组织的单位可以自己出题"，实际相反——单独组织只是分组不同，题目是通用的。这对备考是好消息：往年真题的复用概率很高，把2020年以来的省直真题吃透是有效投入。</p>
+
+<p><strong>第三，除部分单位自行出题外，多为通用题本。</strong>题本是统一的，考官读题与题本并行，这在下一节的考场实况里还会再出现。</p>
+
+<div class="callout callout-key"><strong>推导出的备考策略：</strong>既然题目通用、往年有复用，就不要把时间花在"押题"上。押题是低收益策略；把历年真题按题型分类、按考点归口，形成"看到题干就知道该用哪套框架"的条件反射，才是高收益策略。</div>
+
+<h3 class="section-title">第三节 时间与题量：20分钟4题，每题单独计时</h3>
+
+<p>省直遴选面试的时间安排呈现出一条相当稳定的规律：<strong>20分钟4道题，每道题单独计时</strong>。把历年省直与市州直的时长列出来，差异非常清楚。</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>场次</th><th>层级</th><th>总时长与题量</th><th>逐题时长</th></tr>
+</thead>
+<tbody>
+<tr><td>2024年11月17日</td><td>湖北省直</td><td>20分钟4题</td><td>5、5、4、4分钟</td></tr>
+<tr><td>2022年9月18日</td><td>湖北省直</td><td>20分钟4题</td><td>5、5、4、4分钟</td></tr>
+<tr><td>2024年3月31日</td><td>荆门市直</td><td>13分钟3题</td><td>4、4、5分钟</td></tr>
+<tr><td>2024年3月30日</td><td>黄石市直</td><td>10分钟3题</td><td>3、3、4分钟</td></tr>
+<tr><td>2024年11月16日</td><td>宜昌市直</td><td>12分钟3题</td><td>3、4、5分钟</td></tr>
+<tr><td>2024年3月31日</td><td>宜昌市直</td><td>15分钟3题</td><td>5、5、5分钟</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-tip"><strong>依据：</strong>第三方遴选培训机构考情分析中记录的历年面试时长。2024年11月17日、2022年9月18日两场省直面试均为20分钟4题、逐题5、5、4、4分钟。</div>
+
+<p>三条要读出来的信息：</p>
+
+<p><strong>其一，逐题时长是递减的。</strong>5、5、4、4的排布不是随意的，它反映的是题目难度与信息量的梯度——前面的题信息量大、需要完整展开，后面的题要么题型熟悉（如应急应变有固定套路），要么需要收束。备考时按"前两题从容、后两题收紧"的节奏感去练。</p>
+
+<p><strong>其二，每题单独计时意味着"必须停下来"。</strong>考官会在你答完本题（或时间到）后进入下一题，题与题之间不共享剩余时间。这意味着题号意识极其重要：读到第几题，就要知道还剩几分钟讲完。</p>
+
+<p><strong>其三，省直比市州直多一题、总时长多5到10分钟。</strong>准备省直面试时，训练强度应当按20分钟4题设计，而不是按市州直的3题设计。</p>
+
+<h3 class="section-title">第四节 考场实况</h3>
+
+<p>关于考场内部，可确认的信息有这么几条：</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>项目</th><th>情况</th><th>备考含义</th></tr>
+</thead>
+<tbody>
+<tr><td>考官构成</td><td>一般7人左右</td><td>面对的是"一群人"而非"一个人"，目光要分配，不能全程盯着主考官</td></tr>
+<tr><td>读题方式</td><td>考官读题＋题本</td><td>听题与看题同时进行，要能只靠听觉跟上进度</td></tr>
+<tr><td>答题工具</td><td>一般提供记录笔和草稿纸</td><td>草稿纸是提纲工具，不是废话工具；先列骨架再开口</td></tr>
+<tr><td>管理方式</td><td>封闭式管理</td><td>候考、抽签、引导全部由工作人员组织，个人的自由度很小</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-tip"><strong>依据：</strong>第三方考情分析记录的考场情况（考官7人左右、考官读题加题本、提供记录笔和草稿纸）；封闭式管理依据《湖北省2025年度省直机关公开遴选公务员面试公告》"注意事项"第3项"考场实行封闭式管理"。</div>
+
+<p>7名考官、每人独立打分，是结构化面试的通行做法。考官打的是整体印象分，评分要素并不公开（见第五章开头的说明），所以策略不是"猜评分表"，而是"在有限时间里让考官听懂你的逻辑、看到你的思考"。记录笔和草稿纸的存在，说明草稿是被鼓励的——列个三行提纲再开口，比想到哪说到哪要稳得多。</p>
+
+<h3 class="section-title">第五节 当日流程还原</h3>
+
+<p>面试公告会公布当天的具体流程。以《湖北省2025年度省直机关公开遴选公务员面试公告》为例，整套流程是可以完整还原的：</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>时间</th><th>动作</th><th>要点</th></tr>
+</thead>
+<tbody>
+<tr><td>11月15日6:40前</td><td>到达武汉大学工学部第一教学楼三楼大门</td><td>凭笔试准考证从武汉大学文澜门进入，集中封闭候考</td></tr>
+<tr><td>入场后</td><td>核对身份，宣布考场规则</td><td>规则在正式考试前就已明确，必须全神贯注听完</td></tr>
+<tr><td>抽签</td><td>分职位抽签确定面试顺序</td><td>抽到什么顺序就什么时候上，不能选择</td></tr>
+<tr><td>引导</td><td>引考员依次引导至指定考场</td><td>单人单场，候考期间不得擅自离场</td></tr>
+<tr><td>面试中</td><td>考官读题、题本并行，逐题计时</td><td>答完一题说"回答完毕"，时间到立即停止</td></tr>
+<tr><td>面试后</td><td>成绩宣布后当场签名确认</td><td>签名确认是流程的一部分</td></tr>
+<tr><td>离场</td><td>按规定路线迅速离开</td><td>不得在考场附近停留议论，不得返回候考区，不得泄露考题</td></tr>
+<tr><td>11月下旬</td><td>登陆湖北省人事考试网查询进入考察人员名单</td><td>面试不是终点</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-tip"><strong>依据：</strong>《湖北省2025年度省直机关公开遴选公务员面试公告》（中共湖北省委组织部，2025年11月7日）。该年度通过资格复审进入面试的考生共646人，名单、抽签区安排、考场规则均以附件形式随公告发布。</div>
+
+<p>这套流程里藏着一个对心态很重要的信息：面试全程是<strong>随机分组、随机顺序、不可预期</strong>的。你无法选择题目，也无法选择出场顺序，只能控制自己在每一题上的表现。这决定了备考的重心必须放在"确定性"上——把你能控制的（答题结构、控速、素材）练到确定，把你不能控制的（抽签顺序、题目）交给准备充分。</p>
+</section>
+
+
+<!-- Part: 真题与方法篇 -->
+<div class="part-divider">
+  <div class="part-tag">中编</div>
+  <h2>真题与方法篇</h2>
+</div>
+<!-- ==================== 第三章 ==================== -->
+<section class="chapter" id="ch3">
+<h2 class="chapter-title">第三章 题型图谱：五类题型与出题规律</h2>
+
+<p>题型是备考的第一张地图。知道可能考什么，才知道练什么、怎么练。本章的题型划分来自第三方机构对湖北遴选历年真题的归纳——综合分析、应急应变、组织协调、人际关系、岗位匹配与自我认识五类。这个划分不是湖北独创，但它与湖北真题的实际分布高度吻合，因此备考价值很高。</p>
+
+<div class="callout callout-warning"><strong>口径声明：</strong>本章的题型分类、出题顺序统计、热点词表来自第三方遴选培训机构对2020年以来真题的样本分析，样本共47套（其中2024年24套、2022年9套、2021年8套、2020年6套）。这是机构样本，不是官方发布的题型说明；官方从未公布过面试题型分类。把它当作规律参考，用于安排练习比重，而非当作必然的题型分布。</div>
+
+<h3 class="section-title">第一节 五类题型释义</h3>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>题型</th><th>典型问法</th><th>核心考点</th><th>湖北真题示例</th></tr>
+</thead>
+<tbody>
+<tr><td>综合分析</td><td>谈谈你对某项工作的认识／某句话蕴含的道理</td><td>政治站位、理论水平、对策视野</td><td>2024年11月17日第1题：习近平总书记考察湖北提出的16字寄语，就其中"久久为功"结合我省实际和个人工作谈体会</td></tr>
+<tr><td>应急应变</td><td>遇到突发情况你怎么办</td><td>轻重缓急判断、请示报告意识、闭环处置</td><td>2021年11月20日第4题：某地暴发山洪，当晚11时单位接到参与抢险通知，领导要你2小时内做好参与救援的统筹工作</td></tr>
+<tr><td>组织协调</td><td>领导交办一项工作，你怎么推进</td><td>调研先行、方案落地、沟通协调、跟踪反馈</td><td>2024年4月13日第3题：单位开展中国梦主题微视频比赛前期宣传不够广、影响不大、受众不多，如果你来开展怎么开展</td></tr>
+<tr><td>人际关系</td><td>同事之间出现矛盾你怎么处理</td><td>摆正位置、主动沟通、化解矛盾、补位意识</td><td>2022年9月18日第3题：共同缔造送戏下乡，老年人嫌节目单一、年轻人说听不懂不好看，你是负责人怎么办</td></tr>
+<tr><td>岗位匹配与自我认知</td><td>请结合自身谈一段经历／你如何理解某句话</td><td>经历真实性、岗位适配、落脚点</td><td>2020年11月1日第2题："伟大出自平凡，平凡造就伟大"，谈谈你的看法</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>从湖北真题看，这五类题型几乎从不"纯粹"出现，多是复合命题：2024年11月17日第4题既要求讲经历，又要求谈启示；2022年9月18日第4题既要求讲统筹办法，又要求点出"你认为重点是什么"。这个特征直接决定了答题方法——不能只答一半。第五章会针对每类题型给出"必须答到的两个落点"。</p>
+
+<h3 class="section-title">第二节 2020—2024年省直出题顺序演变</h3>
+
+<p>把五年省直真题的题型顺序排开，能看出三个规律。</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>年份</th><th>第一题</th><th>第二题</th><th>第三题</th><th>第四题</th></tr>
+</thead>
+<tbody>
+<tr><td>2020年11月1日</td><td>综合分析</td><td>综合分析</td><td>组织协调</td><td>组织协调</td></tr>
+<tr><td>2021年11月20日</td><td>综合分析</td><td>综合分析</td><td>自我认知</td><td>应急应变</td></tr>
+<tr><td>2022年9月18日</td><td>综合分析</td><td>综合分析</td><td>组织协调</td><td>组织协调</td></tr>
+<tr><td>2024年4月13日</td><td>自我认知</td><td>综合分析</td><td>计划组织</td><td>应急应变</td></tr>
+<tr><td>2024年11月17日</td><td>综合分析</td><td>综合分析</td><td>计划组织</td><td>综合分析＋自我认知</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-tip"><strong>依据：</strong>第三方考情分析记录的历年省直遴选面试出题顺序。表中"计划组织"为该机构对"组织协调"类题型的表述，与本指南其余部分统一称为"组织协调"。</div>
+
+<p><strong>规律一：综合分析是绝对主力。</strong>五年二十道题里，综合分析单独或作为主型的出现频次最高，且2020、2022、2024下半年三场都固定占据前两题。这不是巧合——第一题往往是"压舱石"，需要在开场的几分钟里就把水平亮出来，考官据此形成整场印象。</p>
+
+<p><strong>规律二：题型逐年轮换，押题不成立。</strong>2020年是"分析＋组织"，2021年是"分析＋自我认知＋应急"，2022年又回到"分析＋组织"，2024年上、下半年则完全不同。任何"今年一定考组织协调"的判断都会被证伪。正确做法是五类题型按同一权重准备，只是投入时间上给综合分析多留一份。</p>
+
+<p><strong>规律三：第一题的题型本身就是信息。</strong>2020、2021、2022、2024下半年四场的第一题都是综合分析，2024上半年是自我认知。这说明出题人倾向于把"最能展示理论功底和岗位理解"的类型放在开局。因此在训练中，第一题要练到最熟——它决定考官对你整场作答的预期。</p>
+
+<h3 class="section-title">第三节 热点紧扣时政：2020—2024年热点词表</h3>
+
+<p>湖北遴选面试的题目高度紧扣时政热点，这一点在真题中毫无例外。历年涉及的主题如下，这张表本身就是一份高价值的备考素材清单。</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>年份</th><th>面试涉及的主要热点</th></tr>
+</thead>
+<tbody>
+<tr><td>2024年</td><td>久久为功、产业链创新链资金链人才链、"学得来""学得好"、基层工作有汗水有泪水、本地特色县域经济高质量发展、中医药文化、学习沿海地区先进经验、推进国家治理体系和治理能力现代化、12345"接诉即办"考核、守正创新、以钉钉子精神抓好改革落实、区域发展不平衡、坚持发扬斗争精神、"网红"打卡点、党的创新理论、美丽乡村、中国梦、科技创新、基层减负、青年干部、中国式现代化、实事求是、乡村振兴、电商经济、基层治理现代化、文旅发展、过"紧日子"、城乡一体化发展、"放管服"改革</td></tr>
+<tr><td>2023年</td><td>粮食安全、科技自立自强</td></tr>
+<tr><td>2022年</td><td>习近平总书记视察湖北、县域经济、理想信念、政治执行力、我为群众办实事、年轻干部心态老龄化、"一盔一带"、保密工作</td></tr>
+<tr><td>2021年</td><td>党的十九届六中全会、优化营商环境、党史学习教育、中央经济工作会议、政治建设、农业产业发展、调查研究、巩固脱贫攻坚成果和推进乡村振兴统筹协调、作风建设</td></tr>
+<tr><td>2020年</td><td>党的十九届五中全会精神、党风廉政建设和反腐败斗争、文化遗产</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-tip"><strong>依据：</strong>第三方考情分析对历年面试题目的热点归类。样本量说明：2023年在该样本中仅出现粮食安全、科技自立自强两个热点，不代表2023年全年只考了两个热点。</div>
+
+<p>这张表有两层用法。第一层是"回看"：表中任何一个词，都能在对应的真题里找到落点，这是精读真题时最好的索引。第二层是"前瞻"：考题的时政属性决定了备考点必然跟着当年的中心工作走。考生应在每年上半年省直遴选公告发布前后，结合当年政府工作报告和省委全会精神更新自己的热点库——这一点与《荆楚遴选备考全书》第十章"2026年命题热点预测"的逻辑是相通的，热点库可以共用。</p>
+
+<div class="callout callout-key"><strong>本章小结：</strong>湖北省直遴选面试以结构化面试为主，集中统一、同题通用、20分钟4题、每题单独计时、考官约7人、读题加题本、提供草稿纸。五类题型中综合分析是主力且多占前两题，其余四类逐年轮换，押题不成立。题目高度紧扣时政，热点库要与《备考全书》第十章共用同一套素材。</div>
+</section>
+
+<!-- ==================== 第四章 ==================== -->
+<section class="chapter" id="ch4">
+<h2 class="chapter-title">第四章 真题解剖：20道省直真题逐题拆解</h2>
+
+<p>这一章把2020年以来公开可考的20道湖北省直遴选面试真题逐题拆开。每一题给四项：题干原貌、考点定位、易踩的坑、答题骨架。</p>
+
+<div class="callout callout-warning"><strong>说明：</strong>下文的"答题骨架"只给结构与落点，不给完整范文。原因有两点：其一，结构可以迁移到同类题，范文照抄反而会露怯；其二，考官看得出模板与真实思考的区别，考题年年相似而答案必须贴着当次题干和考生自己的经历走。请把每一道骨架练成自己的话，再填入自己的素材。</div>
+
+<h3 class="section-title">第一节 2024年11月17日湖北省直遴选面试（20分钟4题，逐题5、5、4、4分钟）</h3>
+
+<h4 class="subsection-title">第1题　习近平总书记考察湖北提出的16字寄语，就其中"久久为功"结合我省实际和个人工作，谈谈体会（题型：综合分析）</h4>
+
+<p><strong>考点定位：</strong>典型的"时政＋个人"双落地题。考的不是"久字诀"这四个字本身，而是能否把一个抽象的工作方法论，落到湖北省的具体省情和本人的具体岗位上。</p>
+
+<p><strong>易踩的坑：</strong>第一种是把寄语当作文背诵，通篇引用原文却不落到"我省实际"和"个人工作"，题目的两个限定词全部落空；第二种是空谈"久久为功"的道理，通篇正确的废话里没有任何具体信息；第三种是只讲个人不讲省情，把省直面试答成了自我检讨。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>三层。第一层释义，用一句话点明"久久为功"的要义——不是慢，而是把正确的事重复做、持续见效；第二层接省情，落到湖北当前的战略任务上（例如把"久久为功"与加快建成中部地区崛起重要战略支点结合起来，谈产业接续攻坚、谈县域经济、谈"两山"转化，都是可用的挂载点）；第三层接个人，讲自己在本职岗位上准备怎么"久"，要给出可考核的动作——比如把某项工作做成台账、按季度跟踪、形成闭环。个人部分一定要有可验证的细节，不能只有态度。</div>
+
+<h4 class="subsection-title">第2题　你厅准备围绕优化"产业链创新链资金链人才链"做专题研讨，请从中拟定3个子研讨题目，并分别做说明（题型：计划组织）</h4>
+
+<p><strong>考点定位：</strong>这道题考的不是答题能力，而是<strong>机关工作实务</strong>——能否站在"你厅"的位置，判断一次专题研讨应该拆成哪几个议题。命题人实际上在考"你懂不懂这项工作"。</p>
+
+<p><strong>易踩的坑：</strong>最容易犯的错是把这道题答成"如何组织好一次研讨活动"，即谈会议怎么筹备——这完全跑偏，题目问的是研讨的<strong>议题</strong>，不是研讨的<strong>会务</strong>。其次是三个题目之间逻辑不成立，比如拟出"加强组织领导""强化保障措施"这类假标题，任何一个处室都能提，说明没有针对性。第三是只拟题目不说明，等于交白卷。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>三个子题目应当是并列且互斥的，构成"链"的完整切分。一种稳妥的拟法：<strong>一是产业链，重点讨论补链强链与本地配套率；二是创新链，重点讨论科技成果与产业需求的对接；三是资金链与人才链，重点讨论要素保障与引才留才。</strong>注意"资金链"与"人才链"合并成一条，是因为二者都是"支撑"，而"创新链"与"产业链"是"本体"，这样切分既有逻辑又便于说明。说明部分对每个题目各说三句：为什么这个题目必须单列、要研究什么、要形成什么成果。</div>
+
+<h4 class="subsection-title">第3题　某地将垃圾填埋场改建为花卉市场，取得不错的经济和社会效益。你厅组织县市区去学习，回来后部分县市区反映"学不来、学不好"，你作为工作人员如何向领导提建议，实现"学得来""学得好"（题型：组织协调）</h4>
+
+<p><strong>考点定位：</strong>表面是"提建议"，实质是<strong>政策落地能力</strong>——把一个先进典型变成可复制经验，中间要做哪些适配工作。这是遴选面试最典型的"调研＋试点＋推广"命题。</p>
+
+<p><strong>易踩的坑：</strong>答成"要宣传典型、要端正态度、要压实责任"，全是正确的废话，一个字都没回答"怎么让学不来的人学得来"。第二个坑是完全不提差异性，把"不能简单照搬"这个关键点漏掉——考题明确说了部分县市区反映学不来，说明短板是客观存在的，不是态度问题。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>三层。第一层点破问题本质：学不来、学不好不是思想问题，是<strong>条件适配问题</strong>——填埋场改花卉市场依赖特定的区位、客源、土壤和运营主体，其他地方未必具备。第二层给分档思路：按条件把县市区分类，具备基础的直接学、条件相近的对标学、条件不具备的先补短板（引技术、引运营主体、建基础设施），避免一刀切。第三层给配套保障：建立"对账清单"逐项比对资源禀赋，试点先行再推开，形成可复制的操作规程，而不是喊口号。</div>
+
+<h4 class="subsection-title">第4题　"基层工作有汗水、有泪水……"请结合自身谈谈基层工作中的一段经历，并说说对你的启示（题型：自我认知）</h4>
+
+<p><strong>考点定位：</strong>要求讲<strong>真实的个人经历</strong>，并且要能从经历里提炼出认识。面试官的关注点不在故事是否精彩，而在经历是否真实、反思是否真诚。</p>
+
+<p><strong>易踩的坑：</strong>最典型的失败是把经历写成述职报告，通篇成绩没有困惑；或者讲一件大事但看不出个人的具体角色，看不出你做了什么、难在哪里。另外，把"启示"讲成道德格言（"这让我深刻认识到……"）也是弱项——启示必须是从这件事本身长出来的，不能是贴上去的。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>三段式。<strong>第一段讲事：</strong>用"时间＋场景＋我的角色＋具体的一件事"开头，把细节落到可感知的层面（例如"我驻村的那个村，冬天山路结霜，走一趟要一个半小时"），一句带过困难，第二句写我当时怎么做的。<strong>第二段讲转折：</strong>事情推进中遇到的具体阻力，以及我当时的判断和调整——这一段是考官真正想听的，因为它证明你有反思能力。<strong>第三段讲启示：</strong>把转折抽象成一句工作认识，并落回岗位要求，例如"基层的事没有捷径，把群众当自家人不是表态，是把每一家门口的路都走一遍"。结尾可以一句回扣"有汗水也有泪水"，说明成长本身包含代价，这样整道题的结构就闭合了。</div>
+
+<h3 class="section-title">第二节 2024年4月13日湖北省直遴选面试</h3>
+
+<h4 class="subsection-title">第1题　习近平新时代中国特色社会主义思想对我们工作开展非常有帮助，请结合你在学思想中的一个事例，谈一下你的体会（题型：自我认知）</h4>
+
+<p><strong>考点定位：</strong>考的是理论学习的<strong>真伪</strong>——是真学真信真用，还是背概念。题干明确要求"一个事例"，就是在逼你交出一份学习记录。</p>
+
+<p><strong>易踩的坑：</strong>把"事例"讲成理论本身的复述，全程都在解释某个概念的意义，没有个人的学习过程；或者讲学习体会时只谈感动，不谈指导作用——"这句话让我很感动"不是体会，"这句话让我改变了什么做法"才是。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>四段收束。<strong>一是学的由头</strong>：什么场合学的、学的哪一篇（点出篇名或具体论断，显示真的读过）。<strong>二是学的过程</strong>：怎么学的（自学原文、听专题辅导、参加主题党日、结合工作查资料）。<strong>三是学的转折</strong>：哪句话或哪个论断让你"卡住"过，或者让你重新理解了某项工作。<strong>四是用的落点</strong>：这句话具体指导了你哪项工作、改变了什么做法。第五段可用一句话收尾，说明学习不是一次性任务，而是要带着问题反复学。</div>
+
+<h4 class="subsection-title">第2题　你们正在开展美丽乡村建设工程，但是发现项目推进不了，经费也没有。如果是你要跟领导建议，你会从哪些方面建议（题型：计划组织）</h4>
+
+<p><strong>考点定位：</strong>考"给领导提建议"的<strong>方法</strong>：不是要你替领导决策，而是要你提供可供决策的信息与方案。这与前面那道"提建议"题形成呼应，可见"提建议"是湖北面试的高频载体。</p>
+
+<p><strong>易踩的坑：</strong>把建议说成"多要钱"。题目已经点明经费没有，答案不能停留在伸手要资源上。另一个坑是建议过于原则（"要加大投入""要健全机制"），领导听完没法用。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>按"先诊断、再开源、再降本、后长效"推进。<strong>一是摸清底数</strong>：区分"项目推不动"是资金问题、规划问题、还是群众参与和后续管护问题，分类才有对策。<strong>二是争政策</strong>：对接上级涉农整合资金与衔接资金，把分散的项目打捆申报。<strong>三是盘活存量</strong>：村集体资产、经营性资产、社会资本参与，形成多元投入。<strong>四是压缩成本</strong>：从设计标准、建材采购、施工组织上降本。<strong>五是建立管护机制</strong>：解决"建而不管"的老问题，明确管护主体与经费来源。每一条都要落到可操作的动作上。</div>
+
+<h4 class="subsection-title">第3题　单位之前开展了主题为中国梦的微视频比赛，但前期宣传不够广，导致影响不大、受众也不多。如果你来开展，你将怎么开展（题型：组织协调）</h4>
+
+<p><strong>考点定位：</strong>典型的"活动改进题"——给你一个已经办过、效果不好的活动，让你重新组织。考的是从问题出发的策划能力。</p>
+
+<p><strong>易踩的坑：</strong>把答案写成"加大宣传力度、扩大宣传范围、创新宣传形式"，与题干给的失败原因完全重合，等于没有诊断。另外容易犯的错是只讲宣传，忽略作品本身质量——受众少可能因为作品不好看，这是内容问题不是渠道问题。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>先归因，再分类施策。<strong>归因</strong>分两类：内容端（主题空、形式单一、没有故事）和渠道端（推送渠道少、推送时机不对、没有跟本地场景结合）。<strong>内容端</strong>：重新设计赛道，聚焦普通人视角，把宏大主题拆成具体故事和身边人；设置"一人一故事"的低门槛参与，让受众成为创作者。<strong>渠道端</strong>：分层触达——本地政务新媒体首发，短视频平台做二次剪辑投放，线下在社区、乡村、校园设拍摄点形成内容供给。结尾补一条：以评促用，把优秀作品纳入宣传素材库，让活动有留存而不是办完即散。</div>
+
+<h4 class="subsection-title">第4题　你接访的困难户反映他享受的补贴没有到位，政策也不了解。如果由你帮助这个困难户，你会怎样开展工作（题型：应急应变与自我认知结合）</h4>
+
+<p><strong>考点定位：</strong>接访是机关工作的常见场景，这道题考的是<strong>群众工作方法</strong>：既要解决具体问题，也要处理情绪、解释政策。</p>
+
+<p><strong>易踩的坑：</strong>把流程走一遍了事——查政策、报上去、等结果，缺少"当面"这一环。群众工作题里，考官往往在看你是否意识到"他不懂政策"本身就是问题的组成部分。另外，只谈补钱不提别的帮扶，也显得单一。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>四步。<strong>一是先安抚后办事</strong>：接访先处理情绪，把人请到屋里倒杯水，说明"这件事我一定给您问到底"，把对立情绪降下来。<strong>二是核实政策与资格</strong>：核对享受条件、申报流程、审批部门，确认到底是漏报、错报还是部门之间衔接不畅。<strong>三是分类处置</strong>：属于漏报未享受的，立即补报并开通临时救助兜底，防止等待期间生活受影响；属于条件不符的，把政策依据一条条讲清楚，同时主动帮他寻找其他可享受的项目；属于部门衔接问题的，做好转办与跟踪。<strong>四是延伸帮扶</strong>：把这项个案变成面上的排查，同步梳理该村同类对象是否还有漏掉的。最后留一句：回访要有回音，问题解决后要当面反馈，让群众看到结果。</div>
+
+<h3 class="section-title">第三节 2022年9月18日湖北省直遴选面试</h3>
+
+<h4 class="subsection-title">第1题　湖北在党的十八大以来各方面取得了很好的成绩，习近平总书记五次视察湖北，你觉得湖北要从哪些方面一以贯之（题型：综合分析）</h4>
+
+<p><strong>考点定位：</strong>考对湖北发展<strong>战略定力</strong>的理解。"一以贯之"四个字是题眼：要求的是持续性，而不是新意。</p>
+
+<p><strong>易踩的坑：</strong>答成湖北近年成绩的罗列加几点希望，这是新闻稿不是面试答卷。题目要的是"坚持什么"，答案却给了"还要做什么"。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>结构为"一条主线＋三个坚持"。主线即湖北当前最大的战略任务——加快建成中部地区崛起重要战略支点。三个坚持分别是：<strong>坚持创新驱动这个根本动力</strong>（把科教资源转化为产业胜势，回答"为什么是湖北"）；<strong>坚持改革开放这个关键一招</strong>（内陆开放新高地、营商环境）；<strong>坚持人民至上这个根本立场</strong>（民生保障、共同缔造）。每一坚持都配一句"一以贯之"的具体表现，最后回到主线收束。</div>
+
+<h4 class="subsection-title">第2题　湖北县域经济比沿海弱，百强县少，结合湖北实际，谈谈怎么发展县域经济（题型：综合分析）</h4>
+
+<p><strong>考点定位：</strong>这是一道<strong>带缺口的分析题</strong>——题干已经指出了短板，要答的是"怎么补"，而且必须"结合湖北实际"。</p>
+
+<p><strong>易踩的坑：</strong>答成通用的"县域经济怎么发展"，没有湖北特色；或者只讲产业不讲人才、不讲交通、不讲金融，格局不完整。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>先承认差距的性质（这不是"慢"，而是产业结构偏重、链条分工处于上游、增值环节留在了省外），再给路径。<strong>路径一，做强特色产业而非追求同质</strong>：光谷科创、宜昌磷化工、襄阳汽车、恩施硒产业等各自绑定细分赛道；<strong>路径二，补链延链</strong>：围绕县域优势产业补齐配套，避免只做原料端；<strong>路径三，用好武汉这个龙头</strong>：推动武汉研发能力与县域产业需求对接；<strong>路径四，把人和钱留下来</strong>：用好省内高校与省内转移就业政策；<strong>路径五，基础设施与要素保障</strong>：交通物流、县域商业、普惠金融。收尾一句：县域强则省强，县域的振兴就是湖北的振兴。</div>
+
+<h4 class="subsection-title">第3题　单位组织"共同缔造"送戏下乡活动，老年人说节目太单一、剧目太少，年轻人说听不懂、不好看，你是这个送戏下乡的负责人，你怎么办（题型：人际关系与组织协调结合）</h4>
+
+<p><strong>考点定位：</strong>题目给了两拨互相冲突的群众需求，测的是<strong>平衡能力</strong>——不是选边站，是找到兼顾方案。</p>
+
+<p><strong>易踩的坑：</strong>只满足一拨人（要么全按老年人的要求办传统戏，要么全按年轻人的要求办新潮节目），或者用"分时段演出"敷衍了事而不给出实质内容。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>先定原则：送戏下乡的落点是文化惠民，两边都是服务对象，不能二选一。再给三个办法：<strong>一是分类供给</strong>——设置"传统戏曲场"和"青春场"不同场次与不同场地的组合，让各自的需求都有出口；<strong>二是内容改造</strong>——用本地题材、方言说唱、互动参与的方式把传统剧目重新包装，降低年轻人的理解门槛，而不是简单换剧；<strong>三是引入社会力量与新业态</strong>——通过政府购买服务、引入小剧团、文旅企业参与，扩大剧目供给总量。最后补一条反馈机制：每场演出后现场收集两类观众的满意度，形成"点单—演出—再评估"的闭环。</div>
+
+<h4 class="subsection-title">第4题　省直单位准备发布一项惠企政策，针对企业组织技能人员培训，单位领导交给你来办，需要统筹好其他各处室之间的配合。你怎么办？你认为重点是什么（题型：计划组织）</h4>
+
+<p><strong>考点定位：</strong>双重考点：既要讲<strong>统筹方法</strong>，又要讲<strong>工作重点</strong>。题干明确问了"你认为重点是什么"，只答统筹方法会丢掉一半分。</p>
+
+<p><strong>易踩的坑：</strong>把"统筹各处室"理解成开会、发通知、催进度，这是把协调当成传话。另一个坑是回答重点时只说"要重视企业需求"，太虚。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>统筹用三句话：<strong>先定事</strong>——把培训需求、企业清单、课时标准、师资来源先摸清，形成任务分工表，明确各处室谁牵头、谁配合、谁审核，避免责任悬空；<strong>再定时</strong>——按企业生产节奏排期，避开订单高峰；<strong>后督办</strong>——建立周调度机制，对进度滞后和推诿的及时拉通。<strong>重点</strong>回答三条：培训内容与企业真实技能需求是否对得上（不能变成走过场）、参训人员是否覆盖一线骨干而非只覆盖管理层、政策是否形成闭环（培训与补贴、评先评优挂钩，让企业有动力送人）。</div>
+
+<h3 class="section-title">第四节 2021年11月20日湖北省直遴选面试</h3>
+
+<h4 class="subsection-title">第1题　党的十九届六中全会11月8日至11日在北京召开，这几天大家都在学习全会精神，你有什么学习体会（题型：综合分析）</h4>
+
+<p><strong>考点定位：</strong>典型的<strong>时效性综合分析题</strong>：题面就是新闻，答的却要是自己的思考。考点在"结合个人"，不在复述全会。</p>
+
+<p><strong>易踩的坑：</strong>大段复述全会公报原文，通篇正确的空话；或者只讲"我们要提高政治站位"这类没有信息量的表态。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>三段递进。<strong>一是抓住一个具体论断</strong>，不要面面俱到，选一个最能触动自己的论断说透（例如"坚持人民至上"这一条的历史方位）。<strong>二是联系自己的岗位</strong>：作为基层公务员，你的工作就是最直接的"人民至上"的载体，讲一件近期处理的具体群众诉求。<strong>三是落到行动</strong>：全会精神不是学完就完，要转化成几条具体的工作要求，并说明打算怎么坚持。最后一句可以回扣"这几天大家都在学"这个共同语境，强调学习要往深里走、往实里落，避免走过场。</div>
+
+<h4 class="subsection-title">第2题　新年首个工作日，全省优化营商环境大会举行。应勇书记强调："人人都是营商环境，人人都有责任。"你如何理解（题型：综合分析）</h4>
+
+<p><strong>考点定位：</strong>考对<strong>地方特色表述</strong>的理解力。这句话后来成为湖北优化营商环境的标志性提法，答不出内涵就等于没答。</p>
+
+<p><strong>易踩的坑：</strong>只解释字面意思（每个人都是环境的一部分），不解释为什么省委要在优化营商环境大会上强调它——背后是"为湖北营造良好营商环境"的战略考量，以及把压力传导到每个干部身上的制度逻辑。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>三句释义＋一层延伸。<strong>第一句讲对象</strong>：营商环境不只是一线窗口部门的事，而是所有涉企服务的部门、每一个在与企业打交道的干部共同构成的。<strong>第二句讲逻辑</strong>：企业感受到的"环境"，往往就是他能遇到的最后一个干部的态度；一个环节的冷脸，抵消的是全流程的努力。<strong>第三句讲行动</strong>：落到具体，就是不推诿、不设障、能马上办的不拖，能一次办结的不让跑第二趟。延伸一层：这句话也是对干部作风的要求——把"人人"落到实处，靠的是纪律约束、评价标准和通报机制。</div>
+
+<h4 class="subsection-title">第3题　请你结合党史学习教育，谈一件自己体会最深的事（题型：自我认知）</h4>
+
+<p><strong>考点定位：</strong>与2024年4月13日第1题同源，考的是学习与个人实践的<strong>真实连接</strong>。</p>
+
+<p><strong>易踩的坑：</strong>讲一件自己参与过的党内活动的热闹场面（参观、研讨、听讲），而不是一件事。题目要的是"事"，而且是让自己"体会最深"的事。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>与2024年4月13日第1题同法，但落点应放在"作风"上。讲一件具体的事（如某次入户走访、某次夜间值守、某次为群众跑腿的经历），把当时的场景、自己当时的念头、后来的转变写出来，最后落到一句作风认识上，并联系党史学习教育中"为民办实事"的要求，说明这件事如何改变了自己的工作标准。结尾可加一句"学习要落到行动上才有意义"，呼应题干。</div>
+
+<h4 class="subsection-title">第4题　某地暴发山洪，群众生命财产受到威胁，当晚11时单位接到参与抢险的通知。你作为某省直机关工作人员，领导要你2小时内做好参与救援的统筹工作，你怎么做（题型：应急应变）</h4>
+
+<p><strong>考点定位：</strong>限时应急题，考的是<strong>快而不乱</strong>。题干给了三个硬条件：突发山洪、深夜11时、2小时时限、还要"统筹"。</p>
+
+<p><strong>易踩的坑：</strong>两个极端。一是把答案写成抢险救灾的技术流程（转移群众、搜救、堤防），越俎代庖——你是省直机关工作人员，不是救援队队长，职责是"统筹参与救援"，不是组织抢险。二是按部就班地走程序（先请示、再开会、再分工），2小时的时限下这是致命的。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>四步，强调"快"和"分"。<strong>一是立即响应</strong>：接到通知后第一时间向带队领导报告，同时请同事先翻出本单位应急预案与上年防汛资料，不等领导再问。<strong>二是快速摸清需求</strong>：用电话向对接的防汛指挥部门确认本单位要派什么、带什么、到哪里、归谁指挥，同时统计本单位可调人员与装备。<strong>三是分线推进</strong>：一边联系车辆物资，一边集结人员简明交代任务、分好小组，明确安全纪律与通信联络方式。<strong>四是动态跟进</strong>：把进度和现场情况定时向领导报告，遇到指令变更随时请示。最后一句落在作风上：抢险就是检验作风的时候，命令一到没有讨价还价的空间。</div>
+
+<h3 class="section-title">第五节 2020年11月1日湖北省直遴选面试</h3>
+
+<h4 class="subsection-title">第1题　党的十九届五中全会提出了十四五规划和2035远景目标，联系实际，谈谈你如何贯彻党的十九届五中全会精神（题型：综合分析）</h4>
+
+<p><strong>考点定位：</strong>考理论联系实际的能力。"联系实际"四个字是题眼，是全部答题的落脚点。</p>
+
+<p><strong>易踩的坑：</strong>把"贯彻"答成口号堆砌；或者只讲自己的本职工作不讲全会精神的要义，落差太大。理想状态是"全会精神的核心要义＋基层的实际问题＋自己的具体做法"三者接通。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>三句要义＋一层对接＋一条自身。<strong>三句要义</strong>：把握新发展阶段这个最大实际；贯彻新发展理念这个基本要求；构建新发展格局这个战略任务。<strong>一层对接</strong>：把这三层落到具体工作场景（例如新发展阶段对应的是把工作重心从"有没有"转到"好不好"，新发展理念对应的是不搞简单重复和铺摊子）。<strong>一条自身</strong>：结合本职岗位，讲一件自己正在做或准备做的具体事，说明如何按全会精神的要求推进。</div>
+
+<h4 class="subsection-title">第2题　"伟大出自平凡，平凡造就伟大"，谈谈你的看法（题型：综合分析兼自我认知）</h4>
+
+<p><strong>考点定位：</strong>看似是一道"名言理解题"，实则要看能不能把这句通俗的话讲出层次，并落到岗位。</p>
+
+<p><strong>易踩的坑：</strong>把这句话解释成"要甘当螺丝钉"，落点太低；或者反过来把它拔高成"每个人都能成大事"，变成空泛的励志话。这句话的重点在"平凡"与"伟大"的<strong>关系</strong>，不在"伟大"两个字。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>先辨析关系：伟大不是凭空来的，是无数平凡岗位上的坚守累积出来的；因此平凡不是平凡的借口，而是伟大的起点。再给支撑：以平凡岗位上的坚守为例，把"不平凡"体现在什么地方——重复做的事情能不能做到标准不降、遇到困难能不能不撂挑子、面对诱惑能不能守住底线。最后落到自身：作为机关工作人员，把手头的小事做扎实、把群众的一件小事办好，就是在自己的岗位上创造不平凡，从而回扣题眼。</div>
+
+<h4 class="subsection-title">第3题　你是省直单位下沉社区的党员，如何保障群众工作取得实效（题型：自我认知与组织协调结合）</h4>
+
+<p><strong>考点定位：</strong>考"基层治理最后一公里"的实操理解，题眼是"取得实效"。</p>
+
+<p><strong>易踩的坑：</strong>把"下沉社区"理解成"多去走访"，把"实效"等同于"次数多、覆盖广"，陷入以数量代替质量的循环。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>三个转变＋三个抓手。<strong>三个转变</strong>：从"下沉"到"融入"（不把自己当外人）、从"走访"到"解题"（不只问需不需、要解决什么）、从"阶段性"到"常态化"（不搞一阵风）。<strong>三个抓手</strong>：一是建机制，和社区干部、小区物业、楼栋骨干一起定下定期走访、问题台账、限时反馈的闭环；二是聚合力，把在职党员、志愿者、物业、业委会组织起来，各管一段，避免单打独斗；三是见实效，问题清单逐条销号，公开反馈结果，让群众看到"下沉"不是走过场。</div>
+
+<h4 class="subsection-title">第4题　单位围绕"六保"开展调研，你该怎么组织（题型：计划组织）</h4>
+
+<p><strong>考点定位：</strong>考调研的组织方法。"六保"指保居民就业、基本民生、市场主体、粮食能源安全、产业链供应链稳定、基层运转，是当年的重大部署，题目的专业性要求考生要有基本的政策理解。</p>
+
+<p><strong>易踩的坑：</strong>把调研组织答成"发通知、组队伍、下发问卷、收材料、汇总上报"，流程有了但没有调研方法；另一个坑是只答形式不答内容，没有事先确定要回答哪些问题。</p>
+
+<div class="callout callout-tip"><strong>答题骨架：</strong>调研组织分"事前、事中、事后"三段。<strong>事前定题</strong>：围绕"六保"六个方面设计问题清单，明确每块要回答什么核心问题（如保就业要问清缺口岗位、技能短板、吸纳渠道），并把指标定到可量化的程度。<strong>事中取样</strong>：采取分层随机的方式确定样本，既看规模企业也看小微和个体，既听部门汇报也听一线群众和企业直接反映，避免只听顺话；采取实地走访、座谈、问卷、明察暗访相结合的方式。<strong>事后用研</strong>：形成问题清单、责任清单和措施清单；对反映集中的问题形成调研报告报领导，同时把能立即解决的小问题现场解决并回访，让调研本身产生效果。</div>
+
+<div class="callout callout-key"><strong>本章小结：</strong>20道真题覆盖五类题型，其中"结合自身""提建议""组织协调""限定时间的应急"反复出现。命题有三条稳定的偏好：一是<strong>设限定条件</strong>（2小时、没经费、"学不来"），考的是在约束下求解；二是<strong>要落点</strong>（"结合我省实际""谈谈启示""你认为重点是什么"），只答一半就丢分；三是<strong>要身份</strong>（"你厅""你作为工作人员"），答的是省直机关的答法，不是记者的答法。把这三条当成读题的固定检查项，比背任何模板都管用。</div>
+</section>
+
+<!-- ==================== 第五章 ==================== -->
+<section class="chapter" id="ch5">
+<h2 class="chapter-title">第五章 答题方法论：五类题型的结构</h2>
+
+<div class="callout callout-warning"><strong>重要声明：</strong>湖北省直遴选面试的官方评分表从未公开。公告只写了"面试主要测试履行职责所要求的基本能力素质，满分100分"，没有公布评分要素、评分档次或权重。本章所有结构均为备考归纳，依据是历年真题的问法与命题规律，不是官方标准答案。考生应当把本章当作"保证下限的框架"，把第四章真题里的具体落点当作"决定上限的细节"。</div>
+
+<h3 class="section-title">第一节 通用四步</h3>
+
+<p>五类题型的框架各不相同，但拆题的动作是共通的。练熟这四步，比背五套模板更省力。</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>步骤</th><th>动作</th><th>对应到卷面</th></tr>
+</thead>
+<tbody>
+<tr><td>一读</td><td>读出题目的全部限定词和身份词</td><td>圈出"结合湖北""谈谈启示""你认为重点是什么""2小时内"</td></tr>
+<tr><td>二判</td><td>判定题型，确定主框架</td><td>决定用"分析""应变""组织""人际""自述"哪一套</td></tr>
+<tr><td>三拆</td><td>把题目拆成必须回答的几个子问题</td><td>草稿纸上列三到五行提纲</td></tr>
+<tr><td>四答</td><td>按框架口述，每一维都答满</td><td>看提纲讲，不要看题本</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>第一步最关键也最容易被跳过。湖北真题几乎每题都带限定词，而限定词就是采分点所在。把限定词读漏一个，这道题就天然少一半。例如"你作为工作人员如何向领导<strong>提建议</strong>"——答成"如何组织学习"就全偏了；"领导要你2小时内做好<strong>参与救援的统筹工作</strong>"——答成"如何组织抢险"就偏了。题本上通常就摆着题干，读题时用笔把限定词画出来，成本很低，回报很高。</p>
+
+<h3 class="section-title">第二节 综合分析题</h3>
+
+<p>综合分析是出题频率最高、也最能拉开差距的一类。它的基本结构是"是什么—为什么—怎么办"，但在湖北的实际考法里，通常只需要"为什么"和"怎么办"两层，"是什么"用一句话带过即可。</p>
+
+<h4 class="subsection-title">一、四步框架</h4>
+
+<p><strong>第一步，亮明判断。</strong>用一句话把题目的核心观点说清楚，不要绕。判断要准，不要滑。考官听的就是这第一句，它决定了后面的展开方向，也决定了考官的印象分。</p>
+
+<p><strong>第二步，讲清道理。</strong>把道理讲透到"为什么成立"这一层，而不是复述政策原文。这部分的评分空间最大，因为讲道理最能体现理论功底，也最能体现独立思考。</p>
+
+<p><strong>第三步，落到湖北。</strong>这是湖北面试区别于通用面试的地方，必须答。省情素材有三个来源：《荆楚遴选备考全书》第三章"荆楚方略"讲的七大战略与省委全会精神，第十章"2026年命题热点预测"的十四类热点，以及本省本年度的政府工作报告重点。三处可以互相印证，确保口径一致。</p>
+
+<p><strong>第四步，落到自身。</strong>用一句话说明这对你意味着什么、准备怎么干。这一步把"道理"和"岗位"连起来，是"结合个人工作"类限定词的必然要求。</p>
+
+<div class="callout callout-tip"><strong>时间分配参考：</strong>5分钟的题，讲道理不超过2分钟，落到湖北约1分半，落到自身不超过1分钟。综合分析最常见的问题是道理讲太久，湖北落点没时间讲，最后成为"放之四海而皆准"的空话。</div>
+
+<h4 class="subsection-title">二、两类常见问法的处理</h4>
+
+<p><strong>问法一：某句话、某个论断让你谈体会。</strong>处理办法是"拆词+连事"。先把这句论断拆成两三个互相支撑的关键词（例："久久为功"拆为"持续""见效""不折腾"），逐个用一句大白话解释，忌直接引用原句充当解释；再连一件自己的事或一个湖北的具体场景。整道题的骨架是"这句话讲了三层意思—第一层—第二层—第三层—我在湖北的工作里对应的是—我的做法是"。</p>
+
+<p><strong>问法二：某项工作、某个现象让你谈看法。</strong>处理办法是"定性—析因—对策"。定性要辩证，既有肯定也有局限，不能一边倒；析因要从机制上找（认识偏差、机制缺陷、落实不力、监督缺位），不能停在"认识不到位"；对策要跟析因一一对应，因什么而来就有什么策。这是整道题最能体现思维层次的地方。</p>
+
+<h3 class="section-title">第三节 应急应变题</h3>
+
+<p>应急应变考的不是临场机智，而是<strong>在约束下有序处置</strong>的能力。湖北的应急题几乎都会带一个硬约束：时间（2小时内）、场合（当晚11时）、身份（你是某省直机关工作人员）。这些约束就是采分点。</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>步骤</th><th>要点</th><th>常见失分</th></tr>
+</thead>
+<tbody>
+<tr><td>一、稳</td><td>先控制局面：稳住现场、安抚情绪、防止次生问题扩大</td><td>跳过这步直接报方案，显得没有现场意识</td></tr>
+<tr><td>二、判</td><td>按轻重缓急排序：生命财产安全＞舆论风险＞工作秩序＞后续影响</td><td>几件事并列讲，没有主次</td></tr>
+<tr><td>三、报</td><td>该报告的报告、该请示的请示，说明已采取的临时措施</td><td>越级指挥，或全程不请示</td></tr>
+<tr><td>四、干</td><td>分工推进、分类处置、同步保障</td><td>措施笼统（"加强协调""做好保障"）</td></tr>
+<tr><td>五、收</td><td>跟踪反馈、总结完善、形成长效机制</td><td>没有闭环，处置完就结束</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-tip"><strong>身份红线：</strong>应急题的答案必须始终停在"你的职权范围内"。你是省直机关工作人员，就要按"执行好领导交办的事、协调好各方、把情况报清楚"来答，而不能直接指挥抢险队伍、直接调动专业力量。越俎代庖是这类题最典型的失分点。</div>
+
+<h3 class="section-title">第四节 组织协调题</h3>
+
+<p>组织协调题在湖北有两种问法，一种问"怎么办"（2024年11月17日第3题、2024年4月13日第3题），一种问"你认为重点是什么"（2022年9月18日第4题）。后者要求多答一个层次。</p>
+
+<h4 class="subsection-title">一、通用框架：先调研、再试点、后推广</h4>
+
+<p>组织协调题的通用骨架是三段加两条保障。</p>
+
+<p><strong>调研摸底。</strong>先弄清事实：对象是谁、需求是什么、条件具备与否、有哪些堵点。不调研就出方案，是这类题最大的雷区。</p>
+
+<p><strong>分类施策。</strong>把对象或条件分类，对应不同办法。湖北真题反复体现这个逻辑——"学不来"就要分条件，"节目太单一"就要分受众。</p>
+
+<p><strong>试点先行。</strong>选有条件、有代表性的点先试，形成经验再推开，避免一步到位。</p>
+
+<p><strong>建立机制。</strong>把有效做法固化成制度、流程、清单，让它可持续。</p>
+
+<p><strong>沟通与反馈。</strong>对内统筹分工、对外争取支持，全程有调度有回音。</p>
+
+<h4 class="subsection-title">二、提建议题的专门要求</h4>
+
+<p>湖北有多道"给领导提建议"的题（2024年11月17日第3题、2024年4月13日第2题）。这类题的答案要体现一个意识：<strong>你是参谋，不是决策者</strong>。</p>
+
+<p>具体来说，第一不能替领导作决定，要提供可供决策的判断依据；第二不能只提方向，要给可操作的选项并说明各自成本；第三要主动说明风险与不确定性，让领导有判断空间；第四要给出优先排序——领导的时间有限，先做哪件、为什么先做这件。</p>
+
+<div class="callout callout-key"><strong>一个通用加分动作：</strong>在组织协调类答案的最后加一句"以上是我的初步考虑，是否可行还需向领导和同事进一步核实"。这不是套话，它展示的是机关工作里最要紧的分寸感——知道自己说的不是结论。</div>
+
+<h3 class="section-title">第五节 人际关系题</h3>
+
+<p>湖北的人际关系题有一个鲜明特点：出题很少是"同事之间闹矛盾"这种私人纠纷，而多是<strong>围绕工作产生的群众之间、部门之间的矛盾</strong>（2022年9月18日第3题就是典型）。这说明考的不是"怎么哄人"，而是"怎么把事办成还不能激化矛盾"。</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>维度</th><th>处理原则</th><th>落到具体</th></tr>
+</thead>
+<tbody>
+<tr><td>摆正位置</td><td>先把自己摆进去：我是这项工作的负责人，矛盾是工作要解决的，不是要回避的</td><td>不推给领导、不推给群众</td></tr>
+<tr><td>找准症结</td><td>区分是信息不对称、利益不一致、还是情绪对立</td><td>群众嫌节目少是供给结构问题，不是态度问题</td></tr>
+<tr><td>分类回应</td><td>不同诉求给不同出口，避免一刀切</td><td>传统场与青春场分开设置</td></tr>
+<tr><td>补位协同</td><td>主动借助他人力量，包括上级、同事、社会组织、第三方</td><td>引入专业力量扩充供给</td></tr>
+<tr><td>建闭环</td><td>收集反馈、改进、再次反馈</td><td>点单—演出—再评估</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 class="section-title">第六节 自我认知与岗位匹配题</h3>
+
+<p>这类题在2020至2024年的省直真题里至少出现过三次（2024年11月17日第4题、2024年4月13日第1题、2021年11月20日第3题），是稳定的送分题，也是最容易讲砸的题。讲砸的原因高度一致：讲成了述职报告，或者讲成了空泛的自我评价。</p>
+
+<p>这类题的核心是<strong>真实</strong>。公告明确要求"防止简单地以分取人"，考察环节会核实你的经历。你的经历讲得越具体、越可验证、越有细节，越安全；讲得越华丽、越像材料，越危险。</p>
+
+<p>推荐的做法是提前准备三个"抽屉"，每个抽屉放一段真实经历：</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>抽屉</th><th>素材类型</th><th>适配题型</th><th>要求</th></tr>
+</thead>
+<tbody>
+<tr><td>一、攻坚抽屉</td><td>一件难度大、最终办成的具体事</td><td>综合分析（讲作为）、应急应变（讲作风）</td><td>要有当时的阻力和自己的判断，不能只有结果</td></tr>
+<tr><td>二、服务抽屉</td><td>一件直接为群众办实事的事</td><td>自我认知、组织协调、人际关系</td><td>要有群众的真实反馈，能说出一句原话更好</td></tr>
+<tr><td>三、底线抽屉</td><td>一次在原则问题上守住底线的经历</td><td>综合分析（谈作风）、自我认知</td><td>要能说明当时放弃了什么，压力来自哪里</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>三个抽屉不要求惊天动地，恰恰相反，越普通越可信。备考时把它们写成三百到五百字的书面材料，反复讲，讲到脱稿且细节不变——考场上要的就是这种稳定。</p>
+
+<div class="callout callout-tip"><strong>衔接备考全书：</strong>第四章的《荆楚遴选备考全书》第五章讲公文写作、第六章讲策论文、第七章讲对策建议题，与本章的组织协调题思路相通。综合分析题则与第六章的"审题立意—四段式模型"直接对应。面试与笔试共用同一套素材库，是最省力的备考策略。</div>
+</section>
+
+
+<!-- Part: 上场与备考篇 -->
+<div class="part-divider">
+  <div class="part-tag">下编</div>
+  <h2>上场与备考篇</h2>
+</div>
+<!-- ==================== 第六章 ==================== -->
+<section class="chapter" id="ch6">
+<h2 class="chapter-title">第六章 考场纪律与细节清单</h2>
+
+<p>前面五章讲的是"考什么、怎么答"，这一章讲"怎么上场"。考场纪律是被低估的部分——它写在官方文件里，却很少被系统讲解；而它的违反后果是直接取消资格，答案再好也没有意义。</p>
+
+<h3 class="section-title">第一节 考场规则八条逐条解读</h3>
+
+<p>湖北省直遴选面试的考场规则，以《湖北省2025年度省直机关公开遴选公务员面试公告》附件3《湖北省2025年度省直机关公开遴选公务员面试考场规则》为准，共八条。省州直系统的规则文本基本一致。</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>条</th><th>规则要点</th><th>考生容易误判的地方</th></tr>
+</thead>
+<tbody>
+<tr><td>一</td><td>开考前10分钟未到达候考室的，视为自动放弃面试资格</td><td>以为"只要在开考前进考场就行"。候考室有截止时间，且考场通常在市中心，路程要留足余量</td></tr>
+<tr><td>二</td><td>不得擅离候考室，不得向外传递抽签信息；进入候考室前应将手机、智能手环等各类电子设备关闭并存放指定位置；严禁随身携带，不论开机与否，一经发现取消面试资格；需暂时离开候考室的，须在考场工作人员陪同下前往</td><td>以为关机就没事、智能手环不算"手机"。规则写的是"随身携带即取消资格"，与是否开机无关</td></tr>
+<tr><td>三</td><td>候考室内保持肃静，不得随意走动、抽烟、大声喧哗</td><td>在候考室打电话、刷视频、跟人讨论上一场题目</td></tr>
+<tr><td>四</td><td>面试时不得向考官透露姓名、工作单位、准考证号、联系方式、家庭成员等个人信息，不得穿戴有职业特征的服装饰品；违反者取消面试资格</td><td>题库里出现真实案例时顺口说出自己单位的名字；穿着明显带有职业标识的制服、徽章、工牌进入考场</td></tr>
+<tr><td>五</td><td>不得要求考官解释试题或向考官提问</td><td>听不懂就追问"请问您能再说一遍吗"。没听清是应该自己按题本理解并作答的，不能靠追问补救</td></tr>
+<tr><td>六</td><td>使用普通话作答；每次回答完考官的提问后说"回答完毕"；答题时间到应立即停止答题；成绩宣布后当场签名确认</td><td>忘了说"回答完毕"，考官不知你是否答完，容易打断或产生歧义；时间到了还在收尾</td></tr>
+<tr><td>七</td><td>面试结束后按规定路线迅速离开，不得在考场附近停留议论，不得返回候考区域，不得以任何方式向场内考生泄露考题</td><td>考完在门口和其他考生对答案；把题目发到群里。这既是纪律问题，也会被认定为泄题</td></tr>
+<tr><td>八</td><td>服从考场工作人员管理，接受监督和检查；对无理取闹、辱骂、威胁、报复考场工作人员的按有关规定处理，构成犯罪的依法追究刑事责任</td><td>因等候时间过长、抽签顺序靠后而情绪失控</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-tip"><strong>依据：</strong>《湖北省2025年度省直机关公开遴选公务员面试公告》附件3；市州直版本见《随州市2025年度市直机关公开遴选公务员面试考场规则》，条文表述一致。</div>
+
+<div class="callout callout-warning"><strong>最危险的一条是第四条的"不得透露个人信息"。</strong>湖北真题里出现频率很高的一个题型就是"结合自身谈经历"，而个人经历往往天然带着单位信息、地区信息和身份线索。答题时的处理原则是：把个人信息抽象成"我在基层""我在此前的工作单位""我服务过的一类群众"，把所有可能指向具体单位、具体地区的细节替换掉。宁可少一层真实，也不冒被取消资格的风险。</div>
+
+<h3 class="section-title">第二节 读题与控速</h3>
+
+<p>面试是限时逐题作答的，前面第三章已经确认了"每题单独计时"的规则。控速的要点有三条。</p>
+
+<p><strong>其一，听题和看题同时进行。</strong>考场一般采取考官读题加题本的方式。考官在读的时候，一定要在题本上把题目的限定词和身份词划出来——手不能停，眼睛要跟着走。只靠耳朵很容易漏掉"结合湖北""你认为重点是什么"这类采分限定词。</p>
+
+<p><strong>其二，每题的题号意识。</strong>题号决定了后面几题的时间分配。读完第一题就要在心里分出这20分钟怎么用：四道题大致按5、5、4、4的比例走，前两题务必讲透但不铺开，第三题是套路题可以压缩，第四题收得干脆利落。计时以考官提示为准，不要自己估计。</p>
+
+<p><strong>其三，草稿纸只列骨架。</strong>草稿纸的作用是防漏，不是打草稿。列三到五行就够：每题的框架名、每个分论点的一句话、以及必须出现的那个具体数据或事实。列满一页反而会让人低头念稿，语速和眼神都会垮掉。</p>
+
+<h3 class="section-title">第三节 表达细节</h3>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>环节</th><th>要点</th></tr>
+</thead>
+<tbody>
+<tr><td>开篇</td><td>用"考生您好"或"考官好"起头，问好之后等考官示意或指示开始再答，不要抢答</td></tr>
+<tr><td>语速</td><td>宁慢勿快。每题的思考时间已经算在作答时间内，语速快会让考官跟不上，语速稳才能体现条理</td></tr>
+<tr><td>音量</td><td>以7名考官都能听清为准。低头念稿时声音会不自觉变小，要刻意稳住</td></tr>
+<tr><td>眼神</td><td>轮流看向考官，不要只盯主考官，也不要盯着题本念；答完看向主考官</td></tr>
+<tr><td>结构词</td><td>多用"第一、第二、第三""一方面、另一方面"这类显性结构词，让考官随时知道你在哪一层</td></tr>
+<tr><td>收尾</td><td>答完说一句"回答完毕"，等考官确认或直接进入下一题</td></tr>
+<tr><td>超时</td><td>听到提示立即停止，不要把最后一句硬说完，也不要慌</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 class="section-title">第四节 进场前的准备清单</h3>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>项目</th><th>要求</th><th>说明</th></tr>
+</thead>
+<tbody>
+<tr><td>有效居民身份证原件</td><td>必备</td><td>公告"注意事项"第2项明确要求携带本人有效居民身份证原件</td></tr>
+<tr><td>笔试准考证</td><td>必备</td><td>既是入场凭证，也是从校门进入考场的通行凭证</td></tr>
+<tr><td>手机与智能手环</td><td>提前关机并存放指定位置</td><td>入场前处理掉，不要指望"调静音"可以带进去</td></tr>
+<tr><td>面试公告与抽签区安排</td><td>提前下载并熟悉</td><td>查清楚考场位置、到场时间、抽签区在哪</td></tr>
+<tr><td>路线与交通</td><td>提前踩点</td><td>公告特别提示避免校门口交通拥堵、车辆不得进入校园，尽量选择公共交通</td></tr>
+<tr><td>着装</td><td>正式但不得有职业标识</td><td>不得穿戴有职业特征的服装饰品</td></tr>
+<tr><td>文具</td><td>一般由考场提供记录笔和草稿纸</td><td>以当次考场规则为准</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-tip"><strong>依据：</strong>《湖北省2025年度省直机关公开遴选公务员面试公告》"注意事项"与"特别提示"：考生应关注湖北省人事考试网，了解面试时间地点、抽签区安排和考场规则；未按规定参加面试者视为自动放弃面试资格；应携带本人有效居民身份证原件、笔试准考证；请合理安排行程、提前熟悉考场地点以免错失考试机会；车辆不得进入校园。</div>
+</section>
+
+<!-- ==================== 第七章 ==================== -->
+<section class="chapter" id="ch7">
+<h2 class="chapter-title">第七章 备考路线图</h2>
+
+<p>前面六章是知识，这一章是排程。面试备考最大的问题不是不会，而是准备得没有章法，最后变成"看了很多书，一进考场还是慌"。下面这条路线图按阶段划分，每阶段有明确的产出物和验收标准。</p>
+
+<h3 class="section-title">第一节 三阶段倒排</h3>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>阶段</th><th>时间</th><th>主要任务</th><th>产出物与验收</th></tr>
+</thead>
+<tbody>
+<tr><td>第一阶段　建框架</td><td>备考启动至笔试结束前</td><td>读透公告与面试公告（第一、二、六章）；背熟考场规则八条；建立热点库与省情库；整理三个经历抽屉</td><td>能不看资料讲清面试的权重、形式、时长、纪律；三个抽屉各成文并能脱稿复述</td></tr>
+<tr><td>第二阶段　练题型</td><td>笔试结束至面试前</td><td>按五类题型逐类过真题；每类题练"拆题—搭框架—控速口述"；建立错题本</td><td>每类题型至少完整口述过10道；能在5分钟内讲完任意一道同型题</td></tr>
+<tr><td>第三阶段　模拟与收口</td><td>面试前两周至考前</td><td>全真模拟：20分钟4题、逐题计时、盖住草稿只看提纲；复盘每一道；回炉错题</td><td>模拟不少于6场，每场有复盘记录；考场流程能预演到不出错</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-tip"><strong>为什么第一阶段要放在笔试之前：</strong>面试公告与考场规则必须在进考场前就烂熟于心，而面试公告往往与笔试同日或相隔不久。把面试备考完全押在笔试之后，等于用最紧张的一段时间做从零开始的事。</div>
+
+<h3 class="section-title">第二节 素材库的三层结构</h3>
+
+<p>面试答题的所有内容，最终都从素材库里取。素材库分三层，缺一层就会出现"道理讲完了，但手里没东西"。</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>层</th><th>内容</th><th>来源</th><th>用途</th></tr>
+</thead>
+<tbody>
+<tr><td>第一层　理论层</td><td>重要论述的核心要义、常用政策术语、基本工作方法</td><td>《备考全书》第一、二章；二十大和二十届历次全会精神</td><td>综合分析题讲"道理"，应急应变题讲"原则"</td></tr>
+<tr><td>第二层　省情层</td><td>湖北战略部署、全省年度重点工作、典型案例与数据</td><td>《备考全书》第三章、第十章；湖北省政府工作报告；省委全会</td><td>综合分析题落省情；组织协调题找本地抓手</td></tr>
+<tr><td>第三层　个人层</td><td>三个经历抽屉及其细节；本岗位业务知识；所在地的基本情况</td><td>自己整理，书面化并反复复述</td><td>自我认知题、经历类综合分析题；组织协调题的身份落点</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>三层素材在考场上是联动的。最好的答案，是用第一层的道理做骨架、用第二层的省情做血肉、用第三层的经历做落点。缺第三层的答案会显得飘，缺第二层的答案会显得"这道题换个省也成立"，缺第一层的答案会显得没有高度。</p>
+
+<h3 class="section-title">第三节 真题训练法</h3>
+
+<p>真题是唯一可靠的题库，因为出题人年年复用同一套命题逻辑。训练按四步循环，一题至少过三遍。</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>轮次</th><th>做什么</th><th>不许做什么</th></tr>
+</thead>
+<tbody>
+<tr><td>第一遍　拆</td><td>读题，圈出限定词，判定题型，拆出必答子问题，写出骨架（不开口）</td><td>不许看答案，不许完整写出成文</td></tr>
+<tr><td>第二遍　讲</td><td>遮住笔记，凭骨架口述，限时5分钟内讲完，自己录音</td><td>不许照稿念</td></tr>
+<tr><td>第三遍　改</td><td>回听录音，对照第四章该题的"易踩的坑"逐条检查，重讲一遍</td><td>不许重复原来的说法</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>20道真题按三遍过完大约需要两周，这是最划算的一段投入。建议按年份倒序做（先做2024年两场），因为最近的题目最能反映当年的命题偏好。</p>
+
+<h3 class="section-title">第四节 八个常见误区</h3>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>误区</th><th>后果</th><th>纠正</th></tr>
+</thead>
+<tbody>
+<tr><td>只背模板不看题</td><td>题目换了限定词，模板套不上，逻辑跑偏</td><td>每个模板前面加一步"拆题"，先看限定词</td></tr>
+<tr><td>押题型不练全型</td><td>出题轮换就崩盘</td><td>五类题型同权重准备，综合分析多练一遍</td></tr>
+<tr><td>背热点不背省情</td><td>答的是全国通用话，缺湖北辨识度</td><td>每个热点都要能落到至少一个湖北场景</td></tr>
+<tr><td>讲经历讲成述职</td><td>没有个人视角，看不出你做了什么</td><td>用"我当时遇到什么、我怎么判断、我改了做法"三段式</td></tr>
+<tr><td>追求文采</td><td>占用时间、挤占内容，逻辑反而变弱</td><td>把力气花在结构清楚和落点准确上</td></tr>
+<tr><td>不练控速</td><td>前两题讲不完，后两题仓促收场</td><td>每次口述都掐表，按5、5、4、4分配</td></tr>
+<tr><td>不熟悉考场规则</td><td>无意违规，取消资格</td><td>八条规则背到能默写，进场前逐条过一遍</td></tr>
+<tr><td>等面试公告出来才复习</td><td>时间不够，考前焦虑</td><td>按第一阶段提前启动，公告只是确认时间</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-key"><strong>全篇收束：</strong>面试考的不是你懂多少，而是你在限定时间内能不能把一件事想清楚、说明白、办成。公告说它测"履行职责所要求的基本能力素质"，这句话就是全部备考的纲：把每一次答题都当成一次真实的履职预演——站在岗位上，面对具体的湖北，面对具体的群众，在倒计时里把事情讲清楚。做到这一点，形式与技巧只是水到渠成。</div>
+</section>
+
+<!-- ==================== 第八章 ==================== -->
+<section class="chapter" id="ch8">
+<h2 class="chapter-title">第八章 模拟练习：八道仿真题与参考答案</h2>
+
+<p>真题解剖讲的是"别人怎么答"，这一章练的是"我怎么答"。八道仿真题按2020至2024年省直真题的问法、限定词与身份设定编写，五类题型各出两题，时间分配参照省直"20分钟4题、逐题5、5、4、4分钟"的实际考法。每题给参考答案，默认折叠——先答后看，才知道差在哪里。</p>
+
+<div class="callout callout-warning"><strong>必须说明：</strong>这八道是仿真题，不是历年真题，也不是任何机构发布的题本。题干中的人物、单位、场景均为教学设定；涉及的政策表述以省委省政府公开文件为准。练的是结构与思路，不要把仿真题的答案当标准答案背。</div>
+
+<h3 class="section-title">第一节 本章用法</h3>
+
+<p><strong>第一步，按时口述。</strong>每题按建议用时讲完，不看答案，不写稿。真实考场里没有停顿查资料的时间，卡壳就是失分。</p>
+
+<p><strong>第二步，展开答案对照。</strong>答案给的是骨架与落点，不是范文。对照时只看四件事：限定词是否都答到；湖北落点是否有具体内容；身份是否越权；时间是否够用。</p>
+
+<p><strong>第三步，重讲一遍。</strong>用答案的结构，重讲自己的版本，把自己的经历、自己的素材填进去。答案里没有你的经历，考官是听得出来的。</p>
+
+<div class="callout callout-tip"><strong>折叠答案的设计意图：</strong>先答后看，避免"看答案觉得都会"的假象。真题解剖那章可以对照着看，模拟练习必须先关上答案讲一遍——讲不出来，就是没学会。</div>
+
+<h3 class="section-title">第二节 综合分析题</h3>
+
+<h4 class="subsection-title">第1题　习近平总书记考察湖北时指出，湖北要"加快建成中部地区崛起重要战略支点"。请结合湖北实际，谈谈你对这句话的理解。（题型：综合分析　建议用时：5分钟）</h4>
+
+<div class="practice-points"><strong>审题要点：</strong>三个限定词缺一不可——"湖北实际"要求落到省情，"这句话"要求先拆解论断的内涵，"理解"意味着不能照抄原文。"结合湖北实际"还暗含一层：不落省情就等于没答。</div>
+
+<details class="practice-answer">
+<summary>参考答案</summary>
+<div class="practice-answer-body">
+<p><strong>一、亮明判断。</strong>这句话点明的是湖北在全国发展大局中的坐标和责任：中部崛起不是别人的事，湖北是主角；"战略支点"更不是自我评价，而是要求湖北成为撬动整个中部地区的一枚支点。</p>
+<p><strong>二、拆词释义。</strong>把论断拆成三个互相支撑的词。"中部地区"讲的是坐标，湖北处在承东启西、连南接北的通衢位置，是全国纵向经济带与横向经济带的交汇点；"崛起"讲的是进位，不是守住既有优势，而是要在全国同类省份中争先；"战略支点"讲的是作用，支点的价值在于撬动全局，因而衡量标准不是"湖北自己好不好"，而是"湖北能不能带动"。</p>
+<p><strong>三、讲清道理。</strong>一，区域协调发展需要新的增长极，单靠传统格局难以支撑中部地区整体跃升，湖北必须把区位优势转化为现实动能。二，湖北具备把优势变成动能的条件：长江中游的通衢区位、光谷的科创集聚、丰富的高校与人才资源、跨越长江与江汉平原的产业基础。三，这条论断同时划出了责任边界——支点是受力点，湖北既受益于国家战略，也要在区域协作中承担更多支撑责任。</p>
+<p><strong>四、落到湖北。</strong>把论断接到几处具体任务上：产业上接续攻坚，依托长江中游城市群和武汉都市圈的牵引作用，推动传统产业改造与新兴产业接续；创新上做实科教融通，把光谷的科创优势向省内其他城市扩散；区域上补齐县域经济短板，推动武汉都市圈与襄阳、宜昌等都市圈的梯次带动；生态上把长江流域生态保护做成发展优势；开放上用好长江黄金水道的通道功能。</p>
+<p><strong>五、落到自身。</strong>作为省直机关工作人员，我理解"支点"二字的含义是把自己这一环做扎实、把政策用到位。具体到本职岗位，就是主动对接国家和省的战略部署，把涉及本领域的政策吃透用好，在跨部门协同中主动补位，不让自己成为链条上的断点。</p>
+</div>
+</details>
+
+<h4 class="subsection-title">第2题　近年来"高效办成一件事"成为政务服务改革的热门方向，某地推行后却有群众反映"材料还是要反复提交、线上线下还是两套跑"。对此，你怎么看？（题型：综合分析　建议用时：5分钟）</h4>
+
+<div class="practice-points"><strong>审题要点：</strong>这是现象类问法，按"定性—析因—对策"三段走。定性要辩证，不能因为有群众反映就否定改革；析因要从机制上找，不能停在"认识不到位"；对策必须与析因一一对应。</div>
+
+<details class="practice-answer">
+<summary>参考答案</summary>
+<div class="practice-answer-body">
+<p><strong>一、定性。</strong>"高效办成一件事"的改革方向是对的，落差也真实存在。群众反映的"两套跑"不是改革本身的失败，而是改革停在半路的产物。这件事要辩证看：一方面不能因个别反映否定改革成效，另一方面不能以"方向正确"为由回避办理环节的具体障碍。</p>
+<p><strong>二、析因。</strong>阻力主要不在群众，而在供给侧的机制。一是数据未通，部门之间系统不互通，同一份材料在不同环节被重复采集；二是流程仍以部门便利为设计起点，事项在部门之间串联而不是在群众体验上并联；三是考核指标还是"办件量""受理量"，窗口与线上各算各的账，"办没办成"少有人负责；四是基层减负与材料精简不同步，新表还在加，旧表还没减。</p>
+<p><strong>三、对策。</strong>针对数据不通，推动部门间系统互联与材料共享，把"重复提交"变成"一次采集、多方复用"，让数据多跑路、群众少跑腿；针对流程串联，按"一件事"而非"一个部门"重新编排办理流程，同一环节并联审批；针对指标错位，把评价标准改为"一次办成率"与群众体验满意度，并让线上线下共用一套受理台账，避免两头扯皮；针对材料反复，把政策依据、申报要件编成清单一次性告知，并同步清理无谓材料，让基层减负与减证同向发力；针对老年和特殊群体，保留并做优人工帮办与上门代办，数字提效不能把一部分人落下。</p>
+<p><strong>四、落到自身。</strong>窗口工作最直接，我所在岗位能做的是把每一件办件当作一次检验：办完之后问一句"您还跑了几趟、还交了几次同样的材料"，把群众的真实成本记下来反馈给改革环节，而不是只在台账上记办结。</p>
+</div>
+</details>
+
+<h3 class="section-title">第三节 应急应变题</h3>
+
+<h4 class="subsection-title">第3题　某地突降特大暴雨，城区多处积水，多个小区被围困。傍晚六点，你接到单位通知，需在两小时内组织一支队伍前往现场协助处置。领导让你负责车辆调度与物资保障，你怎么办？（题型：应急应变　建议用时：4分钟）</h4>
+
+<div class="practice-points"><strong>审题要点：</strong>硬约束有两个——"两小时内"是时间约束，"协助处置"是身份约束，答案是统筹保障，不是组织抢险。答成"我会赶到现场组织群众转移"就是越权；答成"我会立即出发"则漏掉了统筹这个题眼。</div>
+
+<details class="practice-answer">
+<summary>参考答案</summary>
+<div class="practice-answer-body">
+<p><strong>一、先稳。</strong>接到通知后不慌乱，先通过电话向属地了解情况：雨势是否持续、哪些小区受困、有无人员伤亡、我的队伍到现场后承担什么任务。同时提醒随队同志注意安全、备好雨具，明确我方是来协助保障的，不承担专业救援职责。</p>
+<p><strong>二、判轻重。</strong>按轻重缓急排三档：最急的是受困人员的生命安全与危房、住地下沉等次生风险；其次是主要道路的通行保障，防止救援通道被堵；再次是滞留人员的食品、药品、照明与御寒保障。同时预判次生风险，比如涉水车辆、漏电、临建设施受扰，要把安全提示一并纳入。</p>
+<p><strong>三、报情况。</strong>立即向领导报告已启动的安排，同时把缺口讲清楚：现有车辆数量与车型限制、防雨与照明物资储备不足、需要属地提供哪些对接支持。请领导协调增援，不越级指挥专业力量，也不在没有把握时擅自承诺做不到的事。</p>
+<p><strong>四、抓落实。</strong>车辆分组调度：把车辆按涉水能力与用途分类，明确每组任务区和返程时间，避免盲目进入积水区；物资按类别分装成若干份，标明用途、数量与领用负责人，让现场领用不靠临时找；每组指定一名带队负责人，保持与现场指挥点和我单位的双向联络；额外预留一组备用车辆与一条返程通道，防止现场僵住。</p>
+<p><strong>五、收尾闭环。</strong>现场情况定时回传，物资消耗登记造册；处置结束后复盘车辆调度与物资保障中的问题，提出改进清单；把这次暴露出的应急物资储备不足、联络不畅等问题形成台账，推动后续完善预案与物资保障机制。</p>
+</div>
+</details>
+
+<h4 class="subsection-title">第4题　你在政务服务窗口值班，一位老人因系统故障无法完成社保业务办理，情绪激动，在窗口拍桌，并说要到电视台去投诉。你怎么办？（题型：应急应变　建议用时：4分钟）</h4>
+
+<div class="practice-points"><strong>审题要点：</strong>本题的考点不是"讲道理"，而是"降情绪、给路径、留闭环"。三个隐含约束：老人情绪已升级，系统确有故障，而你是窗口人员、权限有限，答应不了超出职权的事。</div>
+
+<details class="practice-answer">
+<summary>参考答案</summary>
+<div class="practice-answer-body">
+<p><strong>一、稳情绪。</strong>先离开柜台一步，压低声音，不与老人争辩，不在公共场合解释系统故障是谁的责任。请同事倒杯水、搬把椅子，请老人坐下，先问身体状况、问清楚今天必须办完的是什么业务。老人情绪有出口，事情才有谈的空间。</p>
+<p><strong>二、判诉求。</strong>老人的诉求有三层：把事情办成、有人给我一个说法、有人对我处理不当造成的损失负责。核心是第一层，其余两层是情绪的外溢。同时要判断系统故障是全部业务停摆还是仅此一项可绕行。</p>
+<p><strong>三、报情况。</strong>当面报告窗口负责人系统故障情况，请技术人员优先处理；同步核实自己手上可用的替代手段有哪些，避免在老人面前空口承诺。</p>
+<p><strong>四、给路径。</strong>把可走的路一次讲清：一是系统故障期间是否可手工受理或容缺受理，能办的当场办结；二是是否可引导到能正常办理的网点或自助终端，并协助查询最近点位；三是确需延后的，为老人出具受理凭证，登记联系方式，明确办结时限；四是可以联系其家属或代办人代办，减少老人奔波；五是线上可办的，请子女在家中代办，我提供一次性告知的清单和电话。每个方案都讲清楚要多久、找谁、会不会再跑一趟。</p>
+<p><strong>五、收尾。</strong>事项办结后主动电话回告，说明办理结果与后续注意事项；把当日系统故障与由此产生的办理障碍记入问题清单，反馈给技术与流程改进环节；对老人的投诉诉求按单位规定登记受理并反馈办理情况，不冷处理，也不擅自承诺超出权限的补偿。事后我会把这次办理经过写成一条服务改进建议：明确系统故障时的窗口处置口径与替代方案清单，避免下一个老人再遇到同样的情况。</p>
+</div>
+</details>
+
+<h3 class="section-title">第四节 组织协调题</h3>
+
+<h4 class="subsection-title">第5题　单位准备举办一次"惠企政策进园区"宣讲活动，前期调研发现：到场的中小微企业不到通知的一半；企业普遍反映"政策太多，不知道该申报哪一条"。如果由你来重新组织，你会怎么做？（题型：组织协调　建议用时：4分钟）</h4>
+
+<div class="practice-points"><strong>审题要点：</strong>这是湖北真题里常见的"活动改进题"：给你一个已经办过、效果不好的活动，让你重新组织。答案不能写成"加大宣传力度、扩大宣传范围"，因为这与题干给的失败原因完全重合，等于没有诊断。</div>
+
+<details class="practice-answer">
+<summary>参考答案</summary>
+<div class="practice-answer-body">
+<p><strong>一、调研摸底。</strong>先分清三类原因，不急于出新方案。渠道上查：通知发到了谁手里，是否只发到规上企业而漏掉了大量小微和个体工商户，园区是否原样转发、有没有回收确认回复。时段上查：活动时间是否撞上企业生产与订单高峰。内容上查：宣讲的政策条目与园区企业实际需求是否对得上。摸清之后才谈怎么改。</p>
+<p><strong>二、分类施策。</strong>渠道端，把企业分层触达，按专精特新、高新技术、个体小微分别通知，通过园区服务专员、企业服务群和上一年参会企业定向邀请，并做逐家确认。时段端，避开生产与订单高峰，改为错峰专场，设在投产前与收工后两档，并同步提供线上回放。内容端，把"政策宣讲会"改成"政策体检台"：按企业类型预置一份可申报政策清单，现场设分类咨询桌，让企业当场算出自己符合哪几条、能享受什么。把这三件事的落点讲清，才叫解决问题。</p>
+<p><strong>三、试点先行。</strong>先选一个园区或一个行业做一场小规模专场，用到场率、意向转化数、问题收集量三项指标评估效果，再决定是否推开，避免一场活动办砸影响后续。</p>
+<p><strong>四、建立机制。</strong>把一次性的宣讲变成常态服务：形成动态更新的《惠企政策清单》，在园区设立固定的政策联络员，建立"企业提问—专人解答—政策更新"的月度闭环，让企业随时知道有什么新政策、自己够不够条件。</p>
+<p><strong>五、沟通反馈。</strong>活动前收集问题清单并预置答案，现场安排专人记录诉求，活动后回收问卷，向企业和园区通报改进情况，把反馈作为下一场活动的内容输入，形成闭环。</p>
+</div>
+</details>
+
+<h4 class="subsection-title">第6题　某市在推进社区老年助餐点上办法有效、群众评价好，周边城区想学却反映"我们社区的老人结构和饮食习惯不一样，成本也高"。你是省直机关工作人员，如何向领导提建议，把这项经验在全省推开？（题型：组织协调（提建议题）　建议用时：5分钟）</h4>
+
+<div class="practice-points"><strong>审题要点：</strong>这是"给领导提建议"题，考点是参谋意识——不能替领导作决定，要提供可供决策的判断依据；不能只提方向，要给可操作的选项并说明成本；还要主动说明风险并给出优先排序。</div>
+
+<details class="practice-answer">
+<summary>参考答案</summary>
+<div class="practice-answer-body">
+<p><strong>一、先把"能不能学"拆成条件。</strong>不笼统谈推广，先做要素分解：老年人口的数量与结构、饮食习惯与菜品结构、场地条件与食品经营资质、运营主体与长期可持续性。这四项具备与否，决定了哪些地方可以直接学、哪些只能对标学、哪些要先补短板。</p>
+<p><strong>二、分类给办法。</strong>条件基本具备的，可以直接学，重点给政策与标准支持；条件相近的，找同类案例对标，把差异部分单独做成适配方案；条件不具备的，先补基础短板，比如集中供餐、场地改造、引入专业运营主体，不强推模式，避免一哄而上、开了就关。</p>
+<p><strong>三、把经验拆成可移植的模块。</strong>社区助餐真正可复制的不是某家店，而是四个机制：需求摸排机制、供餐主体引入机制、定价与补贴机制、食品安全监管机制。按模块分别评估在本地是否可行，避免整体照搬时把不适配的部分也搬过来。</p>
+<p><strong>四、配套与排序。</strong>建议先试点后推开，明确试点范围与评估标准（覆盖老年人数、满意度、运营可持续性），配套政策与经费支持，把有效做法固化成操作指引，便于基层照着办。建议优先推进需求明确、财政与场地条件较好的地区，把有限的资源先用在能见效的地方，同时对条件不足的地区先做能力建设，不搞齐步走。</p>
+<p><strong>五、说明风险。</strong>要把财政可持续性、食品安全责任、老年人接受度三条风险摆在明面上，并给出应对，而不是只讲好处，让领导有判断空间。</p>
+<p>以上是我的初步考虑，具体路径还需向领导和同事进一步核实。</p>
+</div>
+</details>
+
+<h3 class="section-title">第五节 人际关系题</h3>
+
+<h4 class="subsection-title">第7题　你和同事共同负责一项季度数据报送，临近报送截止时间，同事说手头有一件更紧急的临时任务，希望你先把他那部分完成。你怎么办？（题型：人际关系　建议用时：4分钟）</h4>
+
+<div class="practice-points"><strong>审题要点：</strong>湖北的人际关系题考的不是"怎么哄人"，而是"怎么把事办成还不激化矛盾"。答题顺序是摆正位置、找准症结、分类回应、补位协同、建闭环。</div>
+
+<details class="practice-answer">
+<summary>参考答案</summary>
+<div class="practice-answer-body">
+<p><strong>一、摆正位置。</strong>这项数据报送是科室的任务，我是责任人，也是当事人。遇到分工困难第一反应应当是把事办成，而不是先分责任、更不能直接推给领导。</p>
+<p><strong>二、找准症结。</strong>先核实，不猜。用一句关心的话问清楚同事那件临时任务的时限要求、是谁交办、后果如何，判断它是真有硬约束，还是仅仅时间安排上撞了车。这一步不能省，因为两种情况的处理完全不同。</p>
+<p><strong>三、分类回应。</strong>如果同事的任务确有硬约束，比如今晚必须上报、上级等着要，那我先接下他那部分，同时向领导说明分工调整情况，请求把我们的报送时间往后协调一点，或者请科室其他同事支援一段；如果同事的任务并不紧急，那就把总量拆开，两人分工并行，我做数据核对与逻辑校验，他做格式与文字说明，把节点对齐，谁也不欠谁一个人情。至于对方没说的部分，我不能替对方认领责任。</p>
+<p><strong>四、补位协同。</strong>主动与科室同事沟通，争取安排一人交叉复核关键数据；把两个人的进度拉成一张节点表，同步每天的对齐时间，避免最后一晚才发现问题，到时候只能在系统前手忙脚乱。</p>
+<p><strong>五、建闭环。</strong>无论最终走哪条路径，事后与同事把机制说清楚：涉及硬时限的任务提前预警并报备；重要数据固定一人主笔、一人复核；节点提前对齐，不拖到最后一天。把一次偶然的分工冲突，转成科室可用的工作约定，这次麻烦才算真正解决。</p>
+</div>
+</details>
+
+<h3 class="section-title">第六节 岗位匹配与自我认知题</h3>
+
+<h4 class="subsection-title">第8题　有人说，公务员的成长是在处理一件件具体的小事中完成的。请结合自身经历，谈谈你的理解。（题型：岗位匹配与自我认知　建议用时：4分钟）</h4>
+
+<div class="practice-points"><strong>审题要点：</strong>题目要求"结合自身经历"，答案必须是讲事、不是表态。结构按三段走：讲事（时间、场景、我的角色、一件具体的事、一个细节）、讲转折（遇到什么阻力、我怎么判断和调整）、讲启示（从这件事里长出来的认识，落回岗位要求）。</div>
+
+<details class="practice-answer">
+<summary>参考答案</summary>
+<div class="practice-answer-body">
+<p><strong>第一段讲事。</strong>用"时间加场景加我的角色加一件具体的事"开头，把细节落到可感知的层面。比如在乡镇工作期间，我负责过一件为独居老人接通电力的具体事：老人反映家里线路老化跳闸频繁，我到现场看了一圈，发现不是自家线路的问题，而是村道改造时一段临时线路接到了同一根杆上。老人当时的说法是"我反映过三次了，每次都让我等通知"。这句话我当时记了下来。</p>
+<p><strong>第二段讲转折。</strong>这件事的阻力不在技术，在流程：供电所只管到用户侧，村里的临时线路不在他们的责任范围，两个单位互相指向对方。处理过程中我做的调整是，先查台账把那段临时线路的权属和投用时间查清楚，再请镇里出面向两个单位一起说事，把责任划清，而不是让老人继续跑。同时我也意识到，如果只把电接通就走，下一次跳闸老人还是不知道该找谁，所以我顺势把全村独居老人的用电情况摸了一遍，建立了联系卡，交接给了接手这项工作的同事。</p>
+<p><strong>第三段讲启示。</strong>这件事让我理解了题目里的"小事"。小事之所以不小，是因为它连着群众切身的感受，群众评价政府工作，往往就是从这些小事里得出的；小事也是作风的照妖镜，事情办得成不成、有没有绕开群众自己去图省事，干部在小事上的态度最藏不住。对我自己的岗位来说，含义很具体：把每一次交办的小事当大事办，答应的事给出办结的时间，办完了要给一个回音，哪怕只是一件小事，也要让人家知道这事没被忘掉。成长不是等一件大事来证明自己，而是把无数件小事办得越来越稳。</p>
+<p>这道题没有标准答案，面试官在意的是真不真、细不细。备考时请把本段替换成自己真实经历里的那件小事，细节越具体越安全，讲得越像材料越危险。</p>
+</div>
+</details>
+
+<h3 class="section-title">第七节 自评要点</h3>
+
+<p>八道题练完，用下面这张表给自己打分。每一项都按"是"或"否"判断，不要给自己打模糊分。</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>自评项</th><th>判断标准</th><th>没做到怎么补</th></tr>
+</thead>
+<tbody>
+<tr><td>限定词答全</td><td>题干里的每一个限定词都有对应内容</td><td>重读题干，把限定词逐个圈出来，再逐个对答案</td></tr>
+<tr><td>湖北落点具体</td><td>出现可指认的省情内容，而不是"要结合本地实际"这类空话</td><td>把《荆楚遴选备考全书》第三章"荆楚方略"与第十章热点预测当作素材清单，挑两条能贴的用</td></tr>
+<tr><td>身份不越权</td><td>答案始终停在自己的职权范围内，没有替领导决策、没有指挥专业力量</td><td>通读答案，删掉所有"我会安排""我会调配"里自己不该说的话</td></tr>
+<tr><td>结构完整</td><td>该有的层次都在：分析题有判断，应急题有轻重，组织题有调研与试点</td><td>按第五章的四步框架重讲，不要凭印象补</td></tr>
+<tr><td>时间够用</td><td>按建议用时讲完，没有超时</td><td>先练取舍：宁可少讲一层，不要讲不完；结尾一律收住</td></tr>
+<tr><td>有自己的东西</td><td>答案里有自己的经历、自己的判断，不全是书上的原话</td><td>把三个抽屉的书面材料再读一遍，每题至少嵌入一条</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-key"><strong>本章收束：</strong>真题是别人的，模拟题是仿的，考场上的题是新的。能带进考场的只有三样东西：读出限定词的习惯、落到湖北的素材库、以及讲自己真实经历的分寸。把这三样练到不用想，八道仿真题就完成了它们的任务。</div>
+</section>
+
+<!-- ==================== 附录 ==================== -->
+<section class="chapter" id="ch9">
+<h2 class="chapter-title">第九章　附录：依据清单与使用说明</h2>
+
+<h3 class="section-title">第一节 本指南的依据来源</h3>
+
+<p>本指南的全部事实性内容都可回溯到下列公开来源。凡未列入下表的表述，均已注明为"第三方统计"或"备考归纳"。</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>来源</th><th>发布方与时间</th><th>提供的内容</th></tr>
+</thead>
+<tbody>
+<tr><td>《湖北省2026年度省直机关公开遴选公务员公告》</td><td>中共湖北省委组织部，2026年9月18日（湖北省人力资源和社会保障厅网站发布）</td><td>职位规模、报名与考试时间、资格条件、笔试与专业测试安排、面试条款、成绩合成、考察体检、研究决定、公示与试用</td></tr>
+<tr><td>《湖北省2025年度省直机关公开遴选公务员面试公告》</td><td>中共湖北省委组织部，2025年11月7日</td><td>面试时间与地点、面试人员规模、当日程序、注意事项、考场规则附件</td></tr>
+<tr><td>《湖北省2025年度省直机关公开遴选公务员面试考场规则》</td><td>中共湖北省委组织部，随面试公告以附件3发布</td><td>考场纪律八条</td></tr>
+<tr><td>《湖北省2025年度省直机关公开遴选公务员公告》</td><td>中共湖北省委组织部，2025年9月11日</td><td>当年职位规模与考试流程，用作年度对照</td></tr>
+<tr><td>《湖北省2024年度省直机关公开遴选公务员公告》</td><td>中共湖北省委组织部，2024年</td><td>当年职位规模与选调生专项计划，用作年度对照</td></tr>
+<tr><td>《湖北省公务员公开遴选实施细则》</td><td>中共湖北省委组织部</td><td>公告与面试公告据以制定的制度依据（仅作引证，未直接引用条文）</td></tr>
+<tr><td>第三方遴选培训机构面试考情分析</td><td>公务员遴选网等培训机构公开发布的考情分析文章</td><td>题型分类、历年出题顺序、时长与题量统计、热点词表、考场情况、真题回忆</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-tip"><strong>查证入口：</strong>湖北省人事考试网（https://rst.hubei.gov.cn/hbrsksw/ ）是公告、面试公告、面试人员名单、抽签区安排、考场规则与考察对象名单的权威发布渠道。公告与面试公告的原文也由湖北省人力资源和社会保障厅网站同步转载。凡本指南之外的"内部消息"，建议一律以该网站为准。</div>
+
+<h3 class="section-title">第二节 三类信息的可靠性分级</h3>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>等级</th><th>内容</th><th>使用方式</th></tr>
+</thead>
+<tbody>
+<tr><td>一、官方规则</td><td>面试的测查内容、分值、权重、时间、组织方式、考场纪律、考察与试用规定</td><td>可直接作为行动依据，按条对照执行</td></tr>
+<tr><td>二、样本统计</td><td>题型分类、历年出题顺序、时长与题量、热点词表、考场实况、历年真题</td><td>作为规律参考与练习素材，样本口径已在正文标明</td></tr>
+<tr><td>三、备考归纳</td><td>答题框架、素材库结构、训练方法、误区清单</td><td>作为准备工具，个人适配后可调整</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 class="section-title">第三节 使用说明与免责声明</h3>
+
+<p><strong>其一，本指南不替代官方文件。</strong>各地各年度公告的条款可能调整，2026年度公告与往年在职位规模、时间节点上已有差异。请以当次公告和面试公告原文为准。</p>
+
+<p><strong>其二，官方从不指定辅导用书。</strong>历年公告均写明："湖北省省直机关公开遴选公务员考试不指定考试辅导用书，不举办、也不委托任何机构和个人举办考试辅导培训班。任何单位和个人不得借主办方名义举办针对此次考试的任何形式的培训班。"本指南是一份公益性学习研究材料，与任何商业辅导班无关，也未使用任何商业机构的收费课程内容。</p>
+
+<p><strong>其三，第三方统计的口径已在正文标明。</strong>题型分类与热点词表来自培训机构对真题的样本归纳（47套样本），既非官方发布，也未覆盖全部场次，请作为参考而非定论。真题回忆文本来自各类公开渠道，与考场原题可能存在个别字词差异。</p>
+
+<p><strong>其四，本指南只覆盖面试。</strong>笔试、职位选择、资格复审、专业测试、考察体检等环节的政策与备考，另见《荆楚遴选备考全书》相应章节。</p>
+
+<p><strong>其五，版本。</strong>第一版，依据截至2026年10月公开发布的公告与面试公告编写。</p>
+
+<div class="callout callout-key"><strong>回到主线：</strong>无论政策怎么调整，面试考的都是"履行职责所要求的基本能力素质"。把每一道练习题都当作一次真实的履职预演——站在岗位上，面对具体的湖北，面对具体的群众，在倒计时里把事情讲清楚——这就是本指南希望交给读者的全部方法。</div>
+</section>
+</main>
+
+<script>
+(function() {
+  'use strict';
+
+  var sidebar = document.getElementById('sidebarNav');
+  var progressBar = document.getElementById('progressBar');
+  var toggleBtn = document.getElementById('sidebarToggle');
+  var backdrop = document.getElementById('sidebarBackdrop');
+  var expandBtn = document.getElementById('sidebarExpandBtn');
+
+  // Part name mapping
+  var partNames = {
+    1: '上编 · 考情认知篇',
+    2: '上编 · 考情认知篇',
+    3: '中编 · 真题与方法篇',
+    4: '中编 · 真题与方法篇',
+    5: '中编 · 真题与方法篇',
+    6: '下编 · 上场与备考篇',
+    7: '下编 · 上场与备考篇',
+    8: '下编 · 上场与备考篇',
+    9: '下编 · 上场与备考篇'
+  };
+
+  // Build sidebar from page content
+  var chapters = document.querySelectorAll('.chapter');
+  var allTargets = [];
+  var html = '';
+  html += '<div class="sidebar-header">';
+  html += '<div class="sidebar-header-text">全书导航<div class="sidebar-header-sub">湖北省直遴选面试指南</div></div>';
+  html += '<button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="收起导航">&#9664;</button>';
+  html += '</div>';
+  html += '<nav class="sidebar-nav-list" id="navList">';
+
+  var prevPart = '';
+  for (var i = 0; i < chapters.length; i++) {
+    var ch = chapters[i];
+    var chNum = i + 1;
+    var partName = partNames[chNum] || '';
+
+    if (partName && partName !== prevPart) {
+      html += '<div class="sidebar-part">' + partName + '</div>';
+      prevPart = partName;
+    }
+
+    var chTitleEl = ch.querySelector('.chapter-title');
+    var chTitleText = chTitleEl ? chTitleEl.textContent.trim() : ('第' + chNum + '章');
+    var shortTitle = chTitleText.replace(/^第[一二三四五六七八九十]+\s*章[\s\u3000]*/, '');
+
+    html += '<div class="sidebar-chapter" data-ch="' + chNum + '">';
+    html += '<a href="#ch' + chNum + '" class="sidebar-chapter-link" data-target="ch' + chNum + '">';
+    html += '<span class="sidebar-ch-num">' + chNum + '</span>';
+    html += '<span class="sidebar-ch-title">' + shortTitle + '</span>';
+    html += '</a>';
+
+    if (chTitleEl) {
+      allTargets.push({ element: chTitleEl, id: 'ch' + chNum, type: 'chapter', chNum: chNum });
+    }
+
+    var sections = ch.querySelectorAll('.section-title');
+    if (sections.length > 0) {
+      html += '<ul class="sidebar-sections">';
+      for (var j = 0; j < sections.length; j++) {
+        var secId = 'ch' + chNum + '-sec' + (j + 1);
+        sections[j].id = secId;
+        var secText = sections[j].textContent.trim();
+        // FIX: include 节 in the regex so the full "第X节" prefix is removed
+        var shortSec = secText.replace(/^第[一二三四五六七八九十]+节[\s\u3000]*/, '');
+        html += '<li><a href="#' + secId + '" class="sidebar-section-link" data-target="' + secId + '" title="' + secText + '">' + shortSec + '</a></li>';
+        allTargets.push({ element: sections[j], id: secId, type: 'section', chNum: chNum });
+      }
+      html += '</ul>';
+    }
+
+    html += '</div>';
+  }
+  html += '</nav>';
+  sidebar.innerHTML = html;
+
+  // --- Scroll Spy (scroll-based, reliable) ---
+  function clearActive() {
+    var els = sidebar.querySelectorAll('.active');
+    for (var i = 0; i < els.length; i++) {
+      els[i].classList.remove('active');
+    }
+  }
+
+  function setActive(target) {
+    if (!target) return;
+    var secLink = sidebar.querySelector('.sidebar-section-link[data-target="' + target.id + '"]');
+    var chLink = sidebar.querySelector('.sidebar-chapter-link[data-target="ch' + target.chNum + '"]');
+
+    // Only update if changed
+    var needUpdate = false;
+    if (secLink && !secLink.classList.contains('active')) needUpdate = true;
+    if (chLink && !chLink.classList.contains('active')) needUpdate = true;
+
+    if (!needUpdate) return;
+
+    clearActive();
+    if (secLink) secLink.classList.add('active');
+    if (chLink) chLink.classList.add('active');
+
+    // Auto-scroll sidebar to show active item
+    var activeLink = secLink || chLink;
+    if (activeLink && sidebar.scrollHeight > sidebar.clientHeight) {
+      var linkTop = activeLink.offsetTop;
+      var linkHeight = activeLink.offsetHeight;
+      var sv = sidebar.clientHeight;
+      var cs = sidebar.scrollTop;
+      if (linkTop < cs + 40) {
+        sidebar.scrollTo({ top: Math.max(0, linkTop - 60), behavior: 'smooth' });
+      } else if (linkTop + linkHeight > cs + sv - 40) {
+        sidebar.scrollTo({ top: linkTop - sv + linkHeight + 60, behavior: 'smooth' });
+      }
+    }
+  }
+
+  var scrollTicking = false;
+  function onScroll() {
+    if (scrollTicking) return;
+    scrollTicking = true;
+    window.requestAnimationFrame(function() {
+      var scrollY = window.scrollY;
+      var offset = 120; // pixels from top to consider as "current"
+
+      // Find the last target whose top is above the offset line
+      var found = null;
+      for (var i = 0; i < allTargets.length; i++) {
+        var elTop = allTargets[i].element.getBoundingClientRect().top + scrollY;
+        if (elTop <= scrollY + offset) {
+          found = allTargets[i];
+        } else {
+          break;
+        }
+      }
+
+      if (found) {
+        setActive(found);
+      } else if (allTargets.length > 0) {
+        setActive(allTargets[0]);
+      }
+
+      // Update progress bar
+      var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      var progress = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
+      progressBar.style.width = Math.min(100, progress) + '%';
+
+      scrollTicking = false;
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // --- Smooth scroll on link click ---
+  sidebar.addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (!link) return;
+
+    var targetId = link.getAttribute('data-target');
+    if (!targetId) return;
+
+    var targetEl = document.getElementById(targetId);
+    if (!targetEl) return;
+
+    e.preventDefault();
+
+    // Calculate scroll position with offset
+    var rect = targetEl.getBoundingClientRect();
+    var scrollTarget = window.scrollY + rect.top - 20;
+
+    window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+
+    // Update URL hash without jumping
+    if (history.pushState) {
+      history.pushState(null, null, '#' + targetId);
+    }
+
+    // Close mobile sidebar
+    if (window.innerWidth < 1100) {
+      sidebar.classList.remove('sidebar-open');
+      backdrop.classList.remove('show');
+    }
+
+    // Set active immediately
+    for (var i = 0; i < allTargets.length; i++) {
+      if (allTargets[i].id === targetId) {
+        setActive(allTargets[i]);
+        break;
+      }
+    }
+  });
+
+  // --- Collapse / Expand (desktop) ---
+  var collapseBtn = document.getElementById('sidebarCollapseBtn');
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', function() {
+      document.body.classList.add('sidebar-collapsed');
+    });
+  }
+  if (expandBtn) {
+    expandBtn.addEventListener('click', function() {
+      document.body.classList.remove('sidebar-collapsed');
+    });
+  }
+
+  // --- Mobile Toggle ---
+  toggleBtn.addEventListener('click', function() {
+    sidebar.classList.toggle('sidebar-open');
+    backdrop.classList.toggle('show');
+  });
+
+  backdrop.addEventListener('click', function() {
+    sidebar.classList.remove('sidebar-open');
+    backdrop.classList.remove('show');
+  });
+
+  // Handle resize
+  window.addEventListener('resize', function() {
+    if (window.innerWidth >= 1100) {
+      sidebar.classList.remove('sidebar-open');
+      backdrop.classList.remove('show');
+    }
+  });
+
+  // Initial state
+  if (allTargets.length > 0) {
+    setActive(allTargets[0]);
+  }
+  onScroll();
+})();
+</script>
+</body>
+</html>
