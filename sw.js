@@ -39,9 +39,9 @@
 var VERSION = (function () {
     try {
         var m = /[?&]v=([^&]+)/.exec(self.location.search);
-        return m ? decodeURIComponent(m[1]) : '20261031a';
+        return m ? decodeURIComponent(m[1]) : '20261031b';
     } catch (e) {
-        return '20261031a';
+        return '20261031b';
     }
 })();
 
