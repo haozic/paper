@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101m';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101n';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -1523,6 +1523,12 @@ function initReadingSettingsListeners() {
     document.addEventListener('click', (e) => {
         const dock = document.getElementById('readingDock');
         if (dock && !dock.contains(e.target)) closeReadingTrays();
+        const toc = document.getElementById('articleToc');
+        const toggle = document.getElementById('readerTocToggle');
+        if (toc && toc.classList.contains('is-open') && !toc.contains(e.target) && !toggle.contains(e.target)) {
+            toc.classList.remove('is-open');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
     });
 }
 
@@ -2568,6 +2574,12 @@ async function init() {
                 closeReadingTrays();
                 return;
             }
+            const toc = document.getElementById('articleToc');
+            if (toc.classList.contains('is-open')) {
+                toc.classList.remove('is-open');
+                document.getElementById('readerTocToggle').setAttribute('aria-expanded', 'false');
+                return;
+            }
             // 搜索框内按 Esc：失焦并还原为上次已提交的查询词
             const si = document.getElementById('searchInput');
             if (si && document.activeElement === si) {
@@ -2612,6 +2624,7 @@ async function init() {
         const panelOpen = document.getElementById('articleSettingsPanel');
         if (document.body.classList.contains('article-active') &&
             !(panelOpen && panelOpen.classList.contains('show')) && document.getElementById('readingIssueMenu').hidden &&
+            !document.getElementById('articleToc').classList.contains('is-open') &&
             (e.key === 'ArrowLeft' || e.key === 'ArrowRight' ||
              e.key === 'j' || e.key === 'J' || e.key === 'k' || e.key === 'K')) {
             const nb = getArticleNeighbours(state.currentArticleUrl);

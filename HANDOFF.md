@@ -2,32 +2,31 @@
 
 ## 当前任务
 
-党内刊物静态阅读网站通过 GitHub `main` 和 Cloudflare Pages 部署。用户本轮要求除首页三个专题及其独立页面外，统一网站样式、配色、图标和边角。用户希望持续做完并同步 GitHub。
+党内刊物静态阅读网站通过 GitHub `main` 与 Cloudflare Pages 部署。用户认为此前全站样式虽统一，但仍不够优雅简洁、页面层次和操作不够大气，要求借鉴成熟阅读网站继续优化。用户多次要求直接做完并同步 GitHub。首页三个专题及其独立页面维持现状。
 
-## 已完成
+## 本轮已完成
 
-- 新增 `assets/css/system.css`，作为 `style.css`、`books.css`、`one.css` 之后的统一设计层；HTML 与 Service Worker 均加载它。
-- 统一首页、杂志目录、搜索、收藏、板块、正文、关于及访问密码页的纸色背景、深墨文字、朱红强调色、边框、圆角、阴影、控件状态和中文字体。三个专题独立页面不加载新样式。
-- 全站 SVG 图标线宽统一为 1.8；桌面和手机导航图标统一为 20px；浏览器主题色、favicon 与 manifest 主题色改为新版朱红。
-- 阅读设置的夜间模式及自动夜间模式有专门覆盖，避免旧书库 CSS 回到冷灰配色；文章纸张选项仍由原 JS 控制。
-- “关于本站”页面移除直接显示访问密码的文字。
-- 静态资源版本更新为 `20261101m`。
-- 之前已完成：首页三刊大封面居中；正文固定底栏“目录、设置、下一篇”；本期目录列表和进度环定位修复。
+- 研究了 ONE 首页、Apple Books、The Paris Review 的期刊档案和文章页、Readwise Reader 的阅读界面。采用“封面识别、刊名页眉、按期目录、按需工具”的结构；没有照搬站点素材或版式。
+- 首页保持三本居中大封面，收紧刊名/计数层级和搜索条，增加留白，减少控件的视觉重量。
+- 桌面杂志页从固定左侧栏改为整页刊名页眉，目录/板块/收藏放在刊名下方的水平导航，搜索仍由右上角图标展开。目录内容改成居中一栏的年份与期号层级，板块与搜索结果为连续索引列表。
+- 正文页增大标题层级并留出更清晰的标题、元信息、正文间距；“本文小节”改为按需打开的浮层，避免侧栏导致正文与标题错位。固定三按钮底栏缩薄；右下角进度/返回顶部按钮随之上移。
+- 本文小节浮层支持点击外部和 Escape 关闭；浮层打开时方向键不会误切换文章。桌面导航文案与手机一致，使用“目录、板块、收藏”。
+- 静态资源版本更新为 `20261101n`。
 
 ## 验收与限制
 
-- `tinycss2` 解析 `system.css` 无错误；`node --check assets/js/app.js`、`node --check sw.js`、`git -c core.whitespace=cr-at-eol diff --check` 通过。提交前再运行一次。
-- Playwright 尝试打开本地 `http://127.0.0.1:8765/`，环境返回 `net::ERR_NETWORK_ACCESS_DENIED`；本地浏览器视觉检查未能完成。此前移除访问门做视觉核对被自动审批拒绝，不绕过。
+- `tinycss2` 解析 `assets/css/system.css` 无错误；`node --check assets/js/app.js`、`node --check sw.js`、`git -c core.whitespace=cr-at-eol diff --check` 通过。
+- Playwright 浏览器在本环境禁止本地 HTTP (`net::ERR_NETWORK_ACCESS_DENIED`) 和 `file:` 协议，无法完成真实页面截图。此前移除访问门做视觉核对被自动审批拒绝，不绕过。
 - 旧数据问题：红旗文稿 1 篇标记有全文但正文缺失；党建研究 2026 年第 10 期目录有 31 篇文章但正文分片缺失。本轮未改数据。
 
 ## 下一步
 
-- 如有登录后的桌面/手机截图，可继续检查统一设计在真实视口中的细节。
+- 若能得到登录后的桌面/手机截图，检查真实页面的留白、目录密度和阅读浮层位置，再做针对性微调。
 
 ## 踩过的坑
 
-- CSS 加载顺序为 `style.css`、`books.css`、`one.css`、`system.css`；旧夜间规则选择器权重较高，需在最后一层用同等级选择器覆盖。
-- 三个专题是独立 HTML 页面，未引用 `system.css`；首页三个入口也未单独改造。
-- 用 Python 字节替换 HTML SVG 属性时曾产生字面量反斜杠，已修复并用 `rg` 核对属性是 `stroke-width="1.8"`。
-- `.git` 写入可能需要 `require_escalated`。推送偶有凭据程序输出 `fatal: Cannot prompt`，即使命令退出码为 0 也要用 `git ls-remote` 核对远端。
+- CSS 顺序为 `style.css`、`books.css`、`one.css`、`system.css`。旧桌面侧栏在 `style.css` 的媒体查询中设为 flex/sticky/full-height，必须在最后一层完整覆盖布局属性，不能只改宽度。
+- 桌面板块列表旧规则是卡片网格，需要一起覆盖为连续列表；`article-layout:has(...)` 旧规则会让正文在本文目录存在时偏离标题轴线。
+- 站点正文底栏与文末相关阅读是不同容器；不可把相关阅读一起固定。
+- `.git` 写入可能需要 `require_escalated`。推送时可能出现凭据程序无交互警告，需用 `git ls-remote` 核对远端提交。
 - CSS 有 CRLF，diff 检查用 `core.whitespace=cr-at-eol`。

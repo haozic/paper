@@ -215,3 +215,108 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
   .reading-dock, .bottom-nav, .gate { display: none !important; }
   .home-page, .article-page, .section-page, .about-page { background: white !important; color: black !important; }
 }
+
+/* Editorial composition: the covers lead, the interface steps back. */
+.home-header { padding-block: 36px 28px; }
+.home-title { font-size: clamp(30px, 3vw, 38px); letter-spacing: .11em; }
+.home-body { padding-top: clamp(44px, 5vw, 72px); padding-bottom: 20px; }
+.magazine-grid { max-width: 1080px; gap: clamp(28px, 4.5vw, 64px); }
+.mag-cover { box-shadow: 0 12px 28px rgba(36, 32, 26, .11); }
+.magazine-card:hover .mag-cover, .magazine-card:focus-visible .mag-cover { transform: translateY(-3px); box-shadow: 0 17px 34px rgba(36, 32, 26, .16); }
+.mag-info { padding-top: 21px; }
+.mag-info h2 { font-size: 20px; letter-spacing: .02em; }
+.mag-meta { color: var(--text-3); font-size: 11px; }
+.home-search { max-width: 520px; margin-top: 50px; margin-bottom: 58px; }
+.home-search-form { min-height: 44px; background: transparent; border: 0; border-bottom: 1px solid var(--border-2); border-radius: 0; }
+.home-search-form button { padding-inline: 12px; border-radius: 0; background: transparent; color: var(--text-2); font-weight: 500; }
+.home-search-form button:hover { background: transparent; color: var(--primary); }
+
+/* A journal is a title page followed by an index, not a dashboard. */
+@media (min-width: 768px) {
+  body.mag-active #app { display: block; }
+  .app-sidebar { position: relative; width: 100%; height: auto; overflow: visible; border-right: 0; border-bottom: 1px solid var(--border); }
+  .sidebar-header { max-width: 1000px; margin: 0 auto; padding: 60px 26px 42px; text-align: left; border: 0; }
+  .sidebar-header::after { display: none; }
+  .sidebar-brand h1 { font-size: clamp(36px, 4vw, 52px); line-height: 1.2; letter-spacing: .04em; margin-bottom: 13px; }
+  .sidebar-meta { justify-content: flex-start; }
+  .app-subtitle, .search-status { font-size: 12px; }
+  .header-home-btn, .header-search-btn, .header-about-btn { top: 57px; width: 36px; height: 36px; transform: none; }
+  .header-home-btn { left: auto; right: 110px; }
+  .header-search-btn { right: 66px; }
+  .header-about-btn { right: 22px; }
+  .search-bar { max-width: 1000px; margin: 0 auto; padding: 8px 26px 28px; border: 0; }
+  .search-intro { margin-bottom: 13px; }
+  .filters { flex-direction: row; align-items: center; justify-content: flex-start; gap: 10px 16px; margin-top: 13px; }
+  .scope-group { justify-content: flex-start; }
+  .scope-option { flex: none; }
+  .filter-check { padding: 4px 0; background: transparent; }
+  .app-main { width: 100%; }
+  .nav-tabs { position: sticky; top: 0; z-index: 98; justify-content: flex-start; gap: 34px; max-width: none; padding: 0 max(26px, calc((100% - 948px) / 2)); margin: 0; background: var(--bg); }
+  .nav-tabs > * + * { margin-left: 0; }
+  .nav-tab { flex: none; padding: 17px 1px 15px; border-bottom: 2px solid transparent; border-radius: 0; font-size: 14px; }
+  .nav-tab .icon { display: none; }
+  .nav-tab.active { border-bottom-color: var(--primary); }
+  .content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 36px 26px 90px; }
+}
+.year-block { margin-bottom: 42px; border-bottom: 0; }
+.yb-header { padding: 0 0 17px; margin-bottom: 3px; }
+.yb-header h3 { font-size: clamp(23px, 2.3vw, 29px); line-height: 1.35; }
+.yb-info { font-size: 12px; }
+.issue-row { border-bottom: 1px solid var(--border); }
+.ir-header { min-height: 66px; padding: 13px 2px; }
+.ir-title { font-family: var(--font-serif); font-size: 17px; font-weight: 600; }
+.ir-count { padding: 0; background: transparent; border-radius: 0; font-size: 12px; }
+.ir-body { padding: 9px 0 22px; }
+.sec-group { padding-left: 18px; border-left-width: 1px; margin: 12px 0; }
+.sg-title { margin: 9px 0 5px; font-size: 13px; font-weight: 600; }
+.art-item { padding: 9px 12px; margin: 0; font-size: 15px; line-height: 1.6; }
+.section-list, .results-list, .catalog-list { gap: 0; }
+.section-list { display: block; }
+.section-list > * + *, .results-list > * + *, .catalog-list > * + * { margin-top: 0; }
+.section-card, .result-card { padding: 18px 2px; }
+.section-card { flex-direction: row; align-items: center; text-align: left; gap: 16px; overflow: visible; }
+.section-card::before { display: none; }
+.sc-name { margin: 0; }
+.sc-count { margin-left: auto; justify-content: flex-end; }
+.sc-name, .rc-title { font-family: var(--font-serif); font-size: 17px; font-weight: 600; }
+.rc-meta { font-size: 12px; }
+.fav-header, .fav-card { padding-inline: 2px; }
+
+/* Quiet article page: strong title, readable column, small persistent controls. */
+.article-page-header { padding-bottom: 36px; }
+.ap-title { font-size: clamp(30px, 3.1vw, 42px); line-height: 1.45; margin-top: 38px; margin-bottom: 18px; }
+.ap-meta { font-size: 12px; line-height: 1.8; }
+.article-page-body { padding-top: 50px; }
+.article-page-body p { margin-bottom: 1.25em; }
+.article-layout:has(.article-toc:not([hidden])) { display: block; max-width: none; padding: 0; }
+.article-layout:has(.article-toc:not([hidden])) .article-page-body { width: auto; }
+.article-toc:not([hidden]) { display: none; }
+.article-toc.is-open { display: block; position: fixed; top: 76px; right: max(18px, calc((100vw - 1050px) / 2)); left: auto; z-index: 230; width: min(320px, calc(100vw - 36px)); max-height: min(65vh, 580px); margin: 0; padding: 20px 22px; overflow-y: auto; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); }
+.ap-related { margin-top: 12px; }
+body.article-active { --reading-dock-height: 58px; }
+.reading-dock { box-shadow: 0 -2px 14px rgba(36, 32, 26, .045); }
+.reading-dock .ap-nav > button { min-height: 58px; padding: 10px 8px; font-size: 13px; font-weight: 500; }
+.reading-dock .ap-nav > button + button { border-left: 0; }
+.reading-dock .ap-nav > button.active { background: transparent; box-shadow: inset 0 2px 0 var(--primary); }
+.reading-dock .ap-nav > button:hover:not(:disabled) { background: var(--bg-2); }
+.article-page .back-to-top { width: 42px; height: 42px; right: 18px; bottom: calc(var(--reading-dock-height, 58px) + 18px + env(safe-area-inset-bottom, 0px)); box-shadow: none; }
+
+@media (max-width: 767px) {
+  .home-header { padding-block: 26px 20px; }
+  .home-body { padding-top: 32px; }
+  .magazine-grid { gap: 42px; }
+  .mag-info { padding-top: 15px; }
+  .home-search { margin-top: 35px; margin-bottom: 42px; }
+  .sidebar-header { box-shadow: none; }
+  .sidebar-brand h1 { font-size: 23px; letter-spacing: .04em; }
+  .content { padding-top: 22px; }
+  .yb-header h3 { font-size: 22px; }
+  .ir-header { min-height: 58px; }
+  .ir-title { font-size: 16px; }
+  .article-page-header { padding-bottom: 26px; }
+  .ap-title { font-size: 27px; margin-top: 28px; }
+  .article-page-body { padding-top: 34px; }
+  body.article-active { --reading-dock-height: 56px; }
+  .reading-dock .ap-nav > button { min-height: 56px; font-size: 12px; }
+  .article-page .back-to-top { right: 12px; width: 40px; height: 40px; }
+}
