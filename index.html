@@ -6,12 +6,13 @@
 <meta name="theme-color" content="#96382f">
 <meta name="description" content="党内刊物检索系统 — 求是、红旗文稿、党建研究">
 <title>党内刊物</title>
-<link rel="stylesheet" href="assets/css/style.css?v=20261101t">
-<link rel="stylesheet" href="assets/css/books.css?v=20261101t">
-<link rel="stylesheet" href="assets/css/one.css?v=20261101t">
-<link rel="stylesheet" href="assets/css/system.css?v=20261101t">
-<link rel="manifest" href="manifest.webmanifest?v=20261101t">
-<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101t">
+<link rel="stylesheet" href="assets/css/style.css?v=20261101u">
+<link rel="stylesheet" href="assets/css/books.css?v=20261101u">
+<link rel="stylesheet" href="assets/css/one.css?v=20261101u">
+<link rel="stylesheet" href="assets/css/system.css?v=20261101u">
+<link rel="stylesheet" href="assets/css/modern.css?v=20261101u">
+<link rel="manifest" href="manifest.webmanifest?v=20261101u">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101u">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2396382f' stroke-width='1.8'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
 <script>
 (function(){try{
@@ -97,6 +98,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
 <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
 <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h6m4 0h6M4 17h3m4 0h9"/><circle cx="12" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
 </svg>
 
 <!-- ===== PWA：离线提示条 / 新版本提示 ===== -->
@@ -109,20 +111,16 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
         <div class="home-header-inner">
             <p class="home-eyebrow">数字书架 · 三刊合一</p>
             <h1 class="home-title">党内刊物</h1>
-            <button class="home-about-btn" onclick="showAboutPage()" title="关于本站"><svg class="icon"><use href="#i-info"/></svg></button>
+            <div class="home-header-actions">
+                <button class="home-search-icon" type="button" onclick="openGlobalSearch()" title="搜索三刊文章" aria-label="搜索三刊文章"><svg class="icon"><use href="#i-search"/></svg><span>搜索</span></button>
+                <button class="home-about-btn" onclick="showAboutPage()" title="关于本站" aria-label="关于本站"><svg class="icon"><use href="#i-info"/></svg></button>
+            </div>
         </div>
     </header>
     <div class="home-body">
         <div class="magazine-grid">
             <a class="magazine-card" href="#m=qs" onclick="event.preventDefault();enterMagazine('qs')" aria-label="打开求是杂志">
-                <div class="mag-cover mag-cover-qs">
-                    <div class="mag-cover-inner">
-                        <div class="mag-cover-title">求是</div>
-                        <div class="mag-cover-sub">QIUSHI</div>
-                        <div class="mag-cover-line"></div>
-                        <div class="mag-cover-edition">中共中央机关刊</div>
-                    </div>
-                </div>
+                <div class="mag-cover mag-cover-qs"><img src="assets/img/cover_qs.jpg" alt="求是刊物封面" width="600" height="800" fetchpriority="high"></div>
                 <div class="mag-info">
                     <h2>求是</h2>
                     <p class="mag-desc">中共中央委员会主办的理论刊物</p>
@@ -131,14 +129,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
             </a>
 
             <a class="magazine-card" href="#m=hqwg" onclick="event.preventDefault();enterMagazine('hqwg')" aria-label="打开红旗文稿杂志">
-                <div class="mag-cover mag-cover-hqwg">
-                    <div class="mag-cover-inner">
-                        <div class="mag-cover-title">红旗文稿</div>
-                        <div class="mag-cover-sub">RED FLAG MANUSCRIPT</div>
-                        <div class="mag-cover-line"></div>
-                        <div class="mag-cover-edition">求是杂志社主管主办</div>
-                    </div>
-                </div>
+                <div class="mag-cover mag-cover-hqwg"><img src="assets/img/cover_hqwg.jpg" alt="红旗文稿刊物封面" width="600" height="800" loading="lazy"></div>
                 <div class="mag-info">
                     <h2>红旗文稿</h2>
                     <p class="mag-desc">政治理论半月刊</p>
@@ -147,14 +138,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
             </a>
 
             <a class="magazine-card" href="#m=djyj" onclick="event.preventDefault();enterMagazine('djyj')" aria-label="打开党建研究杂志">
-                <div class="mag-cover mag-cover-djyj">
-                    <div class="mag-cover-inner">
-                        <div class="mag-cover-title">党建研究</div>
-                        <div class="mag-cover-sub">PARTY BUILDING RESEARCH</div>
-                        <div class="mag-cover-line"></div>
-                        <div class="mag-cover-edition">中共中央组织部主管</div>
-                    </div>
-                </div>
+                <div class="mag-cover mag-cover-djyj"><img src="assets/img/cover_djyj.jpg" alt="党建研究刊物封面" width="600" height="800" loading="lazy"></div>
                 <div class="mag-info">
                     <h2>党建研究</h2>
                     <p class="mag-desc">党建理论与实践研究月刊</p>
@@ -163,13 +147,6 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
             </a>
         </div>
     </div>
-    <section class="home-search" aria-label="三刊检索">
-        <form class="home-search-form" onsubmit="event.preventDefault(); openGlobalSearch(document.getElementById('homeSearchInput').value)">
-            <svg class="icon"><use href="#i-search"/></svg>
-            <input id="homeSearchInput" type="search" placeholder="搜索三刊文章" aria-label="搜索三刊文章">
-            <button type="submit">搜索</button>
-        </form>
-    </section>
     <div class="home-guides" aria-label="专题指南">
     <div class="home-guide-entry">
         <a href="linxuan-beikao-zhinan/linxuan-beikao-zhinan.html" class="guide-link-card">
@@ -253,6 +230,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 </div><!-- /.app-sidebar -->
 
 <div class="app-main">
+<div class="journal-cover" aria-hidden="true"><img id="journalCoverImage" src="assets/img/cover_qs.jpg" alt="" width="600" height="800"></div>
 <nav class="nav-tabs desktop-only">
     <button class="nav-tab active" data-mode="catalog"><svg class="icon"><use href="#i-list"/></svg>目录</button>
     <button class="nav-tab" data-mode="section"><svg class="icon"><use href="#i-grid"/></svg>板块</button>
@@ -479,6 +457,6 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     </div>
 </div>
 
-<script src="assets/js/app.js?v=20261101t"></script>
+<script src="assets/js/app.js?v=20261101u"></script>
 </body>
 </html>

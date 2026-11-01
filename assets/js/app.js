@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101t';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101u';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -15,6 +15,7 @@ const MAGAZINES = {
         issuesPath: 'data/qs/issues',
         source: 'https://www.qstheory.cn/qs/mulu.htm',
         desc: '中共中央委员会机关刊',
+        cover: 'assets/img/cover_qs.jpg',
     },
     hqwg: {
         name: '红旗文稿',
@@ -25,6 +26,7 @@ const MAGAZINES = {
         issuesPath: 'data/hqwg/issues',
         source: 'https://www.qstheory.cn/hqwglist/mulu.htm',
         desc: '政治理论半月刊',
+        cover: 'assets/img/cover_hqwg.jpg',
     },
     djyj: {
         name: '党建研究',
@@ -35,6 +37,7 @@ const MAGAZINES = {
         issuesPath: 'data/issues',
         source: 'https://djyj.12371.cn/',
         desc: '党建理论与实践研究月刊',
+        cover: 'assets/img/cover_djyj.jpg',
     },
 };
 
@@ -177,6 +180,8 @@ function enterMagazine(magKey) {
 
     // 更新标题
     document.getElementById('magTitle').textContent = conf.fullName;
+    const cover = document.getElementById('journalCoverImage');
+    if (cover) cover.src = conf.cover;
     document.documentElement.style.setProperty('--mag-color-base', conf.color);
     document.documentElement.style.setProperty('--mag-color-dark-base', conf.colorDark);
 
@@ -1711,9 +1716,9 @@ function renderArticleFooter(url, cur) {
         }).join('') + '</div>';
     issueMenu.querySelectorAll('[data-url]').forEach(btn => btn.addEventListener('click', () => showArticle(btn.dataset.url, true)));
 
-    let html = '<button class="ap-bottom-directory" id="articleIssueBtn" type="button" onclick="toggleIssueContents()" aria-expanded="false" aria-controls="readingIssueMenu">目录</button>' +
-        '<button class="ap-bottom-settings" id="articleSettingsBtn" type="button" onclick="toggleArticleSettings(event)" aria-expanded="false" aria-controls="readingOperationMenu">设置</button>' +
-        '<button class="ap-bottom-next" type="button"' + (next ? ' data-url="' + encodeURIComponent(next.u) + '"' : ' disabled') + '>下一篇 →</button>';
+    let html = '<button class="ap-bottom-directory" id="articleIssueBtn" type="button" onclick="toggleIssueContents()" aria-label="本期目录" title="本期目录" aria-expanded="false" aria-controls="readingIssueMenu">' + svgIcon('i-list') + '</button>' +
+        '<button class="ap-bottom-settings" id="articleSettingsBtn" type="button" onclick="toggleArticleSettings(event)" aria-label="阅读设置" title="阅读设置" aria-expanded="false" aria-controls="readingOperationMenu">' + svgIcon('i-sliders') + '</button>' +
+        '<button class="ap-bottom-next" type="button" aria-label="下一篇文章" title="下一篇文章"' + (next ? ' data-url="' + encodeURIComponent(next.u) + '"' : ' disabled') + '>' + svgIcon('i-arrow-right') + '</button>';
     navEl.innerHTML = html;
     closeReadingTrays();
 

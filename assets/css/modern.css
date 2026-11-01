@@ -1,0 +1,162 @@
+/* Modern reading layer. Keep the three topical guides in their own visual system. */
+:root {
+  --bg: #f3f4f7;
+  --bg-2: #e9ebf0;
+  --card: #ffffff;
+  --text: #20232a;
+  --text-2: #515764;
+  --text-3: #777e8a;
+  --border: #dfe2e9;
+  --border-2: #cfd4df;
+  --primary: #a43a38;
+  --primary-dark: #812e2d;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --radius-lg: 24px;
+  --shadow-md: 0 12px 30px rgba(30, 39, 60, .08);
+  --shadow-lg: 0 24px 60px rgba(30, 39, 60, .16);
+}
+html[data-theme="dark"] {
+  --bg: #191c22; --bg-2: #252a33; --card: #2b3039;
+  --text: #f2f3f5; --text-2: #c6cad3; --text-3: #a4aab5;
+  --border: #404650; --border-2: #565c67;
+  --primary: #e39b95; --primary-dark: #f0b2ac;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-theme="auto"] {
+    --bg: #191c22; --bg-2: #252a33; --card: #2b3039;
+    --text: #f2f3f5; --text-2: #c6cad3; --text-3: #a4aab5;
+    --border: #404650; --border-2: #565c67;
+    --primary: #e39b95; --primary-dark: #f0b2ac;
+  }
+}
+body { background: var(--bg); color: var(--text); }
+.home-page, body.mag-active #app, .section-page, .about-page { background: var(--bg); color: var(--text); }
+.home-header, .app-sidebar, .sidebar-header, .search-bar, .nav-tabs { background: transparent; }
+.article-page { --bg: #fdfdfc; --card: #fdfdfc; --border: #e8e9ed; }
+html[data-theme="dark"] .article-page { --bg: #191c22; --card: #2b3039; --border: #404650; }
+@media (prefers-color-scheme: dark) {
+  html[data-theme="auto"] .article-page { --bg: #191c22; --card: #2b3039; --border: #404650; }
+}
+
+/* Home: the actual cover art is the content. */
+.home-page { min-height: 100vh; background: radial-gradient(ellipse 70% 38% at 50% 35%, #e7eaf1 0%, var(--bg) 100%); }
+.home-header { border: 0; padding: 26px 28px 0; }
+.home-header-inner { position: relative; display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: auto; }
+.home-eyebrow { display: none; }
+.home-title { margin: 0; font: 650 22px/1.4 var(--font-sans); letter-spacing: .045em; }
+.home-header-actions { display: flex; align-items: center; gap: 7px; }
+.home-search-icon, .home-about-btn { position: static; display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; padding: 0; border: 1px solid transparent; border-radius: 14px; background: transparent; color: var(--text-2); box-shadow: none; cursor: pointer; }
+.home-search-icon:hover, .home-about-btn:hover { background: var(--card); border-color: var(--border); color: var(--text); }
+.home-search-icon .icon, .home-about-btn .icon { width: 20px; height: 20px; }
+.home-search-icon span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+.home-body { padding: clamp(46px, 7vh, 92px) 28px 40px; }
+.magazine-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 290px)); justify-content: center; align-items: start; gap: clamp(26px, 4.5vw, 66px); width: 100%; max-width: 1110px; margin: auto; padding: 0; overflow: visible; }
+.magazine-card { display: block; min-width: 0; width: 100%; margin: 0; text-decoration: none; color: var(--text); }
+.mag-cover { box-sizing: border-box; width: 100%; height: auto; aspect-ratio: 3 / 4; max-width: none; overflow: hidden; border: 1px solid rgba(20,30,50,.08); border-radius: 7px; background: #fff !important; box-shadow: 0 18px 38px rgba(35,40,55,.16), 0 2px 5px rgba(35,40,55,.08); filter: none !important; transition: transform .25s ease, box-shadow .25s ease; }
+.mag-cover img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.magazine-card:hover .mag-cover, .magazine-card:focus-visible .mag-cover { transform: translateY(-5px); box-shadow: 0 25px 45px rgba(35,40,55,.19); }
+.mag-info { padding: 19px 0 0; text-align: left; align-items: flex-start; }
+.mag-info h2 { margin: 0 0 4px; font: 650 20px/1.4 var(--font-sans); color: var(--text); }
+.mag-desc { display: none; }
+.mag-meta { margin: 0; color: var(--text-3); font-size: 13px; line-height: 1.5; }
+.home-search { display: none; }
+.home-guides { margin-top: 22px; }
+.home-footer { padding: 28px 20px 32px; color: var(--text-3); }
+
+/* Magazine: one title, one cover, a readable index. */
+body.mag-active #app { min-height: 100vh; }
+.app-sidebar { border: 0; }
+.sidebar-header { box-sizing: border-box; position: relative; max-width: 1190px; margin: auto; text-align: left; }
+.sidebar-brand h1 { font-family: var(--font-sans); font-weight: 680; letter-spacing: .015em; }
+.sidebar-meta { color: var(--text-3); }
+.header-home-btn, .header-search-btn, .header-about-btn { border-radius: 14px; }
+.app-sidebar .search-bar { display: none; box-sizing: border-box; max-width: 1138px; margin: 0 auto 12px; padding: 22px 26px; border: 1px solid var(--border); border-radius: 20px; background: var(--card); box-shadow: var(--shadow-md); }
+body.mag-search-open .app-sidebar .search-bar { display: block; }
+.journal-cover { min-width: 0; }
+.journal-cover img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: contain; border: 1px solid rgba(20,30,50,.08); border-radius: 7px; background: #fff; box-shadow: 0 22px 50px rgba(35,40,55,.15); }
+.nav-tabs { border: 1px solid var(--border); border-radius: 16px; background: color-mix(in srgb, var(--card) 82%, transparent); box-shadow: 0 8px 25px rgba(30,39,60,.05); }
+.nav-tab { border: 0; border-radius: 12px; }
+.nav-tab.active { border: 0; border-radius: 12px; background: var(--card); box-shadow: 0 2px 9px rgba(30,39,60,.10); color: var(--text); }
+.year-block { margin-bottom: 14px; padding: 0 22px; border: 1px solid var(--border); border-radius: 20px; background: var(--card); box-shadow: 0 8px 22px rgba(30,39,60,.035); }
+.year-block:hover { background: var(--card); border-color: var(--border-2); }
+.yb-header { padding: 20px 0 14px; margin: 0; border-color: var(--border); }
+.yb-header h3 { font-family: var(--font-sans); font-size: 21px; font-weight: 650; }
+.ir-header { padding-inline: 4px; }
+.ir-title { font-family: var(--font-sans); font-size: 16px; font-weight: 600; }
+.art-item { border-radius: 9px; }
+.section-card, .result-card, .fav-card { border-color: var(--border); }
+.section-card:hover, .result-card:hover, .fav-card:hover { border-radius: 12px; }
+.sc-name, .rc-title { font-family: var(--font-sans); }
+html[data-theme="dark"] .year-block, html[data-theme="dark"] .nav-tab.active { background: var(--card); border-color: var(--border); }
+@media (prefers-color-scheme: dark) {
+  html[data-theme="auto"] .year-block, html[data-theme="auto"] .nav-tab.active { background: var(--card); border-color: var(--border); }
+}
+
+/* Search remains an available tool, not a permanent header. */
+.global-search { background: rgba(25,29,38,.35); backdrop-filter: blur(12px); }
+.gs-panel { box-sizing: border-box; width: min(720px, calc(100% - 28px)); max-height: calc(100vh - 56px); margin: 28px auto; overflow-y: auto; border: 1px solid var(--border); border-radius: 24px; background: var(--card); box-shadow: var(--shadow-lg); }
+.gs-head { background: var(--card); }
+.gs-box { border-radius: 14px; background: var(--bg); }
+
+/* Reading: paper and title stay quiet; the three actions form a floating dock. */
+.ap-title { font-family: var(--font-sans); font-weight: 680; letter-spacing: -.018em; }
+.article-page-header { border-color: var(--border); }
+.ap-related { border-top-color: var(--border); }
+.ap-related-item { border-radius: 10px; }
+body.article-active { --reading-dock-height: 74px; --reader-shortcut-size: 44px; }
+.reading-dock { position: fixed; inset: auto auto max(12px, env(safe-area-inset-bottom, 0px)) 50%; box-sizing: border-box; width: min(420px, calc(100% - 28px)); padding: 5px; transform: translateX(-50%); border: 1px solid var(--border); border-radius: 21px; background: color-mix(in srgb, var(--card) 88%, transparent); backdrop-filter: blur(20px); box-shadow: 0 14px 42px rgba(25,30,45,.16); }
+.reading-dock .ap-nav { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); width: 100%; max-width: none; margin: 0; padding: 0; border: 0; }
+.reading-dock .ap-nav > button { display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 48px; padding: 8px; border: 0; border-radius: 15px; box-shadow: none; color: var(--text-2); }
+.reading-dock .ap-nav > button + button { border: 0; }
+.reading-dock .ap-nav > button.active, .reading-dock .ap-nav > button:hover:not(:disabled) { background: var(--bg-2); box-shadow: none; color: var(--primary); }
+.reading-dock .ap-nav .icon { display: block; width: 22px; height: 22px; }
+.reading-dock .reading-operation-menu, .reading-dock .reading-issue-menu { position: absolute; box-sizing: border-box; right: 0; bottom: calc(100% + 10px); left: auto; width: min(380px, calc(100vw - 28px)); max-width: none; max-height: min(52vh, 460px); margin: 0; overflow-y: auto; border: 1px solid var(--border); border-radius: 20px; background: var(--card); box-shadow: var(--shadow-lg); }
+.reading-dock .reading-operation-menu { padding: 16px 18px 12px; }
+.reading-dock .reading-issue-menu { padding: 16px; }
+.reading-operation-menu .asp-btn-group { border-radius: 10px; }
+.article-page .back-to-top, .reader-nav-shortcut, .reader-nav-menu button { border: 1px solid var(--border); background: color-mix(in srgb, var(--card) 90%, transparent); backdrop-filter: blur(16px); box-shadow: 0 7px 22px rgba(25,30,45,.12); }
+.reader-nav-menu button:hover, .reader-nav-shortcut:hover, .article-page .back-to-top:hover { background: var(--card); }
+
+@media (min-width: 768px) {
+  .sidebar-header { padding: 45px 26px 28px; }
+  .sidebar-brand h1 { margin-bottom: 9px; font-size: 36px; }
+  .header-home-btn, .header-search-btn, .header-about-btn { top: 43px; width: 42px; height: 42px; }
+  .header-home-btn { right: 126px; }
+  .header-search-btn { right: 75px; }
+  .header-about-btn { right: 24px; }
+  .app-main { display: grid; grid-template-columns: minmax(230px, 315px) minmax(0, 1fr); align-items: start; column-gap: clamp(40px, 6vw, 86px); box-sizing: border-box; max-width: 1190px; margin: auto; padding: 22px 26px 100px; }
+  .journal-cover { grid-column: 1; grid-row: 1 / span 2; position: sticky; top: 24px; }
+  .nav-tabs { grid-column: 2; position: relative; top: auto; display: flex; width: max-content; max-width: 100%; gap: 2px; margin: 0; padding: 4px; }
+  .nav-tab { padding: 10px 19px; font-size: 14px; }
+  .content { grid-column: 2; width: 100%; max-width: none; min-width: 0; margin: 0; padding: 25px 0 0; }
+}
+@media (max-width: 767px) {
+  .home-page { background: var(--bg); }
+  .home-header { padding: 18px 20px 0; }
+  .home-title { font-size: 20px; }
+  .home-body { padding: 34px 20px 18px; }
+  .magazine-grid { display: grid; grid-template-columns: minmax(0, 330px); justify-content: center; gap: 42px; width: 100%; max-width: none; padding: 0; overflow: visible; }
+  .magazine-card { width: 100%; max-width: 330px; }
+  .mag-info { padding-top: 14px; }
+  .mag-info h2 { font-size: 19px; }
+  .home-guides { margin-top: 10px; }
+  .gs-panel { max-height: calc(100vh - 28px); margin-block: 14px; }
+  .sidebar-header { padding-bottom: 18px; border-bottom: 0; }
+  .sidebar-brand h1 { font-size: 25px; }
+  .journal-cover { display: none; }
+  .app-sidebar .search-bar { width: calc(100% - 28px); margin: 0 14px 14px; padding: 18px 14px; }
+  .content { padding: 18px 16px 96px; }
+  .year-block { padding-inline: 15px; border-radius: 17px; }
+  .yb-header h3 { font-size: 19px; }
+  .bottom-nav { border-top: 1px solid var(--border); background: color-mix(in srgb, var(--card) 90%, transparent); backdrop-filter: blur(18px); }
+  body.article-active { --reading-dock-height: 72px; --reader-shortcut-size: 42px; }
+  .article-page .back-to-top { right: 12px; width: var(--reader-shortcut-size); height: var(--reader-shortcut-size); }
+  .reading-dock .reading-operation-menu, .reading-dock .reading-issue-menu { right: 0; width: min(380px, calc(100vw - 28px)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mag-cover { transition: none; }
+}
+@media print {
+  .reading-dock, .reader-nav-shortcut, .reader-nav-menu { display: none !important; }
+}
