@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101w';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101x';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -1862,12 +1862,12 @@ function renderRelatedArticles(cur, pos, ordered) {
     }
     scored.sort(function (x, y) { return y.score - x.score; });
 
-    let picks = scored.slice(0, 5);
+    let picks = scored.slice(0, 3);
 
     /* 标题完全无重合时兜底：补同板块里离得最近的几篇 */
-    if (picks.length < 5 && curSec !== OTHER_SECTION) {
+    if (picks.length < 3 && curSec !== OTHER_SECTION) {
         const used = picks.map(function (p) { return p.a.u; });
-        for (let k = 0; k < ordered.length && picks.length < 5; k++) {
+        for (let k = 0; k < ordered.length && picks.length < 3; k++) {
             if (k === pos) continue;
             const a = ordered[k].a;
             if (normalizeSection(a.s) !== curSec) continue;
@@ -1878,13 +1878,14 @@ function renderRelatedArticles(cur, pos, ordered) {
     }
     if (picks.length === 0) { relEl.hidden = true; return; }
 
-    let html = '<div class="ap-related-title">相关阅读</div><div class="ap-related-list">';
+    let html = '<div class="ap-related-heading"><span class="ap-related-kicker">KEEP READING</span><h2 class="ap-related-title">相关阅读</h2></div><div class="ap-related-list">';
     picks.forEach(function (x) {
         const sec = sectionLabel(x.a.s);
         const metaTxt = issueLabel(x.a) + (sec ? ' · ' + escHtml(sec) : '');
-        html += '<div class="ap-related-item" data-url="' + encodeURIComponent(x.a.u) + '">' +
-            '<span class="ap-related-meta">' + metaTxt + '</span>' +
-            '<span class="ap-related-name">' + escHtml(x.a.t) + '</span></div>';
+        html += '<button type="button" class="ap-related-item" data-url="' + encodeURIComponent(x.a.u) + '">' +
+            '<span class="ap-related-copy"><strong class="ap-related-name">' + escHtml(x.a.t) + '</strong>' +
+            '<small class="ap-related-meta">' + escHtml(MAGAZINES[state.currentMag].name) + ' · ' + metaTxt + '</small></span>' +
+            '<span class="ap-related-arrow" aria-hidden="true">↗</span></button>';
     });
     html += '</div>';
     relEl.innerHTML = html;
