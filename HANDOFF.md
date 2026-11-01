@@ -2,31 +2,30 @@
 
 ## 当前任务
 
-党内刊物静态阅读网站的首页、杂志页、正文阅读页视觉与交互优化；GitHub `main` 推送后由 Cloudflare Pages 部署。用户希望直接完成，不要中途停止。当前一轮要求：首页移除重复的最新文章区，缩小底部三个专题链接并减少无用文字；正文页底部为上一篇、操作、下一篇，操作展开阅读设置/收藏/分享/原文；统一杂志与正文风格。
+党内刊物静态阅读网站通过 GitHub `main` 和 Cloudflare Pages 部署。用户希望首页封面醒目、正文阅读顺畅，并要求任务完成后同步 GitHub。本轮针对：首页三本刊物封面太小；正文页底部三按钮要固定；右下角阅读进度环与返回顶部按钮显示异常。
 
-## 本轮已完成
+## 已完成
 
-- 首页删除“各刊最新文章”分区，保留本期精选。`loadHomeFeature()` 仍读取 `data/latest.json` 更新精选标题和期号。
-- 删除首页副标题与“三本刊物”的冗余说明；三个专题链接改为紧凑的三列桌面布局和手机单列布局，隐藏长描述。
-- 正文页移除顶部阅读工具条，将目录按钮放在文章标题区域；文末导航改为上一篇、操作、下一篇三栏。
-- 操作按钮展开文末操作区，包含阅读设置、收藏、分享（复制链接）、原文。阅读设置在文末就地展开，已去掉旧的滚动自动关闭逻辑。
-- `assets/css/one.css` 补齐正文页的标题、正文、目录、文末操作与杂志页一致的细线、留白和文字风格。
-- 资源版本更新为 `20261101j`（HTML、JS、Service Worker）。
+- 首页三刊封面从桌面 92px、手机 70px 的小图恢复为主视觉。桌面三列大封面，手机横滑大封面；继续使用 `background-size: contain`，确保封面完整。
+- 将上一篇、操作、下一篇从文末 footer 拆到独立 `readingDock`，固定在视口底部；操作菜单从底栏向上展开，正文末尾留出安全空间。
+- 找到右下角按钮异常的原因：`books.css` 将 `.article-page .back-to-top` 改成 `position: static`。在最后加载的 `one.css` 恢复 fixed，并放在底栏上方；进度值夹在 0–1 范围内。
+- 文章关闭时隐藏底栏，新文章打开时重置操作菜单和阅读设置状态。资源版本为 `20261101k`。
+- 上轮已完成：首页移除重复最新文章区、缩小底部专题链接；正文页文末三按钮及阅读设置、收藏、分享、原文操作；杂志与正文统一简约风格。
 
 ## 验收与限制
 
-- 本轮 `node --check assets/js/app.js`、`node --check sw.js`、`git -c core.whitespace=cr-at-eol diff --check` 已通过。
-- 已推送到 GitHub `main`，本轮布局提交为 `6e37c39`；`git ls-remote origin refs/heads/main` 已核对远端收到该提交。
-- 站点有访问密码门，本地浏览器无法直接查看登录后的视觉；此前临时移除遮罩的自动审批被拒绝，不能绕过。应以代码检查和用户登录后的线上观察为准。
-- 旧数据问题：红旗文稿有 1 篇标记有全文但正文缺失；党建研究 2026 年第 10 期目录有 31 篇文章但分片缺失。本轮没有改数据。
+- `node --check assets/js/app.js`、`node --check sw.js`、`git -c core.whitespace=cr-at-eol diff --check` 已通过。
+- 站点存在访问密码门，无法直接核对登录后的真实浏览器画面；此前临时移除遮罩的自动审批被拒绝，不能绕过。
+- 旧数据问题：红旗文稿有 1 篇标记有全文但正文缺失；党建研究 2026 年第 10 期目录有 31 篇文章但正文分片缺失。本轮未改数据。
 
 ## 下一步
 
-1. 如后续可进入站点，检查手机/桌面首页、专题链接和正文文末三按钮的实际显示。
+- 若用户能提供登录后的截图，可针对桌面与手机封面、固定底栏、菜单及进度按钮继续做视觉微调。
+- 更新正文数据时，按现有脚本维护首页精选数据 `data/latest.json`。
 
 ## 踩过的坑
 
-- `.git` 写入在默认沙箱中可能失败，`git commit` / `git push` 使用 `require_escalated`；push 返回 session ID 时要持续轮询，不能把尚未结束当成失败。
-- CSS 文件层叠顺序是 `style.css`、`books.css`、`one.css`，本轮覆盖样式应放在 `one.css` 最后。
-- 阅读设置面板旧样式是 fixed，放到文末操作区后必须覆盖其位置、阴影和最大高度。
-- 仓库 CSS 使用 CRLF，diff whitespace 检查加 `core.whitespace=cr-at-eol`。
+- CSS 加载顺序为 `style.css`、`books.css`、`one.css`。封面小图由 `one.css` 最后覆盖造成；进度按钮定位被 `books.css` 改为 static。
+- 固定底栏不能直接把含相关阅读的整个 footer 固定，否则相关阅读也会遮盖正文；导航和操作菜单放进单独的 dock。
+- `.git` 写入可能需要 `require_escalated`；`git push` 返回 session ID 时持续轮询。推送时偶有凭据程序打印 `fatal: Cannot prompt`，即使命令 exit 0 也要用 `git ls-remote` 核对远端提交。
+- 仓库 CSS 有 CRLF，diff whitespace 检查用 `core.whitespace=cr-at-eol`。

@@ -9,11 +9,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=20261101j">
-<link rel="stylesheet" href="assets/css/books.css?v=20261101j">
-<link rel="stylesheet" href="assets/css/one.css?v=20261101j">
-<link rel="manifest" href="manifest.webmanifest?v=20261101j">
-<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101j">
+<link rel="stylesheet" href="assets/css/style.css?v=20261101k">
+<link rel="stylesheet" href="assets/css/books.css?v=20261101k">
+<link rel="stylesheet" href="assets/css/one.css?v=20261101k">
+<link rel="manifest" href="manifest.webmanifest?v=20261101k">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101k">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b0000' stroke-width='2'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
 <script>
 (function(){try{
@@ -437,6 +437,8 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     <div class="article-layout"><nav class="article-toc" id="articleToc" aria-label="本文目录" hidden></nav><div class="article-page-body" id="articleBody"></div></div>
     <footer class="article-page-footer" id="articleFooter" hidden>
         <section class="ap-related" id="articleRelated" aria-label="相关阅读" hidden></section>
+    </footer>
+    <div class="reading-dock" id="readingDock" hidden>
         <div class="reading-operation-menu" id="readingOperationMenu" hidden>
             <div class="ap-actions" aria-label="文章操作">
                 <button class="ap-settings-btn" id="articleSettingsBtn" onclick="toggleArticleSettings(event)" title="阅读设置" aria-label="阅读设置">Aa <span>阅读设置</span></button>
@@ -446,8 +448,8 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
             </div>
         </div>
         <nav class="ap-nav" id="articleNav" aria-label="文章导航与操作"></nav>
-    </footer>
-    <button class="back-to-top" id="backToTopBtn" onclick="scrollToTop()" title="返回顶部">
+    </div>
+    <button class="back-to-top" id="backToTopBtn" onclick="scrollToTop()" title="返回顶部" aria-label="返回顶部，外圈显示阅读进度">
         <svg class="progress-ring" viewBox="0 0 48 48">
             <circle class="progress-ring-bg" cx="24" cy="24" r="21"></circle>
             <circle class="progress-ring-fg" id="progressRingFg" cx="24" cy="24" r="21"></circle>
@@ -485,6 +487,6 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     </div>
 </div>
 
-<script src="assets/js/app.js?v=20261101j"></script>
+<script src="assets/js/app.js?v=20261101k"></script>
 </body>
 </html>

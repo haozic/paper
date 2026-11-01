@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101j';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101k';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -1312,6 +1312,8 @@ function closeArticlePage() {
     if (banner) banner.hidden = true;
     var footer = document.getElementById('articleFooter');
     if (footer) footer.hidden = true;
+    var dock = document.getElementById('readingDock');
+    if (dock) dock.hidden = true;
     var rel = document.getElementById('articleRelated');
     if (rel) rel.hidden = true;
 }
@@ -1663,6 +1665,7 @@ function renderArticleFooter(url, cur) {
     if (menu) menu.hidden = true;
     const panel = document.getElementById('articleSettingsPanel');
     if (panel) panel.classList.remove('show');
+    document.getElementById('articleSettingsBtn').classList.remove('active');
 
     navEl.querySelectorAll('[data-url]').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -1673,6 +1676,7 @@ function renderArticleFooter(url, cur) {
     renderRelatedArticles(cur, pos, ordered);
 
     footer.hidden = false;
+    document.getElementById('readingDock').hidden = false;
 }
 
 function toggleReadingActions() {
@@ -1937,7 +1941,7 @@ function updateReadingProgress() {
     if (!document.body.classList.contains('article-active')) return;
     const scrollTop = window.scrollY;
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const pct = docHeight > 0 ? (scrollTop / docHeight) : 0;
+    const pct = docHeight > 0 ? Math.min(1, Math.max(0, scrollTop / docHeight)) : 0;
     // 更新进度环
     const ring = document.getElementById('progressRingFg');
     if (ring) ring.style.strokeDashoffset = RING_CIRCUMFERENCE * (1 - pct);

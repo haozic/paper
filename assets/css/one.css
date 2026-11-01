@@ -160,3 +160,43 @@ html[data-theme="dark"] .reader-toolbar .ap-actions > * { color: #d0cbc7; }
   .ap-bottom-prev strong, .ap-bottom-next strong { font-size: 12px; }
   .reading-operation-menu .ap-actions > * { height: 54px; }
 }
+
+/* Large, uncropped covers carry the journal selection. */
+.magazine-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(22px, 4vw, 48px); max-width: 1000px; align-items: start; }
+.magazine-grid > * + * { margin: 0; }
+.magazine-card { display: block; min-width: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; text-decoration: none; }
+.magazine-card:hover { transform: none; box-shadow: none; }
+.mag-cover { width: 100%; max-width: none; height: auto; aspect-ratio: 3 / 4; border-radius: 0; background-size: contain; background-color: #fff; box-shadow: 0 8px 24px rgba(20,20,24,.12); }
+.magazine-card:hover .mag-cover, .magazine-card:focus-visible .mag-cover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(20,20,24,.17); }
+.mag-info { padding: 17px 0 0; background: transparent; }
+.mag-info h2 { font-size: 20px; }
+.mag-desc { display: none; }
+.mag-meta { margin-top: 6px; }
+
+/* Fixed article navigation. The action tray opens upward from the dock. */
+body.article-active { --reading-dock-height: 86px; }
+.article-page-body { padding-bottom: 70px; }
+.article-page-footer { padding-bottom: calc(var(--reading-dock-height, 86px) + 44px + env(safe-area-inset-bottom, 0px)); }
+.reading-dock[hidden] { display: none !important; }
+.reading-dock { position: fixed; inset: auto 0 0; z-index: 220; padding: 0 18px env(safe-area-inset-bottom, 0px); border-top: 1px solid var(--border); background: var(--card); box-shadow: 0 -8px 28px rgba(0,0,0,.06); }
+.reading-dock .ap-nav, .reading-dock .reading-operation-menu { width: 100%; max-width: 900px; margin: 0 auto; }
+.reading-dock .ap-nav { border: 0; }
+.reading-dock .reading-operation-menu { max-height: calc(100vh - var(--reading-dock-height, 86px) - 44px); overflow-y: auto; overscroll-behavior: contain; }
+.article-page .back-to-top { position: fixed; right: 20px; bottom: calc(var(--reading-dock-height, 86px) + 20px + env(safe-area-inset-bottom, 0px)); z-index: 225; margin: 0; transform: translateY(10px); }
+.article-page .back-to-top.show { transform: translateY(0); }
+
+@media (max-width: 767px) {
+  .magazine-grid { display: flex; gap: 18px; overflow-x: auto; overflow-y: hidden; width: calc(100vw - 20px); max-width: none; margin: 0; padding: 4px 22px 20px 0; scroll-snap-type: x mandatory; }
+  .magazine-grid > * + * { margin: 0; }
+  .magazine-card { flex: 0 0 clamp(178px, 53vw, 218px); width: auto; margin: 0; scroll-snap-align: start; }
+  .mag-cover { width: 100%; height: auto; aspect-ratio: 3 / 4; }
+  .mag-info { padding-top: 12px; }
+  .mag-info h2 { font-size: 17px; }
+  body.article-active { --reading-dock-height: 72px; }
+  .reading-dock { padding-inline: 10px; }
+  .article-page .back-to-top { right: 14px; width: 44px; height: 44px; }
+}
+@media print {
+  .reading-dock { display: none !important; }
+  .article-page-footer { padding-bottom: 0; }
+}
