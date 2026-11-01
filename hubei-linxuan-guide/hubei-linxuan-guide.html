@@ -733,6 +733,78 @@ body.sidebar-collapsed .sidebar-expand-btn {
     min-width: 600px;
   }
 }
+
+/* ===== 访问密码门（与主站一致） ===== */
+#gate {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+#gate.gate--hidden { display: none; }
+body.gate-active { overflow: hidden; }
+.gate-card {
+    background: var(--card, #fff);
+    border-radius: 12px;
+    padding: 28px 24px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+}
+.gate-title { font-size: 20px; margin: 0 0 6px; }
+.gate-subtitle { font-size: 13px; margin: 0 0 18px; color: var(--text-3, #666); }
+.gate-form { display: flex; flex-direction: column; }
+.gate-form > * + * { margin-top: 10px; }
+.gate-input-wrap { display: flex; align-items: center; }
+.gate-input-wrap > * + * { margin-left: 6px; }
+.gate-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--border-2, #ccc);
+    border-radius: 8px;
+    font-size: 15px;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.gate-input--err { border-color: #c0392b; }
+.gate-toggle {
+    padding: 9px 10px;
+    border: 1px solid var(--border-2, #ccc);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-2, #444);
+    cursor: pointer;
+    font-size: 12px;
+}
+.gate-submit {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary, #991b1b);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.gate-hint { font-size: 12px; min-height: 16px; margin: 0; color: #c0392b; }
+.gate-hint--ok { color: #2e7d32; }
+.gate-footer { font-size: 11px; color: var(--text-3, #888); margin: 16px 0 0; }
+
+/* ===== 返回刊物首页 ===== */
+.back-home-link {
+    margin: 14px 18px 0;
+    font-size: 13px;
+}
+.back-home-link a { color: var(--primary, #991b1b); text-decoration: none; }
+.back-home-link a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -753,6 +825,7 @@ body.sidebar-collapsed .sidebar-expand-btn {
 <button class="sidebar-toggle" id="sidebarToggle" aria-label="打开目录导航">&#9776;</button>
 
 <!-- Cover -->
+<p class="back-home-link"><a href="../index.html">&larr; 返回刊物首页</a></p>
 <div class="cover">
   <div class="cover-tag">湖北省直机关公开遴选公务员考试</div>
   <h1>荆楚遴选<br>备考全书</h1>
@@ -4775,6 +4848,94 @@ body.sidebar-collapsed .sidebar-expand-btn {
     setActive(allTargets[0]);
   }
   onScroll();
+})();
+</script>
+
+<!-- ===== 访问密码门（与主站一致） ===== -->
+<div id="gate" class="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <div class="gate-card">
+        <h1 id="gateTitle" class="gate-title">党内刊物检索系统</h1>
+        <p class="gate-subtitle">请输入访问密码以继续</p>
+        <form id="gateForm" class="gate-form" autocomplete="off" novalidate>
+            <div class="gate-input-wrap" id="gateInputWrap">
+                <input type="password" id="gateInput" class="gate-input" inputmode="numeric" maxlength="20" placeholder="访问密码" aria-label="访问密码">
+                <button type="button" id="gateToggle" class="gate-toggle" aria-label="显示密码" title="显示密码">显示</button>
+            </div>
+            <button type="submit" class="gate-submit">进入系统</button>
+            <p id="gateHint" class="gate-hint" role="status" aria-live="polite"></p>
+        </form>
+        <p class="gate-footer">本系统为非公开内容，仅限内部学习研究使用</p>
+    </div>
+</div>
+<script>
+(function () {
+    'use strict';
+    var STORAGE_KEY = 'djyj_gate_ok';
+    var STORAGE_TS = 'djyj_gate_ts';
+    var PASSWORD = '5255';
+    var TTL_MS = 12 * 60 * 60 * 1000;
+
+    function isAuthed() {
+        try {
+            if (localStorage.getItem(STORAGE_KEY) !== '1') return false;
+            var ts = parseInt(localStorage.getItem(STORAGE_TS) || '0', 10);
+            if (!ts) return false;
+            return (Date.now() - ts) < TTL_MS;
+        } catch (e) { return false; }
+    }
+    function setAuthed() {
+        try {
+            localStorage.setItem(STORAGE_KEY, '1');
+            localStorage.setItem(STORAGE_TS, String(Date.now()));
+        } catch (e) {}
+    }
+    function showGate() {
+        var gate = document.getElementById('gate');
+        if (gate) gate.classList.remove('gate--hidden');
+        document.body.classList.add('gate-active');
+        setTimeout(function () {
+            var input = document.getElementById('gateInput');
+            if (input) input.focus();
+        }, 200);
+    }
+    function hideGate() {
+        var gate = document.getElementById('gate');
+        if (gate) gate.classList.add('gate--hidden');
+        document.body.classList.remove('gate-active');
+    }
+    function bind() {
+        var form = document.getElementById('gateForm');
+        var input = document.getElementById('gateInput');
+        var toggle = document.getElementById('gateToggle');
+        if (!form || !input) return;
+        if (toggle) {
+            toggle.addEventListener('click', function () {
+                input.type = input.type === 'password' ? 'text' : 'password';
+                input.focus();
+            });
+        }
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (input.value === PASSWORD) {
+                setAuthed();
+                hideGate();
+            } else {
+                input.classList.add('gate-input--err');
+                var hint = document.getElementById('gateHint');
+                if (hint) {
+                    hint.textContent = '密码错误，请重试';
+                    hint.className = 'gate-hint gate-hint--err';
+                }
+                input.select();
+            }
+        });
+    }
+    if (isAuthed()) {
+        hideGate();
+    } else {
+        bind();
+        showGate();
+    }
 })();
 </script>
 
