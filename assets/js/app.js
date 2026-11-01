@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101c';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101d';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -840,17 +840,31 @@ function renderCrossMagResults() {
 }
 
 /* 主页浮层：全屏三刊标题搜索 */
-function openGlobalSearch() {
+function openGlobalSearch(initialQuery) {
     const box = document.getElementById('globalSearch');
     if (!box) return;
     box.hidden = false;
     document.body.classList.add('global-search-active');
     const input = document.getElementById('globalSearchInput');
     if (input) {
+        if (typeof initialQuery === 'string') input.value = initialQuery;
         input.focus();
         input.select();
     }
     runGlobalSearch();
+}
+
+async function loadHomeLatest() {
+    const host = document.getElementById('homeLatestList');
+    if (!host) return;
+    if (!await loadSearchIndex()) { host.textContent = '最新文章暂不可用'; return; }
+    const rows = state.searchIndex.rows, picked = {};
+    rows.forEach(r => { if (r && r.length >= 5 && !picked[r[0]] && r[3] !== '本期导读') picked[r[0]] = r; });
+    host.innerHTML = MAGAZINE_ORDER.map(k => {
+        const r = picked[k]; if (!r) return '';
+        return `<button class="home-latest-item" data-mag="${escHtml(k)}" data-url="${encodeURIComponent(r[4])}"><span>${escHtml(MAGAZINES[k].name)} · ${r[1]}年第${r[2]}期</span><strong>${escHtml(r[3])}</strong></button>`;
+    }).join('');
+    host.onclick = e => { const item=e.target.closest('.home-latest-item'); if(!item)return; enterMagazine(item.dataset.mag); showArticle(item.dataset.url); };
 }
 
 function closeGlobalSearch() {
@@ -1103,6 +1117,7 @@ async function showArticle(encUrl, replaceHist) {
                 const sepIdx = md.indexOf('\n---\n');
                 if (sepIdx >= 0) bodyMd = md.substring(sepIdx + 5).trim();
                 bodyEl.innerHTML = renderMarkdown(bodyMd);
+                buildArticleToc(bodyEl);
                 const wordCount = countWords(bodyEl.textContent);
                 updateArticleMeta(a, wordCount);
                 return;
@@ -1153,6 +1168,7 @@ function renderArticleBody(url, bodyEl) {
     if (text) {
         const body = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
         bodyEl.innerHTML = renderMarkdown(body);
+        buildArticleToc(bodyEl);
         const a = ms.meta.find(x => x.u === url);
         if (a) {
             const wordCount = countWords(bodyEl.textContent);
@@ -1162,6 +1178,14 @@ function renderArticleBody(url, bodyEl) {
         bodyEl.innerHTML = `<div class="no-body">未找到该文章的正文数据<br>
             <small>URL: ${escHtml(url.substring(0, 60))}...</small></div>`;
     }
+}
+
+function buildArticleToc(bodyEl) {
+    const toc = document.getElementById('articleToc'); if (!toc) return;
+    const heads = Array.from(bodyEl.querySelectorAll('.md-heading,.md-subheading'));
+    if (heads.length < 3) { toc.hidden = true; toc.innerHTML = ''; return; }
+    toc.hidden = false;
+    toc.innerHTML = '<strong>本文目录</strong>' + heads.map((h,i) => { const id='article-section-'+i; h.id=id; return `<a href="#${id}">${escHtml(h.textContent)}</a>`; }).join('');
 }
 
 async function retryShowArticle(encUrl) {
@@ -2589,6 +2613,7 @@ async function init() {
 
     // 加载首页计数
     loadHomeCounts();
+    loadHomeLatest();
 
     // 注册 Service Worker（离线阅读）
     registerServiceWorker();
