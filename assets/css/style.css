@@ -1525,7 +1525,7 @@ body.global-search-active { overflow: hidden; }
     text-justify: inter-ideograph;
 }
 .article-page-body p.md-heading {
-    text-indent: 0;
+    text-indent: var(--article-indent, 2em);
     text-align: left;
     font-weight: 700;
     color: var(--text);
@@ -1541,19 +1541,22 @@ body.global-search-active { overflow: hidden; }
 @media (max-width: 1100px) { .article-toc { display: none; } }
 @media (max-width: 640px) { .home-latest-list { grid-template-columns: 1fr; } }
 .article-page-body p.md-bold {
-    text-indent: 0;
+    text-indent: var(--article-indent, 2em);
     text-align: left;
     font-weight: 700;
     color: var(--mag-color-dark, var(--primary-dark));
     margin-top: 18px;
 }
 .article-page-body p.md-subheading {
-    text-indent: 0;
+    text-indent: var(--article-indent, 2em);
     text-align: left;
     font-weight: 700;
     color: var(--text);
     font-size: var(--article-fs, 20px);
     margin-top: 22px;
+}
+.article-page-body :is(h1, h2, h3, h4, h5, h6) {
+    text-indent: var(--article-indent, 2em);
 }
 .article-page-body strong { font-weight: 700; }
 .article-page-body div {
