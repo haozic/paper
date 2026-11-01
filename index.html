@@ -9,12 +9,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=20261101n">
-<link rel="stylesheet" href="assets/css/books.css?v=20261101n">
-<link rel="stylesheet" href="assets/css/one.css?v=20261101n">
-<link rel="stylesheet" href="assets/css/system.css?v=20261101n">
-<link rel="manifest" href="manifest.webmanifest?v=20261101n">
-<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101n">
+<link rel="stylesheet" href="assets/css/style.css?v=20261101o">
+<link rel="stylesheet" href="assets/css/books.css?v=20261101o">
+<link rel="stylesheet" href="assets/css/one.css?v=20261101o">
+<link rel="stylesheet" href="assets/css/system.css?v=20261101o">
+<link rel="manifest" href="manifest.webmanifest?v=20261101o">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101o">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2396382f' stroke-width='1.8'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
 <script>
 (function(){try{
@@ -358,12 +358,16 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 
 <!-- ===== 文章页面 ===== -->
 <div id="articlePage" class="article-page">
+    <nav class="reader-topbar" id="readerTopbar" aria-label="阅读导航">
+        <div class="reader-topbar-inner">
+            <button class="ap-back-btn" onclick="goBack()" aria-label="返回文章列表"><svg class="icon"><use href="#i-arrow-left"/></svg><span>返回列表</span></button>
+            <span class="reader-topbar-title" id="readerToolbarTitle"></span>
+        </div>
+    </nav>
     <header class="article-page-header">
         <div class="ap-header-inner">
-            <button class="ap-back-btn" onclick="goBack()"><svg class="icon"><use href="#i-arrow-left"/></svg><span>返回</span></button>
             <h1 class="ap-title" id="articleTitle"></h1>
             <div class="ap-meta" id="articleMeta"></div>
-            <span id="readerToolbarTitle" hidden></span>
             <button class="reader-toc-toggle" id="readerTocToggle" onclick="toggleReaderToc()" aria-expanded="false" hidden>本文小节</button>
         </div>
     </header>
@@ -374,7 +378,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
         <button class="ap-continue-close" onclick="dismissContinue()" title="忽略"><svg class="icon"><use href="#i-close"/></svg></button>
     </div>
     <div class="ap-settings-panel" id="articleSettingsPanel">
-        <button class="asp-close-btn" onclick="toggleArticleSettings()"><svg class="icon"><use href="#i-close"/></svg></button>
+        <button class="asp-close-btn" onclick="toggleArticleSettings()" title="关闭阅读设置" aria-label="关闭阅读设置"><svg class="icon"><use href="#i-close"/></svg></button>
         <div class="asp-section">
             <div class="asp-label">字号</div>
             <div class="asp-btn-group" id="fontSizeGroup">
@@ -477,6 +481,6 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     </div>
 </div>
 
-<script src="assets/js/app.js?v=20261101n"></script>
+<script src="assets/js/app.js?v=20261101o"></script>
 </body>
 </html>

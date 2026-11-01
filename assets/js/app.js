@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101n';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101o';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -1060,6 +1060,7 @@ async function showArticle(encUrl, replaceHist) {
 
     document.getElementById('articleTitle').textContent = a.t;
     document.getElementById('readerToolbarTitle').textContent = a.t;
+    document.getElementById('readerTopbar').classList.remove('is-scrolled');
     const toc = document.getElementById('articleToc');
     toc.hidden = true;
     toc.classList.remove('is-open');
@@ -1281,6 +1282,7 @@ function closeArticlePage() {
     if (ring) ring.style.strokeDashoffset = RING_CIRCUMFERENCE;
     var btt = document.getElementById('backToTopBtn');
     if (btt) btt.classList.remove('show');
+    document.getElementById('readerTopbar').classList.remove('is-scrolled');
     closeReadingTrays();
     // 隐藏"继续阅读"提示条与文末导航（下次进入文章时再按需显示）
     var banner = document.getElementById('articleContinue');
@@ -1944,6 +1946,7 @@ function updateReadingProgress() {
     // 返回顶部按钮：滚动超过 300px 时显示
     const btn = document.getElementById('backToTopBtn');
     if (btn) btn.classList.toggle('show', scrollTop > 300);
+    document.getElementById('readerTopbar').classList.toggle('is-scrolled', scrollTop > 140);
     // 记录阅读位置（内部按 1.5 秒节流）
     maybeSaveReadPosition();
 }
@@ -2499,7 +2502,7 @@ function registerServiceWorker() {
 }
 
 async function init() {
-    document.getElementById('readingOperationMenu').appendChild(document.getElementById('articleSettingsPanel'));
+    document.getElementById('readingOperationMenu').prepend(document.getElementById('articleSettingsPanel'));
     loadFavorites();
     updateFavBadges();
     loadReadingSettings();
