@@ -321,15 +321,14 @@ body.article-active { --reading-dock-height: 58px; }
   .article-page .back-to-top { right: 12px; width: 40px; height: 40px; }
 }
 
-/* Keep the exit path reachable throughout a long article. */
-.reader-topbar { position: sticky; top: 0; z-index: 215; background: var(--card); border-bottom: 1px solid var(--border); }
-.reader-topbar-inner { display: flex; align-items: center; gap: 20px; min-height: 52px; max-width: 1000px; margin: 0 auto; padding: 0 26px; }
-.reader-topbar .ap-back-btn { flex: none; min-height: 44px; margin: 0; padding: 0 10px 0 0; color: var(--text); font-size: 13px; font-weight: 500; }
-.reader-topbar .ap-back-btn:hover { color: var(--primary); }
-.reader-topbar-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-3); font-family: var(--font-serif); font-size: 13px; opacity: 0; transition: opacity .2s ease; }
-.reader-topbar.is-scrolled .reader-topbar-title { opacity: 1; }
 .ap-header-inner { grid-template-columns: 1fr; grid-template-areas: "toc" "title" "meta"; }
 .reader-toc-toggle { min-height: 36px; }
+
+/* Quiet destinations stay inside the issue contents instead of the reading canvas. */
+.reading-issue-header { position: sticky; top: 0; z-index: 1; background: var(--card); }
+.reading-issue-destinations { display: flex; align-items: center; gap: 8px; padding: 0 10px 12px; }
+.reading-issue-destinations button { min-height: 44px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: transparent; color: var(--text-2); font: 12px var(--font-sans); cursor: pointer; }
+.reading-issue-destinations button:hover, .reading-issue-destinations button:focus-visible { border-color: var(--primary); color: var(--primary); }
 
 /* Settings float above the dock and leave the article visible while they change. */
 .reading-dock .reading-operation-menu { position: absolute; right: max(18px, calc((100vw - 1000px) / 2)); bottom: calc(100% + 10px); left: auto; box-sizing: border-box; width: min(376px, calc(100vw - 36px)); max-width: none; max-height: min(50vh, 420px); margin: 0; padding: 16px 18px 12px; overflow-y: auto; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); }
@@ -340,8 +339,6 @@ body.article-active { --reading-dock-height: 58px; }
 .article-page:has(.reading-operation-menu:not([hidden])) .back-to-top { opacity: 0; visibility: hidden; pointer-events: none; }
 
 @media (max-width: 767px) {
-  .reader-topbar-inner { min-height: 50px; padding-inline: 18px; }
-  .reader-topbar .ap-back-btn { font-size: 13px; }
-  .reader-topbar-title { font-size: 12px; }
+  .reading-issue-destinations { padding-inline: 2px; }
   .reading-dock .reading-operation-menu { right: 12px; width: min(376px, calc(100vw - 24px)); max-height: 50vh; padding-inline: 16px; }
 }

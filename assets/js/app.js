@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101o';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101p';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -1059,8 +1059,6 @@ async function showArticle(encUrl, replaceHist) {
     state.currentArticleIdx = idx;
 
     document.getElementById('articleTitle').textContent = a.t;
-    document.getElementById('readerToolbarTitle').textContent = a.t;
-    document.getElementById('readerTopbar').classList.remove('is-scrolled');
     const toc = document.getElementById('articleToc');
     toc.hidden = true;
     toc.classList.remove('is-open');
@@ -1266,6 +1264,18 @@ function goBack() {
     }
 }
 
+function leaveReader(destination) {
+    const magKey = state.currentMag;
+    closeArticlePage();
+    if (magKey) history.replaceState({ mag: magKey }, '', `#m=${magKey}`);
+    if (destination === 'home' || !magKey) {
+        goHome();
+        return;
+    }
+    document.body.classList.remove('section-active', 'about-active');
+    switchMode('catalog');
+}
+
 function closeArticlePage() {
     // 关闭前先记录当前阅读位置（此时页面仍在 article-active 状态，滚动高度有效）
     if (document.body.classList.contains('article-active')) {
@@ -1282,7 +1292,6 @@ function closeArticlePage() {
     if (ring) ring.style.strokeDashoffset = RING_CIRCUMFERENCE;
     var btt = document.getElementById('backToTopBtn');
     if (btt) btt.classList.remove('show');
-    document.getElementById('readerTopbar').classList.remove('is-scrolled');
     closeReadingTrays();
     // 隐藏"继续阅读"提示条与文末导航（下次进入文章时再按需显示）
     var banner = document.getElementById('articleContinue');
@@ -1663,7 +1672,10 @@ function renderArticleFooter(url, cur) {
     const next = nb.next;
     const issueArticles = ordered.filter(item => item.a.y === cur.y && item.a.i === cur.i);
     const issueMenu = document.getElementById('readingIssueMenu');
-    issueMenu.innerHTML = '<div class="reading-issue-heading"><strong>' + escHtml(MAGAZINES[state.currentMag].name) + ' · ' + issueLabel(cur) + '</strong><span>' + issueArticles.length + ' 篇</span></div>' +
+    issueMenu.innerHTML = '<div class="reading-issue-header"><nav class="reading-issue-destinations" aria-label="离开阅读页">' +
+        '<button type="button" onclick="leaveReader(\'home\')">网站首页</button>' +
+        '<button type="button" onclick="leaveReader(\'magazine\')">' + escHtml(MAGAZINES[state.currentMag].name) + '首页</button>' +
+        '</nav><div class="reading-issue-heading"><strong>' + escHtml(MAGAZINES[state.currentMag].name) + ' · ' + issueLabel(cur) + '</strong><span>' + issueArticles.length + ' 篇</span></div></div>' +
         '<div class="reading-issue-list">' + issueArticles.map((item, index) => {
             const a = item.a;
             const active = a.u === url;
@@ -1946,7 +1958,6 @@ function updateReadingProgress() {
     // 返回顶部按钮：滚动超过 300px 时显示
     const btn = document.getElementById('backToTopBtn');
     if (btn) btn.classList.toggle('show', scrollTop > 300);
-    document.getElementById('readerTopbar').classList.toggle('is-scrolled', scrollTop > 140);
     // 记录阅读位置（内部按 1.5 秒节流）
     maybeSaveReadPosition();
 }
