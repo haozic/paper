@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101y';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101z';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -78,6 +78,7 @@ const state = {
     bodySearchRunning: false,
     bodySearchDone: 0,      // 本轮已处理的期次数（进度显示用）
     globalSearchResults: [],   // 主页浮层里的跨刊命中
+    globalSearchMag: 'all',    // 共用搜索面板的刊物范围
     currentPage: 1,
     pageSize: 20,
     readingFs: 20,          // 文章字号
@@ -180,7 +181,7 @@ function enterMagazine(magKey) {
     document.body.classList.add('mag-active');
 
     // 更新标题
-    document.getElementById('magTitle').textContent = conf.fullName;
+    document.getElementById('magTitle').textContent = conf.name;
     const cover = document.getElementById('journalCoverImage');
     if (cover) cover.src = conf.cover;
     document.documentElement.style.setProperty('--mag-color-base', conf.color);
@@ -854,6 +855,10 @@ function openGlobalSearch(initialQuery) {
     if (!box) return;
     box.hidden = false;
     document.body.classList.add('global-search-active');
+    state.globalSearchMag = state.currentMag || 'all';
+    updateGlobalSearchScope();
+    const trigger = document.getElementById('magSearchToggle');
+    if (trigger) trigger.setAttribute('aria-expanded', 'true');
     const input = document.getElementById('globalSearchInput');
     if (input) {
         if (typeof initialQuery === 'string') input.value = initialQuery;
@@ -868,6 +873,28 @@ function closeGlobalSearch() {
     if (!box) return;
     box.hidden = true;
     document.body.classList.remove('global-search-active');
+    const trigger = document.getElementById('magSearchToggle');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+}
+
+function updateGlobalSearchScope() {
+    document.querySelectorAll('[data-gs-mag]').forEach(btn => {
+        const active = btn.dataset.gsMag === (state.globalSearchMag || 'all');
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-pressed', String(active));
+    });
+    const bodyButton = document.getElementById('globalBodySearch');
+    if (bodyButton) bodyButton.hidden = !state.globalSearchMag || state.globalSearchMag === 'all';
+}
+
+function openBodySearchFromGlobal() {
+    const mag = state.globalSearchMag;
+    if (!mag || mag === 'all') return;
+    const query = document.getElementById('globalSearchInput').value.trim();
+    closeGlobalSearch();
+    if (state.currentMag !== mag) enterMagazine(mag);
+    document.getElementById('searchInput').value = query;
+    toggleMagazineSearch(true);
 }
 
 async function runGlobalSearch() {
@@ -888,11 +915,14 @@ async function runGlobalSearch() {
         list.innerHTML = '';
         return;
     }
-    const results = searchAllTitles(state.searchIndex, query);
+    const allResults = searchAllTitles(state.searchIndex, query);
+    const results = state.globalSearchMag && state.globalSearchMag !== 'all'
+        ? allResults.filter(item => item.m === state.globalSearchMag)
+        : allResults;
     state.globalSearchResults = results;
     if (!results.length) {
         count.textContent = '共 0 篇（关键词："' + query + '" ｜ 只匹配标题）';
-        list.innerHTML = '<div class="loading"><div>三刊标题中没有匹配的文章</div></div>';
+        list.innerHTML = '<div class="loading"><div>所选刊物中没有匹配的文章</div></div>';
         return;
     }
     const groups = groupCrossMagResults(results);
@@ -2594,6 +2624,11 @@ async function init() {
 
     // 主页三刊搜索浮层
     const gsInput = document.getElementById('globalSearchInput');
+    document.querySelectorAll('[data-gs-mag]').forEach(btn => btn.addEventListener('click', function () {
+        state.globalSearchMag = btn.dataset.gsMag;
+        updateGlobalSearchScope();
+        runGlobalSearch();
+    }));
     if (gsInput) {
         let gsTimer = null;
         gsInput.addEventListener('input', function () {

@@ -68,13 +68,16 @@ html[data-theme="dark"] .article-page { --bg: #191c22; --card: #2b3039; --border
 /* Magazine: one title, one cover, a readable index. */
 body.mag-active #app { min-height: 100vh; }
 .app-sidebar { border: 0; }
-.sidebar-header { box-sizing: border-box; position: relative; max-width: 1190px; margin: auto; text-align: left; }
-.sidebar-brand { position: static; }
-.sidebar-brand h1 { font-family: var(--font-sans); font-weight: 660; letter-spacing: -.025em; }
+.sidebar-header { box-sizing: border-box; position: relative; display: grid; grid-template-columns: 42px minmax(0,1fr) 42px 42px; align-items: center; column-gap: 8px; max-width: 1190px; margin: auto; text-align: left; }
+.sidebar-brand { position: static; grid-column: 2; grid-row: 1; min-width: 0; }
+.sidebar-brand h1 { margin: 0 0 3px; font-family: var(--font-sans); font-weight: 660; letter-spacing: -.025em; }
 .sidebar-meta { justify-content: flex-start; color: var(--text-3); }
 .sidebar-meta .app-subtitle { font-size: 13px; }
-.sidebar-meta .search-status { margin-left: 0; font-size: 12px; }
-.header-home-btn, .header-search-btn, .header-about-btn { z-index: 2; border-radius: 12px; }
+.sidebar-meta .search-status { display: none; }
+.header-home-btn, .header-search-btn, .header-about-btn { position: static; z-index: 2; width: 42px; height: 42px; transform: none; border-radius: 12px; }
+.header-home-btn { grid-column: 1; grid-row: 1; }
+.header-search-btn { grid-column: 3; grid-row: 1; }
+.header-about-btn { grid-column: 4; grid-row: 1; }
 .app-sidebar .search-bar { display: none; box-sizing: border-box; max-width: 1138px; margin: 0 auto 12px; padding: 22px 26px; border: 1px solid var(--border); border-radius: 20px; background: var(--card); box-shadow: var(--shadow-md); }
 body.mag-search-open .app-sidebar .search-bar { display: block; }
 .app-sidebar .search-box { gap: 8px; }
@@ -118,6 +121,24 @@ html[data-theme="dark"] .year-block, html[data-theme="dark"] .nav-tab.active { b
 .gs-panel { box-sizing: border-box; width: min(720px, calc(100% - 28px)); max-height: calc(100vh - 56px); margin: 28px auto; overflow-y: auto; border: 1px solid var(--border); border-radius: 24px; background: var(--card); box-shadow: var(--shadow-lg); }
 .gs-head { background: var(--card); }
 .gs-box { border-radius: 14px; background: var(--bg); }
+.gs-filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 2px 12px; }
+.gs-filters button { min-height: 36px; padding: 0 13px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text-2); font-size: 12px; cursor: pointer; }
+.gs-filters button.active { border-color: var(--border); background: var(--card); color: var(--text); box-shadow: 0 1px 4px rgba(25,30,45,.08); font-weight: 650; }
+.gs-body-search[hidden] { display: none; }
+.gs-body-search { display: flex; align-items: center; justify-content: space-between; width: calc(100% - 4px); min-height: 42px; margin: 0 2px 12px; padding: 0 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text-2); font-size: 12px; cursor: pointer; }
+.gs-body-search:hover { background: var(--bg-2); color: var(--text); }
+.gs-body-search .icon { width: 16px; height: 16px; }
+
+/* Lists and secondary pages share the same quiet control geometry. */
+.section-page-header { border-bottom: 0; background: var(--bg); box-shadow: none; }
+.sp-back-btn { width: fit-content; min-height: 38px; margin-bottom: 10px; padding: 0 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text-2); font-size: 13px; }
+.sp-back-btn:hover { background: var(--bg-2); color: var(--text); }
+.sp-title { font-family: var(--font-sans); font-weight: 650; }
+.sp-search-input { min-height: 39px; border-color: var(--border); border-radius: 12px; background: var(--card); }
+.section-card, .result-card, .fav-card { border: 1px solid var(--border); border-radius: 15px; background: var(--card); box-shadow: none; }
+.section-card:hover, .result-card:hover, .fav-card:hover { border-color: var(--border-2); border-radius: 15px; background: var(--card); box-shadow: none; }
+.section-list > * + *, .results-list > * + * { margin-top: 8px; }
+.fh-actions button { min-height: 36px; border-color: var(--border); border-radius: 11px; }
 
 /* About: a calm grouped sheet, aligned with the journal index. */
 .about-page { background: var(--bg); }
@@ -179,12 +200,8 @@ body.article-active { --reading-dock-height: 74px; --reader-shortcut-size: 44px;
 .reader-nav-menu button:hover, .reader-nav-shortcut:hover, .article-page .back-to-top:hover { background: var(--card); }
 
 @media (min-width: 768px) {
-  .sidebar-header { padding: 97px 26px 30px; }
-  .sidebar-brand h1 { margin-bottom: 7px; font-size: clamp(39px, 4vw, 48px); line-height: 1.17; }
-  .header-home-btn, .header-search-btn, .header-about-btn { top: 31px; width: 42px; height: 42px; }
-  .header-home-btn { right: 126px; }
-  .header-search-btn { right: 75px; }
-  .header-about-btn { right: 24px; }
+  .sidebar-header { padding: 27px 26px 23px; }
+  .sidebar-brand h1 { font-size: 31px; line-height: 1.2; }
   .app-main { display: grid; grid-template-columns: minmax(230px, 315px) minmax(0, 1fr); align-items: start; column-gap: clamp(40px, 6vw, 86px); box-sizing: border-box; max-width: 1190px; margin: auto; padding: 22px 26px 100px; }
   .journal-cover { grid-column: 1; grid-row: 1 / span 2; position: sticky; top: 24px; }
   .nav-tabs { grid-column: 2; position: relative; top: auto; display: flex; width: max-content; max-width: 100%; gap: 2px; margin: 0; padding: 4px; }
@@ -202,14 +219,9 @@ body.article-active { --reading-dock-height: 74px; --reader-shortcut-size: 44px;
   .mag-info h2 { font-size: 19px; }
   .home-guides { margin-top: 10px; }
   .gs-panel { max-height: calc(100vh - 28px); margin-block: 14px; }
-  .sidebar-header { min-height: 135px; padding: 76px 20px 18px; border-bottom: 0; }
-  .sidebar-brand h1 { margin: 0 0 5px; font-size: 29px; line-height: 1.2; }
-  .sidebar-meta { gap: 6px; justify-content: flex-start; }
-  .sidebar-meta .search-status { display: none; }
-  .header-home-btn, .header-search-btn, .header-about-btn { top: 18px; width: 42px; height: 42px; transform: none; }
-  .header-home-btn { left: 16px; right: auto; }
-  .header-search-btn { right: 65px; }
-  .header-about-btn { right: 16px; }
+  .sidebar-header { min-height: 80px; padding: 16px 14px; border-bottom: 0; }
+  .sidebar-brand h1 { font-size: 23px; line-height: 1.2; }
+  .sidebar-meta { gap: 4px; justify-content: flex-start; }
   .journal-cover { display: none; }
   .app-sidebar .search-bar { width: calc(100% - 28px); margin: 0 14px 14px; padding: 18px 14px; box-shadow: none; }
   .app-sidebar .search-intro { gap: 3px; margin-bottom: 12px; }
