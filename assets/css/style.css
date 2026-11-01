@@ -610,6 +610,44 @@ body.about-active { padding-bottom: 0; }
     cursor: pointer;
 }
 
+/* ===== 检索范围：本刊 / 三刊 ===== */
+.mag-scope-group {
+    flex-shrink: 0;
+}
+/* 三刊模式下隐藏与正文相关的控件（跨刊只搜标题） */
+.filters--all .scope-group--content,
+.filters--all .filter-check--content {
+    display: none;
+}
+
+/* ===== 跨刊结果的分组标题 ===== */
+.result-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.result-group-head {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 12px 2px 4px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid var(--border);
+}
+.result-group-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary);
+}
+.result-group-count {
+    font-size: 12px;
+    color: var(--text-3);
+}
+.result-group-cont {
+    font-size: 12px;
+    color: var(--text-3);
+}
+
 /* ===== Desktop Nav ===== */
 .nav-tabs {
     gap: 4px;
@@ -2380,6 +2418,12 @@ html[data-theme="dark"] .asp-section--light-only { display: none; }
     .asp-section > * + * { margin-top: 8px; }
     .gate-form { gap: 0; }
     .gate-form > * + * { margin-top: 14px; }
+
+    /* ---- 跨刊结果分组 ---- */
+    .result-group { gap: 0; }
+    .result-group > * + * { margin-top: 10px; }
+    .result-group-head { gap: 0; }
+    .result-group-head > * + * { margin-left: 8px; }
 
     /* ---- .filters 基础为横向（可换行） ---- */
     .filters { gap: 0; }

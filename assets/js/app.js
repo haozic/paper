@@ -518,6 +518,40 @@ function performSearch() {
 
     const scope = getSearchScope();
     const bo = document.getElementById('bodyOnly').checked;
+    const magScope = getMagScope();
+
+    // 三刊模式：只做标题检索，走全局索引
+    if (magScope === 'all') {
+        const infoEl = document.getElementById('resultInfo');
+        const bsBox = document.getElementById('bodySearchActions');
+        if (bsBox) { bsBox.innerHTML = ''; bsBox.hidden = true; }
+        if (state.searchIndexStatus === 'error') {
+            infoEl.textContent = '索引不可用，仅可搜本刊';
+            document.getElementById('searchResults').innerHTML =
+                '<div class="loading"><div>跨刊索引不可用，请切回「本刊」检索</div></div>';
+            document.getElementById('pagination').innerHTML = '';
+            return;
+        }
+        infoEl.textContent = '正在加载跨刊标题索引...';
+        document.getElementById('searchResults').innerHTML =
+            '<div class="loading"><div class="spinner"></div><div>加载跨刊标题索引中...</div></div>';
+        const tok = state.searchToken;
+        loadSearchIndex().then(function (ok) {
+            // 等待索引期间用户可能又改了关键词 / 换了范围，别把过期结果写回界面
+            if (state.searchToken !== tok) return;
+            if (!ok) {
+                infoEl.textContent = '索引不可用，仅可搜本刊';
+                document.getElementById('searchResults').innerHTML =
+                    '<div class="loading"><div>跨刊索引不可用，请切回「本刊」检索</div></div>';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+            state.searchResults = searchAllTitles(state.searchIndex, query);
+            state.currentPage = 1;
+            renderCrossMagResults();
+        });
+        return;
+    }
 
     // 标题搜索：立即执行
     let results;
@@ -616,6 +650,61 @@ function finishSearch(results, query, scope, input) {
     document.getElementById('resultInfo').textContent = infoText;
 
     renderSearchPage();
+}
+
+/* 跨刊结果卡片 HTML —— 杂志内结果区与主页搜索浮层**共用这一份**，
+   免得两处模板各改各的、悄悄漂移。
+   showFav=true 时带收藏按钮（杂志内结果区需要），主页浮层不带。 */
+function crossMagCardsHtml(groups, query, showFav) {
+    let html = '';
+    groups.forEach(function (g) {
+        html += '<div class="result-group">';
+        html += '<div class="result-group-head"><span class="result-group-name">' + escHtml(g.name) + '</span>'
+            + '<span class="result-group-count">' + g.count + ' 篇</span></div>';
+        g.items.forEach(function (a) {
+            const ci = a.i <= 24 ? CN[a.i - 1] : a.i;
+            const encUrl = encodeURIComponent(a.u);
+            const titleHtml = query ? highlightText(a.t, query) : escHtml(a.t);
+            let favBtn = '';
+            if (showFav) {
+                const isFav = isFavorite(a.u);
+                favBtn = '<button class="rc-fav-btn ' + (isFav ? 'active' : '')
+                    + '" onclick="event.stopPropagation(); toggleFavFromCard(this, \'' + encUrl + '\')">'
+                    + svgStar(isFav) + '</button>';
+            }
+            html += '<div class="result-card" onclick="showArticle(\'' + encUrl + '\')">'
+                + favBtn
+                + '<div class="rc-title">' + titleHtml + '</div>'
+                + '<div class="rc-meta"><span class="rc-tag">' + a.y + '年第' + ci + '期</span></div>'
+                + '</div>';
+        });
+        html += '</div>';
+    });
+    return html;
+}
+
+/* 跨刊检索结果：按刊物分组平铺，组内沿用索引行序（新 → 旧）。
+   沿用既有 .results-list / .result-card / .rc-* 样式，不引入新的视觉语言。 */
+function renderCrossMagResults() {
+    const container = document.getElementById('searchResults');
+    const pagination = document.getElementById('pagination');
+    const infoEl = document.getElementById('resultInfo');
+    const results = state.searchResults;
+    const query = document.getElementById('searchInput').value.trim().toLowerCase();
+
+    if (!results.length) {
+        container.innerHTML = '<div class="loading"><div>三刊标题中没有匹配的文章</div></div>';
+        pagination.innerHTML = '';
+        infoEl.textContent = query ? '共 0 篇（关键词："' + query + '" ｜ 范围：三刊标题）' : '';
+        return;
+    }
+
+    const groups = groupCrossMagResults(results);
+    container.innerHTML = crossMagCardsHtml(groups, query, true);
+
+    const total = results.length;
+    infoEl.textContent = '共 ' + total + ' 篇（关键词："' + query + '" ｜ 范围：三刊标题 · 只匹配标题）';
+    pagination.innerHTML = '<span class="page-info">共 ' + total + ' 条</span>';
 }
 
 function renderSearchPage() {
@@ -2173,6 +2262,17 @@ async function init() {
     });
     // Chrome 69 不支持 :has()，用 .checked 类同步搜索范围选中态
     syncScopeChecked();
+
+    // 检索范围：本刊 / 三刊
+    document.querySelectorAll('input[name="magScope"]').forEach(r => {
+        r.addEventListener('change', () => {
+            syncMagScopeChecked();
+            const filters = document.getElementById('filters');
+            if (filters) filters.classList.toggle('filters--all', getMagScope() === 'all');
+            if (searchInput.value.trim()) performSearch();
+        });
+    });
+    syncMagScopeChecked();
 
     // "继续阅读"按钮
     const continueBtn = document.getElementById('articleContinueBtn');

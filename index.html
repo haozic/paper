@@ -227,12 +227,16 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
         <button class="search-btn" id="searchBtn">搜索</button>
     </div>
     <div class="filters" id="filters">
-        <div class="scope-group">
+        <div class="scope-group mag-scope-group">
+            <label class="scope-option mag-scope-option"><input type="radio" name="magScope" value="current" checked> 本刊</label>
+            <label class="scope-option mag-scope-option"><input type="radio" name="magScope" value="all"> 三刊</label>
+        </div>
+        <div class="scope-group scope-group--content" id="scopeContentGroup">
             <label class="scope-option"><input type="radio" name="searchScope" value="all" checked> 标题+正文</label>
             <label class="scope-option"><input type="radio" name="searchScope" value="title"> 仅标题</label>
             <label class="scope-option"><input type="radio" name="searchScope" value="body"> 仅正文</label>
         </div>
-        <label class="filter-check"><input type="checkbox" id="bodyOnly"> 仅有全文</label>
+        <label class="filter-check filter-check--content" id="bodyOnlyWrap"><input type="checkbox" id="bodyOnly"> 仅有全文</label>
     </div>
 </section>
 </div><!-- /.app-sidebar -->
