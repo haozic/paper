@@ -2720,6 +2720,15 @@ body.is-offline .offline-bar { display: block; }
 .home-search-form { min-height: 62px; border-radius: 14px; }
 .home-search-form button { border-radius: 9px; }
 .home-latest { margin-bottom: 34px; }
+.home-body { flex: none; }
+.home-body > .home-section-heading { width: 100%; }
+.home-latest { padding-top: 8px; }
+.home-latest-item { display: flex; flex-direction: column; justify-content: center; min-height: 126px; }
+.magazine-card { cursor: default; }
+.magazine-card:hover { transform: none; box-shadow: 0 5px 20px rgba(49,37,23,.06); }
+.mag-cover { position: relative; }
+.mag-info h2 { font-size: 22px; }
+.mag-desc { min-height: 2.8em; }
 .home-latest-item { min-height: 104px; padding: 18px; border-radius: 14px; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
 .home-latest-item:hover { transform: translateY(-2px); }
 .home-body { padding-top: 16px; }
@@ -2767,6 +2776,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
     .home-latest { margin-bottom: 22px; }
     .home-latest-item { min-height: 0; }
     .ap-title { font-size: 23px; }
+    .magazine-card { cursor: pointer; }
 }
 
 .update-toast {

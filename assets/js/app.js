@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101d';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101e';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -857,12 +857,15 @@ function openGlobalSearch(initialQuery) {
 async function loadHomeLatest() {
     const host = document.getElementById('homeLatestList');
     if (!host) return;
-    if (!await loadSearchIndex()) { host.textContent = '最新文章暂不可用'; return; }
-    const rows = state.searchIndex.rows, picked = {};
-    rows.forEach(r => { if (r && r.length >= 5 && !picked[r[0]] && r[3] !== '本期导读') picked[r[0]] = r; });
+    let picked;
+    try {
+        const resp = await fetch(dataUrl('data/latest.json'));
+        if (!resp.ok) throw new Error('latest unavailable');
+        picked = await resp.json();
+    } catch (e) { host.textContent = '最新文章暂不可用'; return; }
     host.innerHTML = MAGAZINE_ORDER.map(k => {
         const r = picked[k]; if (!r) return '';
-        return `<button class="home-latest-item" data-mag="${escHtml(k)}" data-url="${encodeURIComponent(r[4])}"><span>${escHtml(MAGAZINES[k].name)} · ${r[1]}年第${r[2]}期</span><strong>${escHtml(r[3])}</strong></button>`;
+        return `<button class="home-latest-item" data-mag="${escHtml(k)}" data-url="${encodeURIComponent(r.u)}"><span>${escHtml(MAGAZINES[k].name)} · ${r.y}年第${r.i}期</span><strong>${escHtml(r.t)}</strong></button>`;
     }).join('');
     host.onclick = e => { const item=e.target.closest('.home-latest-item'); if(!item)return; enterMagazine(item.dataset.mag); showArticle(item.dataset.url); };
 }

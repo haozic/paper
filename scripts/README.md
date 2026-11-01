@@ -71,6 +71,9 @@ python scripts\check_data.py --dedup
 python scripts\build_search_index.py
 python scripts\build_search_index.py --check
 
+# 更新首页每刊最新文章快捷入口（改了 meta.json 后执行）
+python scripts\build_home_latest.py
+
 # 正文数据重建：years/<年>.json → issues/<年>-<期>.json 分片，并丢弃不可达正文
 python scripts\rebuild_data.py            # 预演，只报告不写盘
 python scripts\rebuild_data.py --apply    # 实际写盘（会重建 issues/ 与 article_index.json）
