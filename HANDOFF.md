@@ -9,7 +9,7 @@
 ### 验收与下一步
 
 - 用正式 HTML/CSS 的 Chrome 隔离夹具在 320px、390px、1280px 检查栏目卡片内边距、长标题换行、底栏位置及横向溢出：手机两套底栏均距视口底部 2px，卡片计算内边距为 `16px 20px`，无横向溢出。`node --check`、CSS 解析、`git diff --check` 通过，临时文件已清理。
-- 代码已推送 GitHub `main`，远端与本地提交一致。首次线上检查时 HTTP 200 但尚未引用 `20261102b`，需要稍后再次确认 Cloudflare Pages 部署。
+- 代码已推送 GitHub `main`，远端与本地提交一致。Cloudflare Pages 稍后返回 HTTP 200，首页 HTML 已引用 `20261102b` 资源。
 
 ### 踩过的坑
 
