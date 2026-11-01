@@ -67,6 +67,10 @@ python scripts\check_data.py
 # 体检 + 就地去重（重复条目按 URL 去重）
 python scripts\check_data.py --dedup
 
+# 重建跨刊标题索引（data/search_index.json 是派生产物，改了 meta.json 必做）
+python scripts\build_search_index.py
+python scripts\build_search_index.py --check
+
 # 正文数据重建：years/<年>.json → issues/<年>-<期>.json 分片，并丢弃不可达正文
 python scripts\rebuild_data.py            # 预演，只报告不写盘
 python scripts\rebuild_data.py --apply    # 实际写盘（会重建 issues/ 与 article_index.json）
@@ -130,6 +134,7 @@ python scripts\make_icons.py
 | 脚本 | 作用 | 何时用 |
 | --- | --- | --- |
 | `check_data.py` | 体检三刊的 meta / 正文分片 / counts / article_index 一致性 + 目录顺序（对照官网快照） | 每次抓取后；怀疑数据异常时 |
+| `build_search_index.py` | 从三份 `meta.json` 生成跨刊标题索引 `data/search_index.json` | 改了 `meta.json` 之后；详见 [§13](#13-跨刊标题索引) |
 | `rebuild_data.py` | 把正文重分片为 `issues/<年>-<期>.json`，丢弃不可达正文，瘦身 article_index | 迁移到分片布局时；怀疑正文文件过大时 |
 | `repair_empty_urls.py` | 修复 `u` 字段为空的条目 | 体检报出空 URL 时 |
 | `refresh_sections.py` | 只抓目录页刷新板块名（不重下正文、不重建分片） | 板块页出现"目录/评论"假板块，或整期无板块时 |
@@ -569,6 +574,10 @@ python scripts\scrape_magazines.py qs 2026 21
 python scripts\scrape_magazines.py hqwg 2026 20
 python scripts\scrape_magazines.py djyj 2026 10
 
+# 2.4 重建跨刊标题索引（改了 meta.json 必做：先升 INDEX_VERSION，再重新生成）
+python scripts\build_search_index.py
+python scripts\build_search_index.py --check
+
 # 2.5 体检数据（期号覆盖 / 重复 / 正文缺失 / 分片与 counts 一致性）
 python scripts\check_data.py
 
@@ -597,7 +606,7 @@ git push origin main
 ```
 
 > 缓存破坏五件套缺一不可，否则 Cloudflare 的 `immutable` 缓存会让用户看不到新内容。
-> 详细说明见 [`docs/UPDATE_FLOW.md` §2.6](../docs/UPDATE_FLOW.md)。
+> 详细说明见 [`docs/UPDATE_FLOW.md` §2.7](../docs/UPDATE_FLOW.md)。
 
 ---
 
@@ -625,7 +634,7 @@ python scripts\build_search_index.py --check
 # 内置自检（14 条，含 4 条反向自检）
 python scripts\build_search_index.py --self-test
 
-# 打印各刊每期正文分片的实测均值字节，供 app.js 的 BODY_AVG_BYTES 常量对账
+# 打印各刊每期正文分片的实测均值字节（供后续任务引入的 app.js BODY_AVG_BYTES 常量对账）
 python scripts\build_search_index.py --print-avg
 ```
 

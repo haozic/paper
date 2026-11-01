@@ -216,47 +216,76 @@ def check_search_index():
         print(f'    !! 缺少 {path}（跑一次 python scripts/build_search_index.py 生成）')
         return 1
 
-    size = os.path.getsize(full)
-    with open(full, encoding='utf-8') as f:
-        idx = json.load(f)
+    try:
+        size = os.path.getsize(full)
+        with open(full, encoding='utf-8') as f:
+            idx = json.load(f)
+    except (OSError, ValueError) as e:
+        # 文件被截断 / 半写 / 读不了：打一行告警后继续，不要带 traceback 中止整个体检
+        print(f'    !! 索引文件读不了或内容损坏：{e}')
+        return 1
 
     rows = idx.get('rows') or []
     cols = idx.get('cols') or []
     bad = 0
 
-    # S2 逐行可寻址：先建 (mag) -> {(y,i,u)} 的集合
-    by_mag = {}
+    # 三份 meta 只解析一遍，S1/S2 复用同一批 list
+    metas = {}
     for key, _name, meta_path, _issues in MAGAZINES:
-        meta = load(meta_path) or []
-        by_mag[key] = set((a['y'], a['i'], a['u']) for a in meta)
+        metas[key] = load(meta_path) or []
+
+    # S2 逐行可寻址：先建 (mag) -> {(y,i,u)} 的集合，
+    # 以及 (mag) -> {(y,i,u): {该条目的标题们}}，供标题一致性子检查用
+    by_mag = {}
+    titles_by_mag = {}
+    for key, meta in metas.items():
+        keys = set()
+        titles = {}
+        for a in meta:
+            k3 = (a['y'], a['i'], a['u'])
+            keys.add(k3)
+            titles.setdefault(k3, set()).add(a.get('t'))
+        by_mag[key] = keys
+        titles_by_mag[key] = titles
 
     # S1 行数
-    want_rows = sum(len(load(mp) or []) for _k, _n, mp, _i in MAGAZINES)
+    want_rows = sum(len(m) for m in metas.values())
     if len(rows) != want_rows:
         print(f"    !! S1 行数不符：索引 {len(rows)} 行，三刊 meta 合计 {want_rows} 行")
         bad += 1
     else:
         print(f'    S1 行数一致：{len(rows)} 行')
 
-    # S2 逐行可寻址
+    # S2 逐行可寻址（并核对标题列：前端真正消费的就是标题这一列）
     missing = 0
     first_bad = None
+    title_bad = 0
+    first_title_bad = None
     for row in rows:
         if len(row) != 5:
             missing += 1
             if first_bad is None:
                 first_bad = row
             continue
-        mag, y, i, _t, u = row
-        if (y, i, u) not in by_mag.get(mag, set()):
+        mag, y, i, t, u = row
+        k3 = (y, i, u)
+        if k3 not in by_mag.get(mag, set()):
             missing += 1
             if first_bad is None:
                 first_bad = row
+            continue
+        if t not in titles_by_mag.get(mag, {}).get(k3, set()):
+            title_bad += 1
+            if first_title_bad is None:
+                first_title_bad = row
     if missing:
         print(f'    !! S2 有 {missing} 行在 meta 中找不到对应条目，示例 {first_bad}')
         bad += 1
-    else:
-        print('    S2 逐行可寻址：全部命中')
+    if title_bad:
+        print(f'    !! S2 有 {title_bad} 行标题与 meta 不一致，示例 {first_title_bad}')
+        bad += 1
+    if not missing and not title_bad:
+        print('    S2 逐行可寻址：全部命中（含标题一致）')
 
     # S3 同一刊物内 URL 无重复
     # 注意：**跨刊**允许重复 —— 实测三刊 meta 合计 7415 行、唯一 URL 7413 个，
@@ -343,7 +372,6 @@ def main():
     print(f'板块名体检: 兜底值 {ph_total} 条   未归一旧写法 {alias_total} 条')
 
     order_bad = check_catalog_order()
-    index_bad = check_search_index()
 
     if dedup and total_dup:
         print('\n开始去重...')
@@ -369,8 +397,13 @@ def main():
     elif dedup:
         print('\n无需去重。')
 
+    # 索引体检放在去重之后：去重一旦改了 meta，索引随即变陈旧，
+    # 退出码要如实报 1（提示「meta 变了，要重建索引」）
+    index_bad = check_search_index()
+    return index_bad
+
 
 if __name__ == '__main__':
     if hasattr(sys.stdout, 'reconfigure'):
         sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-    main()
+    sys.exit(1 if main() else 0)

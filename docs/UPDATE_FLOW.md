@@ -71,7 +71,17 @@ python scripts\scrape_magazines.py djyj 2026 10
   党建研究: 封面图已更新 (123456 bytes)
 ```
 
-### 2.4 验证数据
+### 2.4 重建跨刊标题索引
+
+**重建跨刊标题索引**：`python scripts\build_search_index.py`
+（先升 `scripts\build_search_index.py` 里的 `INDEX_VERSION`，再运行；
+然后 `python scripts\build_search_index.py --check` 确认与 meta 一致）
+
+> `data/search_index.json` 由三份 `meta.json` 派生，是派生产物。
+> 改了 `meta.json` 就要重建这一步。本步要在 §2.5 验证数据之前完成
+> （否则体检会报「S1 行数不符」），也要在 §2.8 提交之前完成。
+
+### 2.5 验证数据
 
 ```bash
 # 数据体检：期号覆盖 / 重复条目 / 正文缺失 / 分片与 counts 一致性
@@ -90,9 +100,19 @@ python scripts/check_data.py
 
 [counts.json] 校验
     红旗文稿: 文章 2265 篇 / 期 164 期  一致
+
+[search_index] 跨刊标题索引
+    S1 行数一致：7415 行
+    S2 逐行可寻址：全部命中（含标题一致）
+    S3 同一刊物内 URL 无重复
+    S4 体积 1000280 字节（上限 1572864）
+    索引问题数: 0
 ```
 
-期望看到：**最新期号已更新、重复条目为 0、无"正文缺失"告警、counts 与 meta 一致**。
+> 期望看到：**最新期号已更新、重复条目为 0、无"正文缺失"告警、counts 与 meta 一致、
+> 索引与 meta 一致（`索引问题数: 0`）**。
+> 改了 `meta.json` 却没有重建索引时，`check_data.py` 会报 `!! S1 行数不符`
+> 并以非 0 退出码退出 —— 这时先回 §2.4 重建索引，不要直接往下走。
 
 > 2026-10-30 起体检脚本多断言两项 **板块名**：兜底值（"目 录"/"评论"，不是真实栏目）
 > 与归一表里的旧写法（同一栏目改过名）都必须为 **0 条**。
@@ -116,7 +136,7 @@ python scripts/check_data.py
 > `check_sw_navigate.py` 是 2026-10-30 新增的：那次"首页入口打不开"的根因就在
 > SW 的导航处理上（详见 [§4.9](#49-首页入口打不开空白没有样式)）。
 
-### 2.5 同步 index.html
+### 2.6 同步 index.html
 
 打开 `index.html`，找到"关于本站 → 数据更新"区块（约 226 行）：
 
@@ -135,7 +155,7 @@ python scripts/check_data.py
 1. 采集日期（用当天日期）
 2. 三本杂志的最新期号
 
-### 2.6 同步缓存破坏三件套
+### 2.7 同步缓存破坏三件套
 
 **这是最容易遗漏的关键步骤**。如果不同步，用户会因为 `immutable` 缓存而看不到新内容。
 
@@ -180,7 +200,7 @@ python scripts/check_data.py
 git grep -n "20261030c" -- ':!docs/UPDATE_FLOW.md'
 ```
 
-### 2.7 提交
+### 2.8 提交
 
 ```bash
 git add -A
@@ -193,7 +213,7 @@ git status
 git commit -m "更新党建研究2026年第10期"
 ```
 
-### 2.8 推送
+### 2.9 推送
 
 ```bash
 git push origin main
@@ -201,7 +221,7 @@ git push origin main
 
 **推送成功后**：Cloudflare Pages 在 1–2 分钟内自动部署。
 
-### 2.9 验证线上
+### 2.10 验证线上
 
 ```bash
 # 等 1–2 分钟后，用 curl 检查
@@ -211,7 +231,7 @@ curl -s https://your-domain.pages.dev/data/meta.json | head -c 200
 
 或者直接打开浏览器**强制刷新**（Ctrl+Shift+R / Cmd+Shift+R），进入"关于本站"查看"数据更新"是否变成最新日期。
 
-### 2.10 验证 Service Worker（离线能力）
+### 2.11 验证 Service Worker（离线能力）
 
 站点自 2026-10-30 起带 Service Worker（`sw.js`），发版后多了一步验证：
 
@@ -242,15 +262,6 @@ curl -I https://your-domain.pages.dev/sw.js
 
 正文 md 缓存跨版本保留，所以**每次发版不会重下 85 MB 正文**；而 meta / 索引会随版本清空重下，
 保证不会把上一期的目录当成本期。
-
-### 2.11 重建跨刊标题索引
-
-**重建跨刊标题索引**：`python scripts\build_search_index.py`
-（先升 `scripts\build_search_index.py` 里的 `INDEX_VERSION`，再运行；
-然后 `python scripts\build_search_index.py --check` 确认与 meta 一致）
-
-> `data/search_index.json` 由三份 `meta.json` 派生，是派生产物。
-> 改了 `meta.json` 就要重建这一步，必须在 §2.7 提交之前完成。
 
 ---
 
