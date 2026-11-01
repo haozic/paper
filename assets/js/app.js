@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101r';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101s';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -1057,6 +1057,7 @@ async function showArticle(encUrl, replaceHist) {
 
     state.currentArticleUrl = url;
     state.currentArticleIdx = idx;
+    closeReaderNavMenu();
 
     document.getElementById('articleTitle').textContent = a.t;
     const toc = document.getElementById('articleToc');
@@ -1079,6 +1080,8 @@ async function showArticle(encUrl, replaceHist) {
 
     const bodyEl = document.getElementById('articleBody');
     document.body.classList.add('article-active');
+    document.getElementById('backToTopBtn').classList.remove('show');
+    document.getElementById('readerNavShortcut').classList.remove('show');
     window.scrollTo(0, 0);
 
     const magKey = state.currentMag;
@@ -1264,6 +1267,18 @@ function goBack() {
     }
 }
 
+function navigateFromReader(destination) {
+    const magKey = state.currentMag;
+    closeArticlePage();
+    if (magKey) history.replaceState({ mag: magKey }, '', `#m=${magKey}`);
+    if (destination === 'home' || !magKey) {
+        goHome();
+        return;
+    }
+    document.body.classList.remove('section-active', 'about-active');
+    switchMode('catalog');
+}
+
 function closeArticlePage() {
     // 关闭前先记录当前阅读位置（此时页面仍在 article-active 状态，滚动高度有效）
     if (document.body.classList.contains('article-active')) {
@@ -1280,6 +1295,8 @@ function closeArticlePage() {
     if (ring) ring.style.strokeDashoffset = RING_CIRCUMFERENCE;
     var btt = document.getElementById('backToTopBtn');
     if (btt) btt.classList.remove('show');
+    document.getElementById('readerNavShortcut').classList.remove('show');
+    closeReaderNavMenu();
     closeReadingTrays();
     // 隐藏"继续阅读"提示条与文末导航（下次进入文章时再按需显示）
     var banner = document.getElementById('articleContinue');
@@ -1432,6 +1449,7 @@ function toggleArticleSettings(e) {
     const panel = document.getElementById('articleSettingsPanel');
     const btn = document.getElementById('articleSettingsBtn');
     const isOpen = menu.hidden;
+    closeReaderNavMenu();
     closeReadingTrays();
     menu.hidden = !isOpen;
     panel.classList.toggle('show', isOpen);
@@ -1452,10 +1470,31 @@ function closeReadingTrays() {
     });
 }
 
+function closeReaderNavMenu() {
+    const menu = document.getElementById('readerNavMenu');
+    const button = document.getElementById('readerNavShortcut');
+    if (menu) menu.hidden = true;
+    if (button) {
+        button.classList.remove('active');
+        button.setAttribute('aria-expanded', 'false');
+    }
+}
+
+function toggleReaderNavMenu() {
+    const menu = document.getElementById('readerNavMenu');
+    const button = document.getElementById('readerNavShortcut');
+    const opening = menu.hidden;
+    closeReadingTrays();
+    menu.hidden = !opening;
+    button.classList.toggle('active', opening);
+    button.setAttribute('aria-expanded', String(opening));
+}
+
 function toggleIssueContents() {
     const menu = document.getElementById('readingIssueMenu');
     const btn = document.getElementById('articleIssueBtn');
     const isOpen = menu.hidden;
+    closeReaderNavMenu();
     closeReadingTrays();
     menu.hidden = !isOpen;
     btn.classList.toggle('active', isOpen);
@@ -1522,6 +1561,9 @@ function initReadingSettingsListeners() {
     document.addEventListener('click', (e) => {
         const dock = document.getElementById('readingDock');
         if (dock && !dock.contains(e.target)) closeReadingTrays();
+        const shortcut = document.getElementById('readerNavShortcut');
+        const navMenu = document.getElementById('readerNavMenu');
+        if (shortcut && navMenu && !shortcut.contains(e.target) && !navMenu.contains(e.target)) closeReaderNavMenu();
         const toc = document.getElementById('articleToc');
         const toggle = document.getElementById('readerTocToggle');
         if (toc && toc.classList.contains('is-open') && !toc.contains(e.target) && !toggle.contains(e.target)) {
@@ -1943,6 +1985,8 @@ function updateReadingProgress() {
     // 返回顶部按钮：滚动超过 300px 时显示
     const btn = document.getElementById('backToTopBtn');
     if (btn) btn.classList.toggle('show', scrollTop > 300);
+    document.getElementById('readerNavShortcut').classList.toggle('show', scrollTop > 300);
+    if (scrollTop <= 300) closeReaderNavMenu();
     // 记录阅读位置（内部按 1.5 秒节流）
     maybeSaveReadPosition();
 }
@@ -2568,6 +2612,10 @@ async function init() {
     // 键盘
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
+            if (!document.getElementById('readerNavMenu').hidden) {
+                closeReaderNavMenu();
+                return;
+            }
             // 先关闭阅读目录或设置面板
             if (!document.getElementById('readingOperationMenu').hidden || !document.getElementById('readingIssueMenu').hidden) {
                 closeReadingTrays();
@@ -2623,6 +2671,7 @@ async function init() {
         const panelOpen = document.getElementById('articleSettingsPanel');
         if (document.body.classList.contains('article-active') &&
             !(panelOpen && panelOpen.classList.contains('show')) && document.getElementById('readingIssueMenu').hidden &&
+            document.getElementById('readerNavMenu').hidden &&
             !document.getElementById('articleToc').classList.contains('is-open') &&
             (e.key === 'ArrowLeft' || e.key === 'ArrowRight' ||
              e.key === 'j' || e.key === 'J' || e.key === 'k' || e.key === 'K')) {
