@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261102b';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261102c';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -195,7 +195,7 @@ function enterMagazine(magKey) {
     // 重置视图
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('catalogView').classList.add('active');
-    document.querySelectorAll('.nav-tab, .bn-item').forEach(btn => {
+    document.querySelectorAll('.nav-tab, .bn-item[data-mode]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.mode === 'catalog');
     });
 
@@ -850,10 +850,19 @@ function renderCrossMagResults() {
 }
 
 /* 首页与杂志页共用的文章搜索 */
+function syncGlobalSearchViewport() {
+    const box = document.getElementById('globalSearch');
+    if (!box || box.hidden) return;
+    const viewport = window.visualViewport;
+    box.style.setProperty('--gs-viewport-top', (viewport ? viewport.offsetTop : 0) + 'px');
+    box.style.setProperty('--gs-viewport-height', (viewport ? viewport.height : window.innerHeight) + 'px');
+}
+
 function openGlobalSearch(initialQuery) {
     const box = document.getElementById('globalSearch');
     if (!box) return;
     box.hidden = false;
+    syncGlobalSearchViewport();
     document.body.classList.add('global-search-active');
     state.globalSearchMag = state.currentMag || 'all';
     updateGlobalSearchScope();
@@ -865,7 +874,13 @@ function openGlobalSearch(initialQuery) {
         input.focus();
         input.select();
     }
+    requestAnimationFrame(syncGlobalSearchViewport);
     runGlobalSearch();
+}
+
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', syncGlobalSearchViewport);
+    window.visualViewport.addEventListener('scroll', syncGlobalSearchViewport);
 }
 
 function closeGlobalSearch() {
@@ -1358,7 +1373,10 @@ const READING_PAPER_KEY = 'reading_paper';
 
 /* 纸张配色：仅浅色模式有意义，深色模式下自动失效 */
 const PAPER_PRESETS = {
-    default: null,
+    default: {
+        bg: '#f2f0e9', bg2: '#e9e6dc', card: '#f8f6f0', text: '#2b2b28',
+        text2: '#5c5d59', text3: '#858680', border: '#deddd5', border2: '#d1d0c6'
+    },
     warm: {
         bg: '#f3ecd7', bg2: '#ece2c6', card: '#f7f2e0', text: '#3b3429',
         text2: '#756b58', text3: '#9a8f78', border: '#ded3b6', border2: '#d0c3a0'
@@ -2455,7 +2473,7 @@ function switchMode(mode) {
     state.isSearching = false;
     state.searchToken++;                 // 取消尚未结束的正文搜索
     document.getElementById('searchInput').value = '';
-    document.querySelectorAll('.nav-tab, .bn-item').forEach(btn => {
+    document.querySelectorAll('.nav-tab, .bn-item[data-mode]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.mode === mode);
     });
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -2564,7 +2582,7 @@ async function init() {
     initReadingSettingsListeners();
 
     // 导航按钮
-    document.querySelectorAll('.nav-tab, .bn-item').forEach(btn => {
+    document.querySelectorAll('.nav-tab, .bn-item[data-mode]').forEach(btn => {
         btn.addEventListener('click', () => switchMode(btn.dataset.mode));
     });
 

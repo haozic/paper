@@ -6,13 +6,13 @@
 <meta name="theme-color" content="#96382f">
 <meta name="description" content="党内刊物检索系统 — 求是、红旗文稿、党建研究">
 <title>党内刊物</title>
-<link rel="stylesheet" href="assets/css/style.css?v=20261102b">
-<link rel="stylesheet" href="assets/css/books.css?v=20261102b">
-<link rel="stylesheet" href="assets/css/one.css?v=20261102b">
-<link rel="stylesheet" href="assets/css/system.css?v=20261102b">
-<link rel="stylesheet" href="assets/css/modern.css?v=20261102b">
-<link rel="manifest" href="manifest.webmanifest?v=20261102b">
-<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261102b">
+<link rel="stylesheet" href="assets/css/style.css?v=20261102c">
+<link rel="stylesheet" href="assets/css/books.css?v=20261102c">
+<link rel="stylesheet" href="assets/css/one.css?v=20261102c">
+<link rel="stylesheet" href="assets/css/system.css?v=20261102c">
+<link rel="stylesheet" href="assets/css/modern.css?v=20261102c">
+<link rel="manifest" href="manifest.webmanifest?v=20261102c">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261102c">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2396382f' stroke-width='1.8'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
 <script>
 (function(){try{
@@ -194,16 +194,16 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 <div id="app">
 <div class="app-sidebar">
 <div class="sidebar-header">
-    <button class="header-home-btn" onclick="goHome()" title="返回首页" aria-label="返回首页"><svg class="icon"><use href="#i-home"/></svg></button>
-    <button class="header-search-btn" id="magSearchToggle" onclick="openGlobalSearch()" title="搜索文章" aria-label="搜索文章" aria-controls="globalSearch searchBar" aria-expanded="false"><svg class="icon"><use href="#i-search"/></svg></button>
-    <button class="header-about-btn" onclick="showAboutPage()" title="关于" aria-label="关于"><svg class="icon"><use href="#i-info"/></svg></button>
-    <div class="sidebar-brand" hidden>
+    <div class="sidebar-brand">
         <h1 id="magTitle">—</h1>
         <div class="sidebar-meta">
             <span class="app-subtitle"><span id="totalCount">-</span> 篇文章</span>
             <span class="search-status" id="searchStatus">加载中...</span>
         </div>
     </div>
+    <button class="header-home-btn" onclick="goHome()" title="返回首页" aria-label="返回首页"><svg class="icon"><use href="#i-home"/></svg></button>
+    <button class="header-search-btn" id="magSearchToggle" onclick="openGlobalSearch()" title="搜索文章" aria-label="搜索文章" aria-controls="globalSearch searchBar" aria-expanded="false"><svg class="icon"><use href="#i-search"/></svg></button>
+    <button class="header-about-btn" onclick="showAboutPage()" title="关于" aria-label="关于"><svg class="icon"><use href="#i-info"/></svg></button>
 </div>
 
 <section class="search-bar" id="searchBar">
@@ -257,6 +257,9 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 </div><!-- /.app-main -->
 
 <nav class="bottom-nav mobile-only">
+    <button class="bn-item bn-home" type="button" onclick="goHome()" aria-label="网站首页">
+        <svg class="icon"><use href="#i-home"/></svg><span class="bn-label">首页</span>
+    </button>
     <button class="bn-item active" data-mode="catalog">
         <svg class="icon"><use href="#i-list"/></svg><span class="bn-label">目录</span>
     </button>
@@ -461,6 +464,6 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     </div>
 </div>
 
-<script src="assets/js/app.js?v=20261102b"></script>
+<script src="assets/js/app.js?v=20261102c"></script>
 </body>
 </html>
