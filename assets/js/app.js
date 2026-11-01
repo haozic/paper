@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101g';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101h';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -169,6 +169,8 @@ function enterMagazine(magKey) {
     state.currentMode = 'section';
     state.searchResults = [];
     state.currentPage = 1;
+    document.body.classList.remove('mag-search-open');
+    document.getElementById('magSearchToggle').setAttribute('aria-expanded', 'false');
 
     // 显示应用页
     document.body.classList.add('mag-active');
@@ -200,7 +202,7 @@ function enterMagazine(magKey) {
 
 function goHome() {
     // 关闭所有覆盖层
-    document.body.classList.remove('article-active', 'section-active', 'about-active', 'mag-active');
+    document.body.classList.remove('article-active', 'section-active', 'about-active', 'mag-active', 'mag-search-open');
     state.currentMag = null;
 
     // 重置杂志颜色
@@ -1882,6 +1884,17 @@ function fallbackCopyText(text, cb) {
 }
 
 /* ===== 快捷键：/ 与 Ctrl/⌘+K 聚焦搜索 ===== */
+function toggleMagazineSearch(forceOpen) {
+    const open = typeof forceOpen === 'boolean' ? forceOpen : !document.body.classList.contains('mag-search-open');
+    document.body.classList.toggle('mag-search-open', open);
+    const button = document.getElementById('magSearchToggle');
+    if (button) button.setAttribute('aria-expanded', String(open));
+    if (open) {
+        const input = document.getElementById('searchInput');
+        if (input) { input.focus(); input.select(); }
+    }
+    updateStickyOffsets();
+}
 function focusSearch() {
     if (!state.currentMag) return;                    // 首页没有搜索框
     const input = document.getElementById('searchInput');
@@ -1893,12 +1906,11 @@ function focusSearch() {
         goBack();                                    // 先退回杂志视图
         setTimeout(function () {
             const i = document.getElementById('searchInput');
-            if (i) { i.focus(); i.select(); }
+            if (i) toggleMagazineSearch(true);
         }, 150);
         return;
     }
-    input.focus();
-    input.select();
+    toggleMagazineSearch(true);
 }
 
 /* ===== 关于页面 ===== */
@@ -2565,6 +2577,11 @@ async function init() {
             if (si && document.activeElement === si) {
                 si.blur();
                 si.value = state.lastQuery || '';
+                toggleMagazineSearch(false);
+                return;
+            }
+            if (document.body.classList.contains('mag-search-open')) {
+                toggleMagazineSearch(false);
                 return;
             }
             if (document.body.classList.contains('article-active') ||

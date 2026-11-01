@@ -89,6 +89,54 @@ body.mag-active #app { background: var(--library-bg); }
   .content { padding: 22px 18px 80px; }
 }
 html[data-theme="dark"] .home-page, html[data-theme="dark"] body.mag-active #app { --library-bg: #202024; --library-ink: #f3f3f5; --library-muted: #aaaab2; background: var(--library-bg); }
+/* A quieter shelf with complete, uncropped covers. */
+.home-page { background: #fafafa; }
+.home-header { padding-top: 28px; padding-bottom: 8px; }
+.home-header-inner, .home-search, .home-body > .home-section-heading, .home-latest { max-width: 920px; }
+.home-eyebrow { display: none; }
+.home-title { font-size: 32px; letter-spacing: -.02em; margin-bottom: 3px; }
+.home-subtitle { font-size: 13px; }
+.home-search { margin-top: 16px; margin-bottom: 30px; }
+.home-search-form { max-width: 620px; min-height: 48px; box-shadow: none; }
+.home-section-heading { margin-bottom: 15px; }
+.home-section-heading h2 { font-size: 19px; }
+.home-body { padding-bottom: 26px; }
+.magazine-grid { max-width: 920px; gap: 30px; }
+.mag-cover { width: 100%; max-width: 210px; aspect-ratio: 3 / 4; background-size: contain; background-color: #fff; box-shadow: 0 5px 16px rgba(20,20,24,.11); }
+.magazine-card:hover .mag-cover, .magazine-card:focus-visible .mag-cover { transform: translateY(-3px); box-shadow: 0 9px 20px rgba(20,20,24,.16); }
+.mag-info { padding-top: 13px; }
+.mag-info h2 { font-size: 17px; }
+.mag-desc { display: none; }
+.home-latest { margin-bottom: 26px; }
+.home-latest-list { display: block; }
+.home-latest-item { display: grid; grid-template-columns: 175px minmax(0, 1fr); align-items: center; width: 100%; min-height: 0; padding: 10px 2px; border-bottom: 1px solid #e6e6e9; border-radius: 0; background: transparent; box-shadow: none; }
+.home-latest-item:hover { transform: none; box-shadow: none; background: transparent; }
+.home-latest-item span { margin: 0; }
+.home-latest-item strong { display: block; white-space: nowrap; text-overflow: ellipsis; font-size: 14px; }
+.home-guide-entry { max-width: 920px; }
+/* Search opens from the magazine header only when requested. */
+.header-search-btn { position: absolute; right: 62px; top: 36px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: transparent; color: var(--library-muted); cursor: pointer; }
+.header-search-btn:hover, body.mag-search-open .header-search-btn { background: var(--library-bg); color: var(--library-ink); }
+.header-search-btn .icon { width: 19px; height: 19px; }
+.search-bar { display: none; }
+body.mag-search-open .search-bar { display: block; }
+.reader-toolbar { position: static; box-shadow: none; }
+.article-page .back-to-top { position: static; transform: none; margin: 10px auto 40px; }
+.article-page .back-to-top.show { transform: none; }
+@media (min-width: 768px) {
+  .header-home-btn { right: 106px; }
+}
+@media (max-width: 767px) {
+  .home-header { padding: 25px 22px 8px; }
+  .home-title { font-size: 29px; }
+  .home-search { margin-bottom: 26px; }
+  .magazine-grid { gap: 18px; }
+  .magazine-card { flex-basis: 148px; }
+  .mag-cover { width: 148px; height: 200px; aspect-ratio: auto; }
+  .home-latest-item { grid-template-columns: 1fr; gap: 2px; padding: 9px 2px; }
+  .home-latest-item strong { font-size: 13px; }
+  .header-search-btn { top: 50%; right: 52px; transform: translateY(-50%); width: 32px; height: 32px; }
+}
 html[data-theme="dark"] .home-search-form, html[data-theme="dark"] .home-latest-item, html[data-theme="dark"] .app-sidebar, html[data-theme="dark"] .sidebar-header, html[data-theme="dark"] .search-bar, html[data-theme="dark"] .nav-tab.active, html[data-theme="dark"] .section-card, html[data-theme="dark"] .result-card, html[data-theme="dark"] .year-block { background: #2c2c31; border-color: #3c3c43; }
 html[data-theme="dark"] .nav-tabs { background: #202024; border-color: #3c3c43; }
 html[data-theme="dark"] .home-title, html[data-theme="dark"] .home-section-heading h2, html[data-theme="dark"] .mag-info h2, html[data-theme="dark"] .home-latest-item strong, html[data-theme="dark"] .sidebar-brand h1 { color: #f3f3f5; }

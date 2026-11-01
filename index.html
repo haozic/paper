@@ -9,10 +9,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=20261101g">
-<link rel="stylesheet" href="assets/css/books.css?v=20261101g">
-<link rel="manifest" href="manifest.webmanifest?v=20261101g">
-<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101g">
+<link rel="stylesheet" href="assets/css/style.css?v=20261101h">
+<link rel="stylesheet" href="assets/css/books.css?v=20261101h">
+<link rel="manifest" href="manifest.webmanifest?v=20261101h">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101h">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b0000' stroke-width='2'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
 <script>
 (function(){try{
@@ -224,6 +224,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 <div class="app-sidebar">
 <div class="sidebar-header">
     <button class="header-home-btn" onclick="goHome()" title="返回首页"><svg class="icon"><use href="#i-home"/></svg></button>
+    <button class="header-search-btn" id="magSearchToggle" onclick="toggleMagazineSearch()" title="搜索文章" aria-label="搜索文章" aria-controls="searchBar" aria-expanded="false"><svg class="icon"><use href="#i-search"/></svg></button>
     <button class="header-about-btn" onclick="showAboutPage()" title="关于"><svg class="icon"><use href="#i-info"/></svg></button>
     <div class="sidebar-brand">
         <h1 id="magTitle">—</h1>
@@ -284,11 +285,11 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 </div><!-- /.app-main -->
 
 <nav class="bottom-nav mobile-only">
-    <button class="bn-item active" data-mode="section">
-        <svg class="icon"><use href="#i-grid"/></svg><span class="bn-label">板块</span>
-    </button>
     <button class="bn-item" data-mode="catalog">
         <svg class="icon"><use href="#i-list"/></svg><span class="bn-label">目录</span>
+    </button>
+    <button class="bn-item active" data-mode="section">
+        <svg class="icon"><use href="#i-grid"/></svg><span class="bn-label">板块</span>
     </button>
     <button class="bn-item" data-mode="favorites">
         <svg class="icon"><use href="#i-bookmark"/></svg><span class="bn-label">收藏</span>
@@ -480,6 +481,6 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     </div>
 </div>
 
-<script src="assets/js/app.js?v=20261101g"></script>
+<script src="assets/js/app.js?v=20261101h"></script>
 </body>
 </html>
