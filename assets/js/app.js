@@ -1463,7 +1463,19 @@ function initReadingSettingsListeners() {
         var asb = document.getElementById('articleSettingsBtn');
         if (asb) asb.classList.remove('active');
     });
-    // 滚动时不关闭面板（面板已为 fixed，会始终保持在屏幕上）
+    // 滚动时自动收起设置面板：面板是 position:fixed 的浮层，
+    // 不收起会一直挡住正文（此前实测滚动时仍悬浮遮挡）。
+    let scrollHideTimer = null;
+    window.addEventListener('scroll', function () {
+        const panel = document.getElementById('articleSettingsPanel');
+        if (!panel || !panel.classList.contains('show')) return;
+        if (scrollHideTimer) clearTimeout(scrollHideTimer);
+        scrollHideTimer = setTimeout(function () {
+            panel.classList.remove('show');
+            const btn = document.getElementById('articleSettingsBtn');
+            if (btn) btn.classList.remove('active');
+        }, 250);
+    }, { passive: true });
 }
 
 /* ===== 阅读位置记忆 ===== */
@@ -2197,7 +2209,7 @@ function toggleYear(year) {
             const cin = parseInt(ik) <= 24 ? CN[parseInt(ik) - 1] : ik;
             html += `<div class="issue-row collapsed" id="ir-${year}-${ik}">
                 <div class="ir-header" data-year="${year}" data-issue="${ik}">
-                    <span class="ir-title">${year}年第${cin}期</span>
+                    <span class="ir-title">第${cin}期</span>
                     <div class="ir-right">
                         <span class="ir-count">${issueTotal}篇</span>
                         <span class="ir-toggle">${chevron}</span>

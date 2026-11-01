@@ -2657,3 +2657,60 @@ body.is-offline .offline-bar { display: block; }
     cursor: pointer;
 }
 .update-toast.show { display: block; }
+
+/* ===== 打印 ===== */
+@media print {
+    .app-sidebar,
+    .nav-tabs,
+    .bottom-nav,
+    .search-bar,
+    .offline-bar,
+    .update-toast,
+    .back-to-top,
+    .ap-back-btn,
+    .ap-actions,
+    .article-settings-panel,
+    .ap-continue,
+    .home-page,
+    .global-search,
+    .pagination,
+    .filters {
+        display: none !important;
+    }
+    .app-main {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    /* 文章抬头要留：里面是标题与期号/字数；
+       打印稿没有标题就只是一堆匿名正文。只把返回键和操作按钮藏掉。 */
+    .article-page-header {
+        background: transparent !important;
+        border-bottom: 1px solid #999 !important;
+        padding: 0 0 8px !important;
+    }
+    .ap-title {
+        color: #000 !important;
+    }
+    /* 抬头与正文栏同宽，否则打印稿里标题居中、正文顶到纸边，两边对不齐 */
+    .ap-header-inner {
+        max-width: none !important;
+        padding: 0 !important;
+    }
+    .article-page-body {
+        max-width: none !important;
+        padding: 0 !important;
+        font-size: 12pt !important;
+        color: #000 !important;
+        background: #fff !important;
+    }
+    .article-page {
+        position: static !important;
+    }
+    .ap-related,
+    .article-page-footer {
+        display: block !important;
+    }
+    a[href]::after {
+        content: "";
+    }
+}
