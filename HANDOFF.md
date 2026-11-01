@@ -15,15 +15,14 @@
 
 ## 验收与限制
 
-- 本轮 `node --check assets/js/app.js`、`node --check sw.js`、`git -c core.whitespace=cr-at-eol diff --check` 已通过；提交前应再运行一次。
+- 本轮 `node --check assets/js/app.js`、`node --check sw.js`、`git -c core.whitespace=cr-at-eol diff --check` 已通过。
+- 已推送到 GitHub `main`，本轮布局提交为 `6e37c39`；`git ls-remote origin refs/heads/main` 已核对远端收到该提交。
 - 站点有访问密码门，本地浏览器无法直接查看登录后的视觉；此前临时移除遮罩的自动审批被拒绝，不能绕过。应以代码检查和用户登录后的线上观察为准。
 - 旧数据问题：红旗文稿有 1 篇标记有全文但正文缺失；党建研究 2026 年第 10 期目录有 31 篇文章但分片缺失。本轮没有改数据。
 
 ## 下一步
 
-1. 复查当前 diff，做最终代码检查。
-2. 提交并推送 GitHub `main`，轮询直到 push 完成，再验证本地和远端 commit 相同。
-3. 如后续可进入站点，检查手机/桌面首页、专题链接和正文文末三按钮的实际显示。
+1. 如后续可进入站点，检查手机/桌面首页、专题链接和正文文末三按钮的实际显示。
 
 ## 踩过的坑
 
