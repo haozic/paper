@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101z';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101aa';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -849,7 +849,7 @@ function renderCrossMagResults() {
     pagination.innerHTML = '<span class="page-info">共 ' + total + ' 条</span>';
 }
 
-/* 主页浮层：全屏三刊标题搜索 */
+/* 首页与杂志页共用的文章搜索 */
 function openGlobalSearch(initialQuery) {
     const box = document.getElementById('globalSearch');
     if (!box) return;
@@ -885,6 +885,8 @@ function updateGlobalSearchScope() {
     });
     const bodyButton = document.getElementById('globalBodySearch');
     if (bodyButton) bodyButton.hidden = !state.globalSearchMag || state.globalSearchMag === 'all';
+    const input = document.getElementById('globalSearchInput');
+    if (input) input.placeholder = state.globalSearchMag === 'all' ? '搜索三刊文章标题' : '搜索本刊文章标题';
 }
 
 function openBodySearchFromGlobal() {
@@ -908,7 +910,7 @@ async function runGlobalSearch() {
         count.textContent = '';
         return;
     }
-    count.textContent = '正在加载跨刊标题索引...';
+    count.textContent = '正在搜索…';
     const ok = await loadSearchIndex();
     if (!ok) {
         count.textContent = '索引不可用，请稍后再试或回到杂志内搜索';
@@ -921,13 +923,13 @@ async function runGlobalSearch() {
         : allResults;
     state.globalSearchResults = results;
     if (!results.length) {
-        count.textContent = '共 0 篇（关键词："' + query + '" ｜ 只匹配标题）';
+        count.textContent = '未找到匹配的文章';
         list.innerHTML = '<div class="loading"><div>所选刊物中没有匹配的文章</div></div>';
         return;
     }
     const groups = groupCrossMagResults(results);
     list.innerHTML = crossMagCardsHtml(groups, query, false);
-    count.textContent = '共 ' + results.length + ' 篇（关键词："' + query + '" ｜ 只匹配标题）';
+    count.textContent = '找到 ' + results.length + ' 篇文章';
 }
 
 function renderSearchPage() {

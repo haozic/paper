@@ -6,13 +6,13 @@
 <meta name="theme-color" content="#96382f">
 <meta name="description" content="党内刊物检索系统 — 求是、红旗文稿、党建研究">
 <title>党内刊物</title>
-<link rel="stylesheet" href="assets/css/style.css?v=20261101z">
-<link rel="stylesheet" href="assets/css/books.css?v=20261101z">
-<link rel="stylesheet" href="assets/css/one.css?v=20261101z">
-<link rel="stylesheet" href="assets/css/system.css?v=20261101z">
-<link rel="stylesheet" href="assets/css/modern.css?v=20261101z">
-<link rel="manifest" href="manifest.webmanifest?v=20261101z">
-<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101z">
+<link rel="stylesheet" href="assets/css/style.css?v=20261101aa">
+<link rel="stylesheet" href="assets/css/books.css?v=20261101aa">
+<link rel="stylesheet" href="assets/css/one.css?v=20261101aa">
+<link rel="stylesheet" href="assets/css/system.css?v=20261101aa">
+<link rel="stylesheet" href="assets/css/modern.css?v=20261101aa">
+<link rel="manifest" href="manifest.webmanifest?v=20261101aa">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101aa">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2396382f' stroke-width='1.8'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
 <script>
 (function(){try{
@@ -194,10 +194,10 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 <div id="app">
 <div class="app-sidebar">
 <div class="sidebar-header">
-    <button class="header-home-btn" onclick="goHome()" title="返回首页"><svg class="icon"><use href="#i-home"/></svg></button>
+    <button class="header-home-btn" onclick="goHome()" title="返回首页" aria-label="返回首页"><svg class="icon"><use href="#i-home"/></svg></button>
     <button class="header-search-btn" id="magSearchToggle" onclick="openGlobalSearch()" title="搜索文章" aria-label="搜索文章" aria-controls="globalSearch searchBar" aria-expanded="false"><svg class="icon"><use href="#i-search"/></svg></button>
-    <button class="header-about-btn" onclick="showAboutPage()" title="关于"><svg class="icon"><use href="#i-info"/></svg></button>
-    <div class="sidebar-brand">
+    <button class="header-about-btn" onclick="showAboutPage()" title="关于" aria-label="关于"><svg class="icon"><use href="#i-info"/></svg></button>
+    <div class="sidebar-brand" hidden>
         <h1 id="magTitle">—</h1>
         <div class="sidebar-meta">
             <span class="app-subtitle"><span id="totalCount">-</span> 篇文章</span>
@@ -442,17 +442,20 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     <div class="section-page-body" id="sectionPageBody"></div>
 </div>
 
-<!-- ===== 主页：三刊标题搜索浮层 ===== -->
-<div id="globalSearch" class="global-search" hidden>
+<!-- ===== 全站文章搜索 ===== -->
+<div id="globalSearch" class="global-search" role="dialog" aria-modal="true" aria-labelledby="globalSearchTitle" hidden>
     <div class="gs-panel">
         <div class="gs-head">
+            <div class="gs-title-row">
+                <h2 id="globalSearchTitle">搜索文章</h2>
+                <button class="gs-close" onclick="closeGlobalSearch()" title="关闭搜索" aria-label="关闭搜索"><svg class="icon"><use href="#i-close"/></svg></button>
+            </div>
             <div class="search-box gs-box">
                 <svg class="icon search-icon"><use href="#i-search"/></svg>
-                <input type="text" id="globalSearchInput" placeholder="在三刊标题中搜索..." autocomplete="off">
-                <button class="gs-close" onclick="closeGlobalSearch()" title="关闭"><svg class="icon"><use href="#i-close"/></svg></button>
+                <input type="search" id="globalSearchInput" placeholder="搜索文章标题" aria-label="搜索文章标题" autocomplete="off">
             </div>
-            <p class="gs-hint">搜索文章标题；选择刊物后可进入全文搜索</p>
         </div>
+        <p class="gs-hint">按标题搜索，选定刊物后可搜索正文</p>
         <div class="gs-filters" id="globalSearchFilters" aria-label="搜索范围">
             <button type="button" data-gs-mag="all" class="active">三刊</button>
             <button type="button" data-gs-mag="qs">求是</button>
@@ -465,6 +468,6 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     </div>
 </div>
 
-<script src="assets/js/app.js?v=20261101z"></script>
+<script src="assets/js/app.js?v=20261101aa"></script>
 </body>
 </html>
