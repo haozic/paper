@@ -713,11 +713,17 @@ check_data.py 新增 S1~S4：行数一致、逐行可寻址、URL 无重复、�
 
 ---
 
-### Task 3: 跨刊检索内核体检脚本 `scripts/check_search_upgrade.js`
+### Task 3: 跨刊检索内核体检脚本 `scripts/check_search_upgrade.js`（与 Task 4 合并为一次提交）
 
 **Files:**
 - Create: `scripts/check_search_upgrade.js`
 - Read: `assets/js/app.js`（本任务**只读**，实现放到 Task 4）
+
+> **本任务不单独提交。** 脚本写完时 `app.js` 里还没有它要验证的函数，
+> 跑起来必然是红的（Step 2 就是要看到它红）。单独提交一个跑不过的体检脚本，
+> 会让仓库里长期留着一个失败的脚本，也会让「每次提交都是绿的」这条约定失效。
+> **脚本与 Task 4 的实现一起提交**（见 Task 4 的 Step 8）。
+> TDD 顺序不变：先写脚本 → 看到它失败 → 实现 → 再看到它通过。
 
 **Interfaces:**
 - Consumes: `assets/js/app.js` 里的纯函数 `searchAllTitles(index, query)`、`groupCrossMagResults(results)`、`pickBodyWindow(issues, yearSpan)`、`formatBytes(n)`、`articleMatches(a, query, scope, ms)`，以及常量 `MAGAZINES`。
@@ -1050,23 +1056,15 @@ Expected: `❌ 在 assets/js/app.js 里找不到函数：searchAllTitles` + `（
 
 > 这一步是**故意**的失败：脚本依赖 Task 4 的实现，现在就该红。
 
-- [ ] **Step 3: 提交体检脚本**
+- [ ] **Step 3: 不提交，交给 Task 4 一起提交**
 
-```bash
-git -C E:/cursor/djyj add scripts/check_search_upgrade.js
-git -C E:/cursor/djyj commit -m "新增跨刊检索内核体检脚本
-
-把 app.js 里的 searchAllTitles / groupCrossMagResults / pickBodyWindow /
-formatBytes / articleMatches 原样抽出来跑，断言分组顺序、子集性质、
-正文窗口选取，并带 3 条反向自检（R10/R11/R12）。
-
-当前状态：故意为红 —— app.js 里还没有这些实现，脚本按预期报"找不到函数"。
-已实现但未独立审查。"
-```
+脚本此刻是红的（Step 2 就是要看到它红）。**不要在这里提交** —— 单独提交一个跑不过的
+体检脚本，会让仓库里长期留着一个失败的脚本。提交动作放在 Task 4 的 Step 8，
+那时脚本与 `app.js` 的实现一起进库，两者的 commit 是绿的。
 
 ---
 
-### Task 4: `assets/js/app.js` 跨刊检索内核
+### Task 4: `assets/js/app.js` 跨刊检索内核（与 Task 3 合并提交）
 
 **Files:**
 - Modify: `assets/js/app.js`（`state` 对象约 42–64 行；`getSearchScope()` 附近 371–386 行）
@@ -1236,17 +1234,21 @@ Expected: `✅ 未发现 Chrome 69 不兼容的用法`
 Run: `python -u scripts/check_js_comments.py`
 Expected: 全绿（`scripts/check_js_comments.py` 会同时做 SW 求值冒烟）
 
-- [ ] **Step 8: 提交**
+- [ ] **Step 8: 提交（与 Task 3 的体检脚本一起）**
 
 ```bash
-git -C E:/cursor/djyj add assets/js/app.js
-git -C E:/cursor/djyj commit -m "app.js 新增跨刊检索内核（纯函数 + 索引懒加载）
+git -C E:/cursor/djyj add assets/js/app.js scripts/check_search_upgrade.js
+git -C E:/cursor/djyj commit -m "app.js 新增跨刊检索内核（纯函数 + 索引懒加载）并附体检脚本
 
 新增 loadSearchIndex / searchAllTitles / groupCrossMagResults /
 pickBodyWindow / formatBytes / getMagScope / syncMagScopeChecked，
 以及 state.searchIndex 与 state.searchIndexStatus。
 
 跨刊只匹配标题（不含作者与板块），返回顺序即索引行序。
+
+同时新增 scripts/check_search_upgrade.js：把上面这些函数从 app.js 里
+原样抽出来跑，断言分组顺序、子集性质、正文窗口选取，
+并带 3 条反向自检（R10/R11/R12）。脚本与实现一起提交，仓库里不留红脚本。
 
 验证范围：node scripts/check_search_upgrade.js 12 条用例全绿；
 acorn --ecma2019 通过；check_compat.py 与 check_js_comments.py 零失败。
@@ -1265,6 +1267,7 @@ acorn --ecma2019 通过；check_compat.py 与 check_js_comments.py 零失败。
 **Interfaces:**
 - Consumes: Task 4 的 `loadSearchIndex` / `searchAllTitles` / `groupCrossMagResults` / `getMagScope` / `syncMagScopeChecked`。
 - Produces:
+  - `crossMagCardsHtml(groups, query, showFav)` → `string`：跨刊结果卡片 HTML。杂志内结果区传 `showFav=true`（带收藏按钮），主页浮层传 `false`。**Task 6 的浮层必须复用这个函数，不要另写一份模板。**
   - `renderCrossMagResults()` → `undefined`：把 `state.searchResults`（跨刊命中）按组渲染进 `#searchResults`，并在 `#resultInfo` 写命中数与范围说明。
   - DOM：`input[name="magScope"]` 两个单选（`value="current"` 默认选中、`value="all"`）；`.filters` 上加 `.filters--all` 表示三刊模式。
 
@@ -1362,6 +1365,37 @@ acorn --ecma2019 通过；check_compat.py 与 check_js_comments.py 零失败。
 在 `assets/js/app.js` 的 `function renderSearchPage() {` **之前**插入：
 
 ```javascript
+/* 跨刊结果卡片 HTML —— 杂志内结果区与主页搜索浮层**共用这一份**，
+   免得两处模板各改各的、悄悄漂移。
+   showFav=true 时带收藏按钮（杂志内结果区需要），主页浮层不带。 */
+function crossMagCardsHtml(groups, query, showFav) {
+    let html = '';
+    groups.forEach(function (g) {
+        html += '<div class="result-group">';
+        html += '<div class="result-group-head"><span class="result-group-name">' + escHtml(g.name) + '</span>'
+            + '<span class="result-group-count">' + g.count + ' 篇</span></div>';
+        g.items.forEach(function (a) {
+            const ci = a.i <= 24 ? CN[a.i - 1] : a.i;
+            const encUrl = encodeURIComponent(a.u);
+            const titleHtml = query ? highlightText(a.t, query) : escHtml(a.t);
+            let favBtn = '';
+            if (showFav) {
+                const isFav = isFavorite(a.u);
+                favBtn = '<button class="rc-fav-btn ' + (isFav ? 'active' : '')
+                    + '" onclick="event.stopPropagation(); toggleFavFromCard(this, \'' + encUrl + '\')">'
+                    + svgStar(isFav) + '</button>';
+            }
+            html += '<div class="result-card" onclick="showArticle(\'' + encUrl + '\')">'
+                + favBtn
+                + '<div class="rc-title">' + titleHtml + '</div>'
+                + '<div class="rc-meta"><span class="rc-tag">' + a.y + '年第' + ci + '期</span></div>'
+                + '</div>';
+        });
+        html += '</div>';
+    });
+    return html;
+}
+
 /* 跨刊检索结果：按刊物分组平铺，组内沿用索引行序（新 → 旧）。
    沿用既有 .results-list / .result-card / .rc-* 样式，不引入新的视觉语言。 */
 function renderCrossMagResults() {
@@ -1379,27 +1413,7 @@ function renderCrossMagResults() {
     }
 
     const groups = groupCrossMagResults(results);
-    let html = '';
-    groups.forEach(function (g) {
-        html += '<div class="result-group">';
-        html += '<div class="result-group-head"><span class="result-group-name">' + escHtml(g.name) + '</span>'
-            + '<span class="result-group-count">' + g.count + ' 篇</span></div>';
-        g.items.forEach(function (a) {
-            const ci = a.i <= 24 ? CN[a.i - 1] : a.i;
-            const isFav = isFavorite(a.u);
-            const favClass = isFav ? 'active' : '';
-            const favIcon = svgStar(isFav);
-            const encUrl = encodeURIComponent(a.u);
-            const titleHtml = query ? highlightText(a.t, query) : escHtml(a.t);
-            html += '<div class="result-card" onclick="showArticle(\'' + encUrl + '\')">'
-                + '<button class="rc-fav-btn ' + favClass + '" onclick="event.stopPropagation(); toggleFavFromCard(this, \'' + encUrl + '\')">' + favIcon + '</button>'
-                + '<div class="rc-title">' + titleHtml + '</div>'
-                + '<div class="rc-meta"><span class="rc-tag">' + a.y + '年第' + ci + '期</span></div>'
-                + '</div>';
-        });
-        html += '</div>';
-    });
-    container.innerHTML = html;
+    container.innerHTML = crossMagCardsHtml(groups, query, true);
 
     const total = results.length;
     infoEl.textContent = '共 ' + total + ' 篇（关键词："' + query + '" ｜ 范围：三刊标题 · 只匹配标题）';
@@ -1545,11 +1559,11 @@ check_compat.py / check_js_comments.py / check_data.py 零失败。
 - Modify: `assets/js/app.js`
 
 **Interfaces:**
-- Consumes: Task 4 的 `loadSearchIndex` / `searchAllTitles` / `groupCrossMagResults`。
+- Consumes: Task 4 的 `loadSearchIndex` / `searchAllTitles` / `groupCrossMagResults`；Task 5 的 `crossMagCardsHtml(groups, query, showFav)`。
 - Produces:
   - `openGlobalSearch()` → `undefined`：显示 `#globalSearch` 浮层、聚焦输入框
   - `closeGlobalSearch()` → `undefined`：隐藏浮层
-  - `runGlobalSearch()` → `undefined`：按当前输入做跨刊标题检索并渲染
+  - `runGlobalSearch()` → `undefined`：按当前输入做跨刊标题检索并渲染（复用 `crossMagCardsHtml`，**不要另写一份卡片模板**）
   - DOM：`#globalSearch` / `#globalSearchInput` / `#globalSearchResults` / `#globalSearchCount` / `#homeSearchBtn`
 
 - [ ] **Step 1: `index.html` 首页头加放大镜按钮**
@@ -1751,22 +1765,7 @@ async function runGlobalSearch() {
         return;
     }
     const groups = groupCrossMagResults(results);
-    let html = '';
-    groups.forEach(function (g) {
-        html += '<div class="result-group">';
-        html += '<div class="result-group-head"><span class="result-group-name">' + escHtml(g.name) + '</span>'
-            + '<span class="result-group-count">' + g.count + ' 篇</span></div>';
-        g.items.forEach(function (a) {
-            const ci = a.i <= 24 ? CN[a.i - 1] : a.i;
-            const encUrl = encodeURIComponent(a.u);
-            html += '<div class="result-card" onclick="showArticle(\'' + encUrl + '\')">'
-                + '<div class="rc-title">' + highlightText(a.t, query) + '</div>'
-                + '<div class="rc-meta"><span class="rc-tag">' + a.y + '年第' + ci + '期</span></div>'
-                + '</div>';
-        });
-        html += '</div>';
-    });
-    list.innerHTML = html;
+    list.innerHTML = crossMagCardsHtml(groups, query, false);
     count.textContent = '共 ' + results.length + ' 篇（关键词："' + query + '" ｜ 只匹配标题）';
 }
 ```
@@ -2940,13 +2939,13 @@ Console 0 错误。
 
 把 `assets/js/app.js` 里 `renderCatalog` 中这一行：
 
-```javascript
+```html
                     <span class="ir-title">${year}年第${cin}期</span>
 ```
 
 改成：
 
-```javascript
+```html
                     <span class="ir-title">第${cin}期</span>
 ```
 
