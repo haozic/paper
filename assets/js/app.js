@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101i';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101j';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -857,26 +857,19 @@ function openGlobalSearch(initialQuery) {
     runGlobalSearch();
 }
 
-async function loadHomeLatest() {
-    const host = document.getElementById('homeLatestList');
-    if (!host) return;
+async function loadHomeFeature() {
     let picked;
     try {
         const resp = await fetch(dataUrl('data/latest.json'));
         if (!resp.ok) throw new Error('latest unavailable');
         picked = await resp.json();
-    } catch (e) { host.textContent = '最新文章暂不可用'; return; }
+    } catch (e) { return; }
     const feature = picked.qs;
     if (feature) {
         document.getElementById('homeFeatureIssue').textContent = feature.y + ' 年第 ' + feature.i + ' 期';
         document.getElementById('homeFeatureTitle').textContent = feature.t;
         document.getElementById('homeFeatureRead').dataset.url = encodeURIComponent(feature.u);
     }
-    host.innerHTML = MAGAZINE_ORDER.map(k => {
-        const r = picked[k]; if (!r) return '';
-        return `<button class="home-latest-item" data-mag="${escHtml(k)}" data-url="${encodeURIComponent(r.u)}"><span>${escHtml(MAGAZINES[k].name)} · ${r.y}年第${r.i}期</span><strong>${escHtml(r.t)}</strong></button>`;
-    }).join('');
-    host.onclick = e => { const item=e.target.closest('.home-latest-item'); if(!item)return; enterMagazine(item.dataset.mag); showArticle(item.dataset.url); };
 }
 
 function readHomeFeature() {
@@ -1529,19 +1522,6 @@ function initReadingSettingsListeners() {
         var asb = document.getElementById('articleSettingsBtn');
         if (asb) asb.classList.remove('active');
     });
-    // 滚动时自动收起设置面板：面板是 position:fixed 的浮层，
-    // 不收起会一直挡住正文（此前实测滚动时仍悬浮遮挡）。
-    let scrollHideTimer = null;
-    window.addEventListener('scroll', function () {
-        const panel = document.getElementById('articleSettingsPanel');
-        if (!panel || !panel.classList.contains('show')) return;
-        if (scrollHideTimer) clearTimeout(scrollHideTimer);
-        scrollHideTimer = setTimeout(function () {
-            panel.classList.remove('show');
-            const btn = document.getElementById('articleSettingsBtn');
-            if (btn) btn.classList.remove('active');
-        }, 250);
-    }, { passive: true });
 }
 
 /* ===== 阅读位置记忆 ===== */
@@ -1673,24 +1653,18 @@ function renderArticleFooter(url, cur) {
     const prev = nb.prev;
     const next = nb.next;
 
-    let html = '';
-    if (prev) {
-        html += '<button class="ap-nav-item" data-url="' + encodeURIComponent(prev.u) + '">' +
-            '<span class="ap-nav-dir"><svg class="icon"><use href="#i-arrow-left"/></svg>上一篇 · ' + issueLabel(prev) + '</span>' +
-            '<span class="ap-nav-title">' + escHtml(prev.t) + '</span></button>';
-    } else {
-        html += '<div class="ap-nav-empty"></div>';
-    }
-    if (next) {
-        html += '<button class="ap-nav-item" data-url="' + encodeURIComponent(next.u) + '">' +
-            '<span class="ap-nav-dir">下一篇 · ' + issueLabel(next) + '<svg class="icon"><use href="#i-arrow-right"/></svg></span>' +
-            '<span class="ap-nav-title">' + escHtml(next.t) + '</span></button>';
-    } else {
-        html += '<div class="ap-nav-empty"></div>';
-    }
+    let html = '<button class="ap-bottom-prev"' + (prev ? ' data-url="' + encodeURIComponent(prev.u) + '"' : ' disabled') + '>' +
+        '<span>← 上一篇</span><strong>' + (prev ? escHtml(prev.t) : '已经是第一篇') + '</strong></button>' +
+        '<button class="ap-bottom-action" type="button" onclick="toggleReadingActions()" aria-expanded="false" aria-controls="readingOperationMenu">操作 <span aria-hidden="true">＋</span></button>' +
+        '<button class="ap-bottom-next"' + (next ? ' data-url="' + encodeURIComponent(next.u) + '"' : ' disabled') + '>' +
+        '<span>下一篇 →</span><strong>' + (next ? escHtml(next.t) : '已经是最后一篇') + '</strong></button>';
     navEl.innerHTML = html;
+    const menu = document.getElementById('readingOperationMenu');
+    if (menu) menu.hidden = true;
+    const panel = document.getElementById('articleSettingsPanel');
+    if (panel) panel.classList.remove('show');
 
-    navEl.querySelectorAll('.ap-nav-item[data-url]').forEach(function (btn) {
+    navEl.querySelectorAll('[data-url]').forEach(function (btn) {
         btn.addEventListener('click', function () {
             showArticle(btn.getAttribute('data-url'), true);
         });
@@ -1699,6 +1673,19 @@ function renderArticleFooter(url, cur) {
     renderRelatedArticles(cur, pos, ordered);
 
     footer.hidden = false;
+}
+
+function toggleReadingActions() {
+    const menu = document.getElementById('readingOperationMenu');
+    const button = document.querySelector('.ap-bottom-action');
+    if (!menu || !button) return;
+    menu.hidden = !menu.hidden;
+    button.setAttribute('aria-expanded', String(!menu.hidden));
+    if (menu.hidden) {
+        const panel = document.getElementById('articleSettingsPanel');
+        if (panel) panel.classList.remove('show');
+        document.getElementById('articleSettingsBtn').classList.remove('active');
+    }
 }
 
 /* ===== 相关阅读：标题语义相似度 =====
@@ -2512,6 +2499,7 @@ function registerServiceWorker() {
 }
 
 async function init() {
+    document.getElementById('readingOperationMenu').appendChild(document.getElementById('articleSettingsPanel'));
     loadFavorites();
     updateFavBadges();
     loadReadingSettings();
@@ -2674,7 +2662,7 @@ async function init() {
 
     // 加载首页计数
     loadHomeCounts();
-    loadHomeLatest();
+    loadHomeFeature();
 
     // 注册 Service Worker（离线阅读）
     registerServiceWorker();

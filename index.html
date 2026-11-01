@@ -9,11 +9,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=20261101i">
-<link rel="stylesheet" href="assets/css/books.css?v=20261101i">
-<link rel="stylesheet" href="assets/css/one.css?v=20261101i">
-<link rel="manifest" href="manifest.webmanifest?v=20261101i">
-<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101i">
+<link rel="stylesheet" href="assets/css/style.css?v=20261101j">
+<link rel="stylesheet" href="assets/css/books.css?v=20261101j">
+<link rel="stylesheet" href="assets/css/one.css?v=20261101j">
+<link rel="manifest" href="manifest.webmanifest?v=20261101j">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101j">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b0000' stroke-width='2'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
 <script>
 (function(){try{
@@ -111,7 +111,6 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
         <div class="home-header-inner">
             <p class="home-eyebrow">数字书架 · 三刊合一</p>
             <h1 class="home-title">党内刊物</h1>
-            <p class="home-subtitle">打开一本刊物，开始今天的阅读。</p>
             <button class="home-about-btn" onclick="showAboutPage()" title="关于本站"><svg class="icon"><use href="#i-info"/></svg></button>
         </div>
     </header>
@@ -133,7 +132,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
         </form>
     </section>
     <div class="home-body">
-        <div class="home-section-heading"><h2>三本刊物</h2><span>选择刊物，按期浏览</span></div>
+        <div class="home-section-heading"><h2>三本刊物</h2></div>
         <div class="magazine-grid">
             <a class="magazine-card" href="#m=qs" onclick="event.preventDefault();enterMagazine('qs')" aria-label="打开求是杂志">
                 <div class="mag-cover mag-cover-qs">
@@ -184,10 +183,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
             </a>
         </div>
     </div>
-    <section class="home-latest" aria-label="最新文章">
-        <div class="home-section-heading"><h2>各刊最新文章</h2><span>从最近一期开始阅读</span></div>
-        <div id="homeLatestList" class="home-latest-list"><span class="home-latest-loading">正在加载…</span></div>
-    </section>
+    <div class="home-guides" aria-label="专题指南">
     <div class="home-guide-entry">
         <a href="linxuan-beikao-zhinan/linxuan-beikao-zhinan.html" class="guide-link-card">
             <div class="guide-card-icon">
@@ -223,6 +219,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
             </div>
             <svg class="icon guide-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </a>
+    </div>
     </div>
     <footer class="home-footer">
         <p>公益性学习研究项目 · 仅供内部参考</p>
@@ -376,21 +373,10 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
             <button class="ap-back-btn" onclick="goBack()"><svg class="icon"><use href="#i-arrow-left"/></svg><span>返回</span></button>
             <h1 class="ap-title" id="articleTitle"></h1>
             <div class="ap-meta" id="articleMeta"></div>
+            <span id="readerToolbarTitle" hidden></span>
+            <button class="reader-toc-toggle" id="readerTocToggle" onclick="toggleReaderToc()" aria-expanded="false" hidden>本文目录</button>
         </div>
     </header>
-    <div class="reader-toolbar" aria-label="阅读工具">
-        <div class="reader-toolbar-inner">
-            <button class="reader-toolbar-back" onclick="goBack()" aria-label="返回文章列表"><svg class="icon"><use href="#i-arrow-left"/></svg><span>返回目录</span></button>
-            <span class="reader-toolbar-title" id="readerToolbarTitle"></span>
-            <button class="reader-toc-toggle" id="readerTocToggle" onclick="toggleReaderToc()" aria-expanded="false" hidden>目录</button>
-            <div class="ap-actions">
-                <button class="ap-settings-btn" id="articleSettingsBtn" onclick="toggleArticleSettings(event)" title="阅读设置" aria-label="阅读设置">Aa <span>设置</span></button>
-                <button class="ap-fav-btn" id="articleFavBtn" onclick="toggleArticleFav()" aria-label="收藏文章"><svg class="icon"><use href="#i-star"/></svg><span>收藏</span></button>
-                <a class="ap-original-link" id="articleOrigLink" href="#" target="_blank" rel="noopener" aria-label="查看原文"><svg class="icon"><use href="#i-external"/></svg><span>原文</span></a>
-                <button class="ap-copy-btn" id="articleCopyBtn" onclick="copyArticleLink()" title="复制本篇链接" aria-label="复制文章链接"><svg class="icon"><use href="#i-link"/></svg><span>分享</span></button>
-            </div>
-        </div>
-    </div>
     <div class="ap-continue" id="articleContinue" hidden>
         <svg class="icon ap-continue-icon"><use href="#i-clock"/></svg>
         <span class="ap-continue-text">上次读到 <strong id="articleContinuePct">0%</strong></span>
@@ -450,8 +436,16 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     </div>
     <div class="article-layout"><nav class="article-toc" id="articleToc" aria-label="本文目录" hidden></nav><div class="article-page-body" id="articleBody"></div></div>
     <footer class="article-page-footer" id="articleFooter" hidden>
-        <nav class="ap-nav" id="articleNav" aria-label="上下篇导航"></nav>
         <section class="ap-related" id="articleRelated" aria-label="相关阅读" hidden></section>
+        <div class="reading-operation-menu" id="readingOperationMenu" hidden>
+            <div class="ap-actions" aria-label="文章操作">
+                <button class="ap-settings-btn" id="articleSettingsBtn" onclick="toggleArticleSettings(event)" title="阅读设置" aria-label="阅读设置">Aa <span>阅读设置</span></button>
+                <button class="ap-fav-btn" id="articleFavBtn" onclick="toggleArticleFav()" aria-label="收藏文章"><svg class="icon"><use href="#i-star"/></svg><span>收藏</span></button>
+                <button class="ap-copy-btn" id="articleCopyBtn" onclick="copyArticleLink()" title="复制本篇链接" aria-label="复制文章链接"><svg class="icon"><use href="#i-link"/></svg><span>分享</span></button>
+                <a class="ap-original-link" id="articleOrigLink" href="#" target="_blank" rel="noopener" aria-label="查看原文"><svg class="icon"><use href="#i-external"/></svg><span>原文</span></a>
+            </div>
+        </div>
+        <nav class="ap-nav" id="articleNav" aria-label="文章导航与操作"></nav>
     </footer>
     <button class="back-to-top" id="backToTopBtn" onclick="scrollToTop()" title="返回顶部">
         <svg class="progress-ring" viewBox="0 0 48 48">
@@ -491,6 +485,6 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     </div>
 </div>
 
-<script src="assets/js/app.js?v=20261101i"></script>
+<script src="assets/js/app.js?v=20261101j"></script>
 </body>
 </html>
