@@ -341,9 +341,12 @@ body.article-active { --reader-shortcut-size: 42px; --reader-shortcut-edge: 18px
 .reader-nav-shortcut:hover, .reader-nav-shortcut.active { background: var(--bg-2); color: var(--primary); }
 .reader-nav-shortcut .icon { width: 20px; height: 20px; }
 .reader-nav-menu[hidden] { display: none; }
-.reader-nav-menu { position: fixed; right: calc(var(--reader-shortcut-edge) + var(--reader-shortcut-size) + 12px); bottom: calc(var(--reading-dock-height, 58px) + 18px + env(safe-area-inset-bottom, 0px)); z-index: 230; display: grid; width: 148px; padding: 5px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--card); box-shadow: var(--shadow-md); }
-.reader-nav-menu button { min-height: 44px; padding: 0 12px; border: 0; border-radius: 3px; background: transparent; color: var(--text); font: 13px var(--font-sans); text-align: left; cursor: pointer; }
+.reader-nav-menu { position: fixed; right: calc(var(--reader-shortcut-edge) + var(--reader-shortcut-size) + var(--reader-shortcut-gap)); bottom: calc(var(--reading-dock-height, 58px) + 18px + env(safe-area-inset-bottom, 0px)); z-index: 230; display: flex; align-items: center; gap: var(--reader-shortcut-gap); animation: reader-nav-reveal .18s var(--ease) both; }
+.reader-nav-menu button { display: flex; align-items: center; justify-content: center; width: var(--reader-shortcut-size); height: var(--reader-shortcut-size); padding: 0; border: 1px solid var(--border); border-radius: 50%; background: var(--card); color: var(--primary); cursor: pointer; }
 .reader-nav-menu button:hover, .reader-nav-menu button:focus-visible { background: var(--bg-2); color: var(--primary); }
+.reader-nav-menu .icon { width: 20px; height: 20px; }
+@keyframes reader-nav-reveal { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: translateX(0); } }
+@media (prefers-reduced-motion: reduce) { .reader-nav-menu { animation: none; } }
 
 @media (max-width: 767px) {
   body.article-active { --reader-shortcut-size: 40px; --reader-shortcut-edge: 12px; }
