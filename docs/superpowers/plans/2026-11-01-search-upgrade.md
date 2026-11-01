@@ -284,7 +284,7 @@ def main():
 Run: `python -u scripts/build_search_index.py`
 Expected: 输出 `已生成 data/search_index.json：7415 行，... 字节`
 
-- [ ] **Step 4: 加 `--self-test`（≥12 条，含 3 条反向自检）**
+- [ ] **Step 4: 加 `--self-test`（14 条用例，含 4 条反向自检 + 1 条鉴别力）**
 
 在 `scripts/build_search_index.py` 里 `main()` 之前插入：
 
@@ -300,7 +300,7 @@ Expected: 输出 `已生成 data/search_index.json：7415 行，... 字节`
 #   R7  行序：年份降序、期号降序，期内保持 meta 原有顺序
 #   R8  dump_index 输出可被 json.loads 还原，且与原对象相等
 #
-# 用例标签（self_test 里的一条条断言，不是一���规则）：
+# 用例标签（self_test 里的一条条断言，不是一条规则）：
 #   C1  正对照：结构合规的样本 → R1~R8 全部零错误
 #   C2  空 meta 不炸，返回空 rows
 #   C3  反向自检：同一刊物内 URL 重复 → 必须命中 R4
