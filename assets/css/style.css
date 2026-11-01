@@ -1532,7 +1532,7 @@ body.global-search-active { overflow: hidden; }
     margin-top: 24px;
     font-size: calc(var(--article-fs, 20px) * 1.15);
 }
-.article-page-body p.md-heading[id] { scroll-margin-top: 18px; }
+.article-page-body p.md-heading[id], .article-page-body p.md-subheading[id] { scroll-margin-top: 76px; }
 .article-layout { position: relative; }
 .article-toc { position: absolute; left: 24px; top: 28px; width: 190px; max-height: 70vh; overflow: auto; padding: 12px; border-left: 2px solid var(--border-2); color: var(--text-2); }
 .article-toc strong,.article-toc a { display: block; margin-bottom: 8px; }
@@ -2747,6 +2747,26 @@ body.is-offline .offline-bar { display: block; }
 .section-card, .result-card, .year-block, .fav-card { border-radius: 14px; }
 .section-card, .result-card, .year-block { box-shadow: 0 3px 14px rgba(49,37,23,.045); }
 .article-page-header { padding-bottom: 20px; }
+.ap-header-inner { grid-template-columns: 1fr; grid-template-areas: "back" "title" "meta"; }
+.article-page-header .ap-back-btn { margin-bottom: 8px; }
+.reader-toolbar { position: sticky; top: 0; z-index: 210; background: var(--card); border-bottom: 1px solid var(--border); box-shadow: 0 5px 18px rgba(49,37,23,.045); }
+.reader-toolbar-inner { max-width: 1220px; min-height: 54px; margin: auto; padding: 7px 24px; display: flex; align-items: center; }
+.reader-toolbar-inner > * + * { margin-left: 16px; }
+.reader-toolbar-back,.reader-toc-toggle { border: 0; background: transparent; color: var(--text-2); font-size: 13px; cursor: pointer; white-space: nowrap; }
+.reader-toolbar-back { display: flex; align-items: center; }
+.reader-toolbar-back .icon { margin-right: 6px; }
+.reader-toolbar-back .icon { width: 16px; height: 16px; }
+.reader-toolbar-back:hover,.reader-toc-toggle:hover { color: var(--primary); }
+.reader-toolbar-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-3); font-size: 12px; }
+.reader-toolbar .ap-actions { flex-shrink: 0; }
+.reader-toolbar .ap-actions > * { border-radius: 8px; }
+.reader-toc-toggle[hidden],.article-toc[hidden] { display: none !important; }
+.article-layout { max-width: 1220px; margin: auto; }
+.article-toc { position: sticky; top: 78px; align-self: start; width: 100%; max-height: calc(100vh - 100px); padding: 18px 20px; box-shadow: none; border: 1px solid var(--border); }
+.article-toc strong { font-size: 13px; color: var(--text); }
+.article-toc a { padding: 3px 0; }
+.article-toc button { display: block; width: 100%; padding: 4px 0; border: 0; background: none; color: var(--text-2); font: inherit; font-size: 12px; line-height: 1.6; text-align: left; cursor: pointer; }
+.article-toc button:hover { color: var(--primary); }
 .ap-title { font-size: 29px; line-height: 1.42; letter-spacing: .015em; margin-top: 20px; }
 .ap-meta { line-height: 1.8; }
 .article-page-body { padding-top: 38px; }
@@ -2770,12 +2790,27 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
     .article-layout { max-width: 1260px; margin: 0 auto; }
     .article-toc { left: 24px; }
 }
+@media (min-width: 1101px) {
+    .article-layout:has(.article-toc:not([hidden])) { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 36px; padding: 0 24px; }
+    .article-layout:has(.article-toc:not([hidden])) .article-page-body { width: 100%; }
+}
+@media (max-width: 1100px) {
+    .article-toc { display: none; }
+    .article-toc.is-open { display: block; position: sticky; top: 54px; z-index: 205; width: calc(100% - 32px); max-width: 760px; margin: 0 auto; max-height: 45vh; overflow: auto; }
+}
 @media (max-width: 767px) {
     .home-header { padding-top: calc(28px + env(safe-area-inset-top, 0px)); }
     .home-title { font-size: 29px; }
     .home-latest { margin-bottom: 22px; }
     .home-latest-item { min-height: 0; }
     .ap-title { font-size: 23px; }
+    .reader-toolbar-inner { padding: 7px 14px; }
+    .reader-toolbar-inner > * + * { margin-left: 9px; }
+    .reader-toolbar-back span,.reader-toolbar-title { display: none; }
+    .reader-toolbar-back { padding: 8px; }
+    .reader-toolbar .ap-actions { gap: 4px; }
+    .reader-toolbar .ap-actions > * { width: 32px; height: 32px; }
+    .reader-toc-toggle { margin-right: auto; font-weight: 600; }
     .magazine-card { cursor: pointer; }
 }
 

@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101e';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101f';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -1072,6 +1072,12 @@ async function showArticle(encUrl, replaceHist) {
     state.currentArticleIdx = idx;
 
     document.getElementById('articleTitle').textContent = a.t;
+    document.getElementById('readerToolbarTitle').textContent = a.t;
+    const toc = document.getElementById('articleToc');
+    toc.hidden = true;
+    toc.classList.remove('is-open');
+    document.getElementById('readerTocToggle').hidden = true;
+    document.getElementById('readerTocToggle').setAttribute('aria-expanded', 'false');
     updateArticleMeta(a, 0);
     showContinueBanner(url);
     renderArticleFooter(url, a);
@@ -1185,10 +1191,28 @@ function renderArticleBody(url, bodyEl) {
 
 function buildArticleToc(bodyEl) {
     const toc = document.getElementById('articleToc'); if (!toc) return;
+    const toggle = document.getElementById('readerTocToggle');
     const heads = Array.from(bodyEl.querySelectorAll('.md-heading,.md-subheading'));
-    if (heads.length < 3) { toc.hidden = true; toc.innerHTML = ''; return; }
+    if (heads.length < 3) { toc.hidden = true; toc.innerHTML = ''; if (toggle) toggle.hidden = true; return; }
     toc.hidden = false;
-    toc.innerHTML = '<strong>本文目录</strong>' + heads.map((h,i) => { const id='article-section-'+i; h.id=id; return `<a href="#${id}">${escHtml(h.textContent)}</a>`; }).join('');
+    if (toggle) toggle.hidden = false;
+    toc.innerHTML = '<strong>本文目录</strong>' + heads.map((h,i) => { const id='article-section-'+i; h.id=id; return `<button type="button" data-target="${id}">${escHtml(h.textContent)}</button>`; }).join('');
+    toc.onclick = e => {
+        const item = e.target.closest('button[data-target]');
+        if (!item) return;
+        const target = document.getElementById(item.dataset.target);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        toc.classList.remove('is-open');
+        if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    };
+}
+
+function toggleReaderToc() {
+    const toc = document.getElementById('articleToc');
+    const toggle = document.getElementById('readerTocToggle');
+    if (!toc || toc.hidden) return;
+    const open = toc.classList.toggle('is-open');
+    toggle.setAttribute('aria-expanded', String(open));
 }
 
 async function retryShowArticle(encUrl) {
@@ -1229,7 +1253,7 @@ async function retryShowArticle(encUrl) {
             <a href="${a.u}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;color:var(--primary);">直接查看原文</a></div>`;
         return;
     }
-    renderArticleBody(url, a.y, bodyEl);
+    renderArticleBody(url, bodyEl);
 }
 
 function toggleArticleFav() {
