@@ -1124,7 +1124,7 @@ Expected: `❌ 在 assets/js/app.js 里找不到函数：searchAllTitles` + `（
   - `syncMagScopeChecked()` → `undefined`：同步 `.checked` 类（Chrome 69 没有 `:has()`）
   - `MAGAZINE_ORDER` 常量 = `['qs', 'hqwg', 'djyj']`（展示顺序）
 
-- [ ] **Step 1: 在 `state` 里加 5 个字段**
+- [ ] **Step 1: 在 `state` 里加 2 个字段（`searchIndex` / `searchIndexStatus`）**
 
 把 `assets/js/app.js` 的 `state` 对象里这一段：
 
