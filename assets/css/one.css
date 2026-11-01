@@ -215,7 +215,7 @@ body.article-active { --reading-dock-height: 86px; }
 .home-search { width: calc(100% - 52px); max-width: 640px; margin: 30px auto 58px; }
 .home-search-form { min-height: 48px; }
 
-/* Current issue list and reading settings open above the fixed three-button dock. */
+/* Current issue list and reading settings open above the fixed reading dock. */
 body.article-active { --reading-dock-height: 70px; }
 .reading-dock .ap-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .reading-dock .ap-nav > button { min-height: 70px; padding: 14px 10px; text-align: center; font-size: 14px; font-weight: 500; }
