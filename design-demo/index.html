@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>三刊阅读 · 视觉方向预览</title>
+  <style>
+    :root { --paper:#f5f3ee; --surface:#fffefa; --ink:#252522; --muted:#706d66; --faint:#969189; --line:#d9d5cc; --accent:#913b33; --sans:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; --serif:"Songti SC","STSong","SimSun",serif; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); -webkit-font-smoothing:antialiased; }
+    button { font:inherit; cursor:pointer; }
+    button:focus-visible,a:focus-visible { outline:2px solid var(--accent); outline-offset:4px; }
+    [hidden] { display:none !important; }
+    .site-header { border-bottom:1px solid var(--line); background:var(--paper); }
+    .site-header-inner { display:flex; align-items:center; justify-content:space-between; gap:20px; max-width:1200px; min-height:75px; margin:auto; padding:0 34px; }
+    .brand { display:flex; align-items:baseline; gap:12px; padding:0; border:0; background:none; color:var(--ink); text-align:left; font-family:var(--serif); font-size:23px; font-weight:700; letter-spacing:.08em; }
+    .brand small { color:var(--muted); font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:.15em; }
+    .view-tabs { display:flex; align-items:center; gap:29px; }
+    .view-tabs button { min-height:44px; padding:3px 0 0; border:0; border-bottom:2px solid transparent; background:none; color:var(--muted); font-size:13px; }
+    .view-tabs button[aria-current="page"] { border-color:var(--accent); color:var(--ink); }
+    .demo-note { max-width:1200px; margin:0 auto; padding:14px 34px 0; color:var(--faint); font-size:11px; letter-spacing:.04em; }
+    .view { min-height:calc(100vh - 110px); }
+    .home { max-width:1200px; margin:auto; padding:55px 34px 95px; }
+    .eyebrow { margin:0; color:var(--accent); font-size:11px; font-weight:650; letter-spacing:.18em; }
+    .home-heading { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:28px; margin:10px 0 51px; }
+    .home-heading::before,.home-heading::after { content:""; height:1px; background:var(--line); }
+    .home-heading h1 { margin:0; font-family:var(--serif); font-size:clamp(33px,4.2vw,51px); font-weight:600; letter-spacing:.22em; white-space:nowrap; }
+    .home-intro { text-align:center; }
+    .home-intro .eyebrow { color:var(--muted); }
+    .shelf { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:start; gap:clamp(28px,4vw,56px); max-width:1030px; margin:0 auto; }
+    .shelf button { display:block; width:100%; padding:0; border:0; background:none; color:inherit; text-align:left; }
+    .cover-frame { display:block; overflow:hidden; padding:11px; border:1px solid #e3ded4; background:#eae6dd; box-shadow:0 13px 27px rgba(38,34,29,.09); transition:transform .26s ease,box-shadow .26s ease; }
+    .shelf button:hover .cover-frame,.shelf button:focus-visible .cover-frame { transform:translateY(-5px); box-shadow:0 20px 34px rgba(38,34,29,.13); }
+    .cover-frame img { display:block; width:100%; aspect-ratio:3/4; object-fit:contain; background:#fff; }
+    .shelf-label { display:flex; align-items:baseline; justify-content:space-between; gap:8px; padding:17px 1px 0; }
+    .shelf-label strong { font-family:var(--serif); font-size:22px; font-weight:600; }
+    .shelf-label span { color:var(--muted); font-size:11px; }
+    .home-foot { display:flex; align-items:center; justify-content:space-between; gap:20px; max-width:1030px; margin:70px auto 0; padding-top:17px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; }
+    .home-foot button { padding:6px 0; border:0; background:none; color:var(--accent); }
+    .magazine { max-width:1200px; margin:auto; padding:48px 34px 100px; }
+    .crumb { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:12px; }
+    .crumb button { padding:5px 0; border:0; background:none; color:inherit; }
+    .crumb span { color:var(--faint); }
+    .mag-head { display:flex; align-items:end; justify-content:space-between; gap:25px; margin:49px 0 23px; }
+    .mag-head h1 { margin:9px 0 0; font-family:var(--serif); font-size:clamp(47px,6vw,78px); font-weight:600; line-height:1.12; letter-spacing:.08em; }
+    .mag-head p:last-child { margin:0 0 7px; color:var(--muted); font-size:12px; }
+    .mag-tabs { display:flex; gap:30px; border-bottom:1px solid var(--line); }
+    .mag-tabs button { min-height:53px; padding:0 1px; border:0; border-bottom:2px solid transparent; background:none; color:var(--muted); font-size:13px; }
+    .mag-tabs button.active { border-color:var(--accent); color:var(--ink); font-weight:650; }
+    .issue-layout { display:grid; grid-template-columns:minmax(220px,310px) minmax(0,1fr); gap:clamp(55px,7vw,112px); padding-top:47px; }
+    .issue-aside img { display:block; width:100%; aspect-ratio:3/4; object-fit:contain; background:#fff; box-shadow:0 14px 28px rgba(37,34,30,.1); }
+    .issue-aside p { margin:16px 0 0; color:var(--muted); font-size:12px; }
+    .issue-topline { display:flex; align-items:baseline; justify-content:space-between; gap:15px; padding-bottom:16px; border-bottom:1px solid var(--ink); }
+    .issue-topline h2 { margin:0; font-family:var(--serif); font-size:29px; font-weight:600; }
+    .issue-topline span { color:var(--muted); font-size:12px; }
+    .issue-section { margin:27px 0 10px; color:var(--accent); font-size:11px; font-weight:650; letter-spacing:.14em; }
+    .issue-row { display:grid; grid-template-columns:40px minmax(0,1fr) 20px; align-items:start; gap:10px; width:100%; padding:17px 0; border:0; border-bottom:1px solid var(--line); background:none; color:var(--ink); text-align:left; }
+    .issue-row:hover strong,.issue-row:focus-visible strong { color:var(--accent); }
+    .issue-row .num { padding-top:4px; color:var(--faint); font-size:12px; }
+    .issue-row strong { display:block; font-family:var(--serif); font-size:20px; font-weight:600; line-height:1.5; }
+    .issue-row small { display:block; margin-top:4px; color:var(--muted); font-size:12px; }
+    .issue-row .arrow { padding-top:5px; color:var(--faint); font-size:19px; }
+    .reading { background:var(--surface); padding-bottom:130px; }
+    .reading-head { max-width:900px; margin:auto; padding:58px 28px 50px; border-bottom:1px solid var(--line); }
+    .reading-head .crumb { margin-bottom:48px; }
+    .reading-head h1 { max-width:760px; margin:15px 0 23px; font-family:var(--serif); font-size:clamp(34px,4vw,49px); font-weight:600; line-height:1.42; letter-spacing:.015em; }
+    .reading-meta { display:flex; flex-wrap:wrap; gap:8px 22px; color:var(--muted); font-size:12px; }
+    .prose { max-width:760px; margin:0 auto; padding:40px 28px 120px; font-family:var(--serif); font-size:var(--reader-size,20px); line-height:var(--reader-leading,2); }
+    .prose p { margin:0 0 1.2em; text-align:justify; text-indent:2em; }
+    .prose h2 { margin:2em 0 .9em; font-size:1.18em; line-height:1.6; text-indent:2em; }
+    .prose .editor-note { color:var(--muted); font-family:var(--sans); font-size:12px; line-height:1.7; text-indent:0; }
+    .reader-dock { position:fixed; right:0; bottom:0; left:0; z-index:20; display:flex; justify-content:center; gap:0; min-height:61px; border-top:1px solid var(--line); background:var(--surface); }
+    .reader-dock button { width:min(170px,33.333vw); min-height:61px; border:0; background:none; color:var(--ink); font-size:13px; }
+    .reader-dock button:hover,.reader-dock button.active { color:var(--accent); background:#f8f5ef; }
+    .reader-panel { position:fixed; right:max(20px,calc((100vw - 860px)/2)); bottom:77px; z-index:22; width:min(332px,calc(100vw - 40px)); max-height:45vh; overflow:auto; padding:16px 19px; border:1px solid var(--line); background:var(--surface); box-shadow:0 12px 30px rgba(32,28,24,.1); }
+    .reader-panel h3 { margin:0 0 12px; font-family:var(--serif); font-size:17px; }
+    .reader-panel .panel-row { width:100%; min-height:43px; border:0; border-top:1px solid var(--line); background:none; color:var(--ink); text-align:left; font-size:13px; }
+    .reader-panel .panel-row:hover { color:var(--accent); }
+    .reader-panel .setting-line { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 0; border-top:1px solid var(--line); font-size:13px; }
+    .reader-panel .setting-line button { width:38px; height:34px; border:1px solid var(--line); background:none; color:var(--ink); }
+    .reader-panel .setting-line button:hover { border-color:var(--accent); color:var(--accent); }
+    .reader-panel .setting-line .controls { display:flex; gap:6px; }
+    .reader-panel .setting-line .swatch { width:34px; height:34px; border-radius:50%; }
+    .reader-panel .setting-line .swatch.warm { background:#f4eddf; }
+    .reader-panel .setting-line .swatch.white { background:#fff; }
+    .reader-panel .setting-line .swatch.current { outline:2px solid var(--accent); outline-offset:2px; }
+    .reading.warm { background:#f4eddf; }
+    .reading.warm .reader-dock,.reading.warm .reader-panel { background:#f4eddf; }
+    @media (max-width:780px) {
+      .site-header-inner { min-height:62px; padding:0 18px; }
+      .brand { font-size:18px; }
+      .brand small { display:none; }
+      .view-tabs { gap:14px; }
+      .view-tabs button { font-size:12px; }
+      .demo-note { padding:10px 18px 0; }
+      .home { padding:36px 20px 70px; }
+      .home-heading { gap:10px; margin-bottom:36px; }
+      .home-heading h1 { font-size:31px; letter-spacing:.11em; }
+      .shelf { grid-template-columns:minmax(0,340px); justify-content:center; gap:44px; }
+      .shelf-label strong { font-size:20px; }
+      .home-foot { display:block; margin-top:48px; text-align:center; }
+      .magazine { padding:25px 20px 70px; }
+      .mag-head { margin-top:34px; }
+      .mag-head h1 { font-size:49px; }
+      .mag-head p:last-child { display:none; }
+      .issue-layout { grid-template-columns:1fr; gap:40px; padding-top:30px; }
+      .issue-aside { display:flex; align-items:center; gap:20px; }
+      .issue-aside img { width:132px; flex:none; }
+      .issue-aside p { margin:0; line-height:1.7; }
+      .issue-topline h2 { font-size:24px; }
+      .issue-row strong { font-size:17px; }
+      .reading-head { padding:35px 22px 31px; }
+      .reading-head .crumb { margin-bottom:31px; }
+      .reading-head h1 { font-size:32px; }
+      .prose { padding:31px 22px 100px; font-size:18px; }
+      .reader-panel { right:13px; bottom:74px; }
+    }
+    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } .cover-frame { transition:none; } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <button class="brand" type="button" data-view="home">党内刊物 <small>READING ROOM</small></button>
+      <nav class="view-tabs" aria-label="设计预览页面">
+        <button type="button" data-view="home" aria-current="page">首页</button>
+        <button type="button" data-view="magazine">杂志</button>
+        <button type="button" data-view="reading">正文</button>
+      </nav>
+    </div>
+  </header>
+  <div class="demo-note">视觉方向预览 · 文章标题与正文为排版示意</div>
+
+  <main>
+    <section class="view home" id="homeView" aria-label="首页预览">
+      <div class="home-intro"><p class="eyebrow">THREE JOURNALS</p></div>
+      <div class="home-heading"><h1>三刊阅读</h1></div>
+      <div class="shelf">
+        <button type="button" data-mag="qs" aria-label="浏览求是"><span class="cover-frame"><img src="../assets/img/cover_qs.jpg" alt="求是刊物封面"></span><span class="shelf-label"><strong>求是</strong><span>进入刊物 ↗</span></span></button>
+        <button type="button" data-mag="hqwg" aria-label="浏览红旗文稿"><span class="cover-frame"><img src="../assets/img/cover_hqwg.jpg" alt="红旗文稿刊物封面"></span><span class="shelf-label"><strong>红旗文稿</strong><span>进入刊物 ↗</span></span></button>
+        <button type="button" data-mag="djyj" aria-label="浏览党建研究"><span class="cover-frame"><img src="../assets/img/cover_djyj.jpg" alt="党建研究刊物封面"></span><span class="shelf-label"><strong>党建研究</strong><span>进入刊物 ↗</span></span></button>
+      </div>
+      <div class="home-foot"><span>按刊物与期号阅读</span><button type="button" id="homeBrowse">浏览本期目录　↗</button></div>
+    </section>
+
+    <section class="view magazine" id="magazineView" aria-label="杂志页预览" hidden>
+      <div class="crumb"><button type="button" data-view="home">全部刊物</button><span>／</span><span id="crumbMag">求是</span></div>
+      <div class="mag-head"><div><p class="eyebrow">THE JOURNAL</p><h1 id="magTitle">求是</h1></div><p>以期为序 · 以文为本</p></div>
+      <div class="mag-tabs"><button type="button" class="active" data-mag-tab="catalog">目录</button><button type="button" data-mag-tab="section">板块</button><button type="button" data-mag-tab="saved">收藏</button></div>
+      <div class="issue-layout">
+        <aside class="issue-aside"><img id="magCover" src="../assets/img/cover_qs.jpg" alt="求是封面"><p id="magAside">当期目录<br>2026 年 · 第 20 期</p></aside>
+        <div class="issue-main"><div class="issue-topline"><h2 id="issueHeading">2026 年第 20 期</h2><span>示意目录</span></div><p class="issue-section" id="issueSection">本期文章</p><div id="issueRows"></div></div>
+      </div>
+    </section>
+
+    <section class="view reading" id="readingView" aria-label="正文页预览" hidden>
+      <div class="reading-head"><div class="crumb"><button type="button" data-view="magazine" id="readingBack">求是</button><span>／</span><span>2026 年第 20 期</span></div><p class="eyebrow">示意文章 · 阅读版式</p><h1 id="articleTitle">在发展中增进民生福祉</h1><div class="reading-meta"><span id="articleSource">求是 · 2026 年第 20 期</span><span>阅读约 6 分钟</span></div></div>
+      <article class="prose" id="prose">
+        <p class="editor-note">以下文字仅用于展示行宽、段距和标题层级，不对应正式刊物文章。</p>
+        <p>阅读一篇文章，需要的是安静而稳定的节奏。标题引出主题，期号说明出处，正文以清楚的层级展开。页面不应反复提醒读者工具在哪里，而应让注意力自然落在文字上。</p>
+        <p>对于中文长文，适中的行宽与疏朗的行距比复杂装饰更重要。首行缩进、段落间距、标点与标题的关系，应构成连贯的阅读秩序。每一处留白都服务于理解，而不只是为了让页面显得空旷。</p>
+        <h2>一、让目录先于工具</h2>
+        <p>期刊的阅读路径从封面开始，经过当期目录，再进入正文。读者知道自己正在读哪一本刊物、哪一期、哪篇文章，也能随时回到本期继续选择。清楚的路径，可以减少操作上的犹疑。</p>
+        <p>首页只需展示三本刊物的完整封面。杂志页集中呈现期号与文章目录。阅读页则让文字占据中心，把设置和跳转收进需要时才打开的控件。这样的层次能同时容纳检索与沉浸阅读。</p>
+        <h2>二、把阅读留给正文</h2>
+        <p>文章越长，界面越要克制。固定底栏只保留高频动作，更多选项放在轻量面板中；改变字号或纸张时，仍能看见正文的变化。纸面感来自字距、行距与比例，而不是厚重的阴影与边框。</p>
+        <p>这份预览展示的是方向，不是对现有内容和数据结构的迁移。待视觉方向确定后，再把它逐步用于实际首页、杂志页和正文页，并保留现有检索、收藏与离线能力。</p>
+      </article>
+      <div class="reader-panel" id="tocPanel" hidden><h3>本期目录</h3><div id="tocRows"></div></div>
+      <div class="reader-panel" id="settingsPanel" hidden><h3>阅读设置</h3><div class="setting-line"><span>字号</span><span class="controls"><button type="button" id="smaller" aria-label="缩小字号">−</button><button type="button" id="larger" aria-label="放大字号">＋</button></span></div><div class="setting-line"><span>纸张</span><span class="controls"><button type="button" class="swatch white current" data-paper="white" aria-label="白色纸张"></button><button type="button" class="swatch warm" data-paper="warm" aria-label="暖色纸张"></button></span></div></div>
+      <div class="reader-dock"><button type="button" id="tocToggle" aria-expanded="false">目录</button><button type="button" id="settingsToggle" aria-expanded="false">设置</button><button type="button" id="nextArticle">下一篇　→</button></div>
+    </section>
+  </main>
+
+  <script>
+    const magazines = {
+      qs: {name:'求是', cover:'../assets/img/cover_qs.jpg', issue:'2026 年第 20 期', rows:['在发展中增进民生福祉','把握高质量发展的实践要求','持续提升基层治理效能','以改革精神推进制度创新','推动文化建设迈出新步伐']},
+      hqwg: {name:'红旗文稿', cover:'../assets/img/cover_hqwg.jpg', issue:'2026 年第 20 期', rows:['深刻把握新时代的新使命','以实际行动推动高质量发展','把调查研究做深做实','凝聚团结奋斗的力量','在实践中提高工作本领']},
+      djyj: {name:'党建研究', cover:'../assets/img/cover_djyj.jpg', issue:'2026 年第 10 期', rows:['不断提高党的建设质量','把基层党组织建设得更加坚强有力','以严实作风抓好工作落实','建设忠诚干净担当的干部队伍','推动党建与业务深度融合']}
+    };
+    let activeMag='qs', articleIndex=0, activeTab='catalog', fontSize=20;
+    const $=id=>document.getElementById(id);
+    function closePanels(){ $('tocPanel').hidden=true; $('settingsPanel').hidden=true; for(const id of ['tocToggle','settingsToggle']) {$(id).classList.remove('active');$(id).setAttribute('aria-expanded','false');} }
+    function showView(view){ for(const [name,id] of [['home','homeView'],['magazine','magazineView'],['reading','readingView']]) $(id).hidden=name!==view; document.querySelectorAll('[data-view]').forEach(b=>{if(b.closest('.view-tabs')) b.setAttribute('aria-current',b.dataset.view===view?'page':'false');}); closePanels(); window.scrollTo(0,0); }
+    function setMagazine(key){ activeMag=key; articleIndex=0; activeTab='catalog'; document.querySelectorAll('[data-mag-tab]').forEach(b=>b.classList.toggle('active',b.dataset.magTab==='catalog')); const m=magazines[key]; $('magTitle').textContent=m.name; $('crumbMag').textContent=m.name; $('magCover').src=m.cover; $('magCover').alt=m.name+'封面'; $('magAside').innerHTML='当期目录<br>'+m.issue.replace('第',' · 第'); renderRows(); renderToc(); showView('magazine'); }
+    function renderRows(){ const m=magazines[activeMag]; const choices=activeTab==='catalog'?[0,1,2,3,4]:activeTab==='section'?[0,2,4]:[1,3]; $('issueHeading').textContent=activeTab==='catalog'?m.issue:activeTab==='section'?'板块':'我的收藏'; $('issueSection').textContent=activeTab==='catalog'?'本期文章':activeTab==='section'?'理论文章':'示意收藏'; $('issueRows').replaceChildren(); choices.forEach(i=>{const title=m.rows[i];const b=document.createElement('button'); b.type='button';b.className='issue-row';b.innerHTML='<span class="num">'+String(i+1).padStart(2,'0')+'</span><span><strong></strong><small>示意文章 · '+m.issue+'</small></span><span class="arrow">↗</span>';b.querySelector('strong').textContent=title;b.addEventListener('click',()=>openArticle(i));$('issueRows').append(b);}); }
+    function renderToc(){ $('tocRows').replaceChildren(); magazines[activeMag].rows.forEach((title,i)=>{const b=document.createElement('button');b.type='button';b.className='panel-row';b.textContent=String(i+1).padStart(2,'0')+'　'+title;b.addEventListener('click',()=>openArticle(i));$('tocRows').append(b);}); }
+    function openArticle(i){ articleIndex=i;const m=magazines[activeMag];$('articleTitle').textContent=m.rows[i];$('articleSource').textContent=m.name+' · '+m.issue;$('readingBack').textContent=m.name;showView('reading'); }
+    document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+    document.querySelectorAll('[data-mag]').forEach(b=>b.addEventListener('click',()=>setMagazine(b.dataset.mag)));
+    $('homeBrowse').addEventListener('click',()=>setMagazine('qs'));
+    document.querySelectorAll('[data-mag-tab]').forEach(b=>b.addEventListener('click',()=>{activeTab=b.dataset.magTab;document.querySelectorAll('[data-mag-tab]').forEach(x=>x.classList.toggle('active',x===b));renderRows();}));
+    $('tocToggle').addEventListener('click',()=>{const open=$('tocPanel').hidden;closePanels();$('tocPanel').hidden=!open;$('tocToggle').classList.toggle('active',open);$('tocToggle').setAttribute('aria-expanded',String(open));});
+    $('settingsToggle').addEventListener('click',()=>{const open=$('settingsPanel').hidden;closePanels();$('settingsPanel').hidden=!open;$('settingsToggle').classList.toggle('active',open);$('settingsToggle').setAttribute('aria-expanded',String(open));});
+    $('smaller').addEventListener('click',()=>{$('prose').style.setProperty('--reader-size',(fontSize=Math.max(16,fontSize-2))+'px');});
+    $('larger').addEventListener('click',()=>{$('prose').style.setProperty('--reader-size',(fontSize=Math.min(26,fontSize+2))+'px');});
+    document.querySelectorAll('[data-paper]').forEach(b=>b.addEventListener('click',()=>{$('readingView').classList.toggle('warm',b.dataset.paper==='warm');document.querySelectorAll('[data-paper]').forEach(x=>x.classList.toggle('current',x===b));}));
+    $('nextArticle').addEventListener('click',()=>openArticle((articleIndex+1)%magazines[activeMag].rows.length));
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanels();});
+    document.addEventListener('click',e=>{if(!$('tocPanel').contains(e.target)&&!$('settingsPanel').contains(e.target)&&!$('tocToggle').contains(e.target)&&!$('settingsToggle').contains(e.target))closePanels();});
+    renderRows();
+    renderToc();
+  </script>
+</body>
+</html>
