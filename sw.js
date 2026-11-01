@@ -39,9 +39,9 @@
 var VERSION = (function () {
     try {
         var m = /[?&]v=([^&]+)/.exec(self.location.search);
-        return m ? decodeURIComponent(m[1]) : '20261101h';
+        return m ? decodeURIComponent(m[1]) : '20261101i';
     } catch (e) {
-        return '20261101h';
+        return '20261101i';
     }
 })();
 
@@ -57,6 +57,7 @@ var SHELL_ASSETS = [
     './manifest.webmanifest?v=' + VERSION,
     './assets/css/style.css?v=' + VERSION,
     './assets/css/books.css?v=' + VERSION,
+    './assets/css/one.css?v=' + VERSION,
     './assets/js/app.js?v=' + VERSION,
     './assets/img/icon-192.png',
     './assets/img/icon-512.png',

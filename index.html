@@ -9,10 +9,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=20261101h">
-<link rel="stylesheet" href="assets/css/books.css?v=20261101h">
-<link rel="manifest" href="manifest.webmanifest?v=20261101h">
-<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101h">
+<link rel="stylesheet" href="assets/css/style.css?v=20261101i">
+<link rel="stylesheet" href="assets/css/books.css?v=20261101i">
+<link rel="stylesheet" href="assets/css/one.css?v=20261101i">
+<link rel="manifest" href="manifest.webmanifest?v=20261101i">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101i">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b0000' stroke-width='2'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
 <script>
 (function(){try{
@@ -114,6 +115,15 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
             <button class="home-about-btn" onclick="showAboutPage()" title="关于本站"><svg class="icon"><use href="#i-info"/></svg></button>
         </div>
     </header>
+    <section class="home-feature" aria-label="本期精选">
+        <a class="home-feature-cover" href="#m=qs" onclick="event.preventDefault();enterMagazine('qs')" aria-label="打开求是杂志"></a>
+        <div class="home-feature-text">
+            <span class="home-feature-kicker">本期精选 · 《求是》</span>
+            <span class="home-feature-issue" id="homeFeatureIssue">最新一期</span>
+            <h2 id="homeFeatureTitle">从一篇文章开始阅读</h2>
+            <button type="button" id="homeFeatureRead" class="home-feature-read" onclick="readHomeFeature()">阅读文章 <span aria-hidden="true">→</span></button>
+        </div>
+    </section>
     <section class="home-search" aria-label="三刊检索">
         <div class="home-search-copy"><strong>在三本刊物中寻找文章</strong><span>检索《求是》《红旗文稿》《党建研究》标题</span></div>
         <form class="home-search-form" onsubmit="event.preventDefault(); openGlobalSearch(document.getElementById('homeSearchInput').value)">
@@ -123,7 +133,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
         </form>
     </section>
     <div class="home-body">
-        <div class="home-section-heading"><h2>你的书架</h2><span>选择刊物，按期浏览</span></div>
+        <div class="home-section-heading"><h2>三本刊物</h2><span>选择刊物，按期浏览</span></div>
         <div class="magazine-grid">
             <a class="magazine-card" href="#m=qs" onclick="event.preventDefault();enterMagazine('qs')" aria-label="打开求是杂志">
                 <div class="mag-cover mag-cover-qs">
@@ -260,8 +270,8 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 
 <div class="app-main">
 <nav class="nav-tabs desktop-only">
-    <button class="nav-tab active" data-mode="section"><svg class="icon"><use href="#i-grid"/></svg>按板块浏览</button>
-    <button class="nav-tab" data-mode="catalog"><svg class="icon"><use href="#i-list"/></svg>按期号浏览</button>
+    <button class="nav-tab active" data-mode="catalog"><svg class="icon"><use href="#i-list"/></svg>按期号浏览</button>
+    <button class="nav-tab" data-mode="section"><svg class="icon"><use href="#i-grid"/></svg>按板块浏览</button>
     <button class="nav-tab" data-mode="favorites"><svg class="icon"><use href="#i-bookmark"/></svg>收藏 <span class="fav-badge" id="favBadgeTop">0</span></button>
 </nav>
 
@@ -272,10 +282,10 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
         <div id="searchResults" class="results-list"></div>
         <div id="pagination" class="pagination"></div>
     </div>
-    <div class="view active" id="sectionView">
+    <div class="view" id="sectionView">
         <div id="sectionContent" class="section-list"></div>
     </div>
-    <div class="view" id="catalogView">
+    <div class="view active" id="catalogView">
         <div id="catalogContent" class="catalog-list"></div>
     </div>
     <div class="view" id="favoritesView">
@@ -285,10 +295,10 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 </div><!-- /.app-main -->
 
 <nav class="bottom-nav mobile-only">
-    <button class="bn-item" data-mode="catalog">
+    <button class="bn-item active" data-mode="catalog">
         <svg class="icon"><use href="#i-list"/></svg><span class="bn-label">目录</span>
     </button>
-    <button class="bn-item active" data-mode="section">
+    <button class="bn-item" data-mode="section">
         <svg class="icon"><use href="#i-grid"/></svg><span class="bn-label">板块</span>
     </button>
     <button class="bn-item" data-mode="favorites">
@@ -374,10 +384,10 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
             <span class="reader-toolbar-title" id="readerToolbarTitle"></span>
             <button class="reader-toc-toggle" id="readerTocToggle" onclick="toggleReaderToc()" aria-expanded="false" hidden>目录</button>
             <div class="ap-actions">
-                <button class="ap-settings-btn" id="articleSettingsBtn" onclick="toggleArticleSettings(event)" title="阅读设置" aria-label="阅读设置">Aa</button>
-                <button class="ap-fav-btn" id="articleFavBtn" onclick="toggleArticleFav()"><svg class="icon"><use href="#i-star"/></svg></button>
-                <a class="ap-original-link" id="articleOrigLink" href="#" target="_blank" rel="noopener"><svg class="icon"><use href="#i-external"/></svg></a>
-                <button class="ap-copy-btn" id="articleCopyBtn" onclick="copyArticleLink()" title="复制本篇链接"><svg class="icon"><use href="#i-link"/></svg></button>
+                <button class="ap-settings-btn" id="articleSettingsBtn" onclick="toggleArticleSettings(event)" title="阅读设置" aria-label="阅读设置">Aa <span>设置</span></button>
+                <button class="ap-fav-btn" id="articleFavBtn" onclick="toggleArticleFav()" aria-label="收藏文章"><svg class="icon"><use href="#i-star"/></svg><span>收藏</span></button>
+                <a class="ap-original-link" id="articleOrigLink" href="#" target="_blank" rel="noopener" aria-label="查看原文"><svg class="icon"><use href="#i-external"/></svg><span>原文</span></a>
+                <button class="ap-copy-btn" id="articleCopyBtn" onclick="copyArticleLink()" title="复制本篇链接" aria-label="复制文章链接"><svg class="icon"><use href="#i-link"/></svg><span>分享</span></button>
             </div>
         </div>
     </div>
@@ -481,6 +491,6 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     </div>
 </div>
 
-<script src="assets/js/app.js?v=20261101h"></script>
+<script src="assets/js/app.js?v=20261101i"></script>
 </body>
 </html>

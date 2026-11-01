@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101h';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101i';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -166,7 +166,7 @@ function enterMagazine(magKey) {
     state.catalogPending = false;
     state.catalogExpanded = new Set();
     state.isSearching = false;
-    state.currentMode = 'section';
+    state.currentMode = 'catalog';
     state.searchResults = [];
     state.currentPage = 1;
     document.body.classList.remove('mag-search-open');
@@ -187,9 +187,9 @@ function enterMagazine(magKey) {
 
     // 重置视图
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('sectionView').classList.add('active');
+    document.getElementById('catalogView').classList.add('active');
     document.querySelectorAll('.nav-tab, .bn-item').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.mode === 'section');
+        btn.classList.toggle('active', btn.dataset.mode === 'catalog');
     });
 
     // 加载数据
@@ -266,6 +266,7 @@ async function initMagazine(magKey) {
 
     // 默认显示板块
     renderSections();
+    if (state.currentMode === 'catalog') renderCatalog();
     onMagazineDataReady();
     updateStickyOffsets();
 
@@ -865,11 +866,23 @@ async function loadHomeLatest() {
         if (!resp.ok) throw new Error('latest unavailable');
         picked = await resp.json();
     } catch (e) { host.textContent = '最新文章暂不可用'; return; }
+    const feature = picked.qs;
+    if (feature) {
+        document.getElementById('homeFeatureIssue').textContent = feature.y + ' 年第 ' + feature.i + ' 期';
+        document.getElementById('homeFeatureTitle').textContent = feature.t;
+        document.getElementById('homeFeatureRead').dataset.url = encodeURIComponent(feature.u);
+    }
     host.innerHTML = MAGAZINE_ORDER.map(k => {
         const r = picked[k]; if (!r) return '';
         return `<button class="home-latest-item" data-mag="${escHtml(k)}" data-url="${encodeURIComponent(r.u)}"><span>${escHtml(MAGAZINES[k].name)} · ${r.y}年第${r.i}期</span><strong>${escHtml(r.t)}</strong></button>`;
     }).join('');
     host.onclick = e => { const item=e.target.closest('.home-latest-item'); if(!item)return; enterMagazine(item.dataset.mag); showArticle(item.dataset.url); };
+}
+
+function readHomeFeature() {
+    const url = document.getElementById('homeFeatureRead').dataset.url;
+    enterMagazine('qs');
+    if (url) showArticle(url);
 }
 
 function closeGlobalSearch() {
@@ -1091,7 +1104,7 @@ async function showArticle(encUrl, replaceHist) {
     const favBtn = document.getElementById('articleFavBtn');
     const isFav = isFavorite(url);
     favBtn.classList.toggle('active', isFav);
-    favBtn.innerHTML = svgStar(isFav);
+    favBtn.innerHTML = svgStar(isFav) + '<span>收藏</span>';
 
     const bodyEl = document.getElementById('articleBody');
     document.body.classList.add('article-active');
@@ -1265,7 +1278,7 @@ function toggleArticleFav() {
     const isFav = isFavorite(url);
     const btn = document.getElementById('articleFavBtn');
     btn.classList.toggle('active', isFav);
-    btn.innerHTML = svgStar(isFav);
+    btn.innerHTML = svgStar(isFav) + '<span>收藏</span>';
     if (state.currentMode === 'favorites' && !state.isSearching) renderFavorites();
     if (state.isSearching) performSearch();
 }
@@ -2249,7 +2262,11 @@ function renderCatalog() {
 
     // 自动展开第一年
     if (years.length > 0) {
-        requestAnimationFrame(() => toggleYear(years[0]));
+        requestAnimationFrame(() => {
+            toggleYear(years[0]);
+            const newest = Object.keys(catalog[years[0]]).sort((a, b) => parseInt(b) - parseInt(a))[0];
+            if (newest) toggleIssue(years[0], newest);
+        });
     }
 }
 
