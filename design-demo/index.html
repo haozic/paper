@@ -88,26 +88,123 @@
       .reader-panel { right:13px; bottom:74px; }
     }
     @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } .cover-frame { transition:none; } }
+    /* iOS-inspired material belongs to controls; publication content stays opaque. */
+    :root { --paper:#f2f3f6; --surface:#ffffff; --ink:#20222a; --muted:#6e7380; --faint:#a0a5af; --line:rgba(38,44,55,.11); --accent:#a62e32; --glass:rgba(255,255,255,.72); }
+    body { background:radial-gradient(ellipse 42% 35% at 18% 29%,rgba(224,231,244,.7),transparent 100%),radial-gradient(ellipse 35% 35% at 82% 12%,rgba(246,225,220,.5),transparent 100%),var(--paper); }
+    .site-header { position:relative; z-index:25; border-bottom:1px solid rgba(255,255,255,.75); background:rgba(248,249,252,.7); -webkit-backdrop-filter:blur(24px) saturate(150%); backdrop-filter:blur(24px) saturate(150%); box-shadow:0 1px 0 rgba(40,45,60,.04); }
+    .site-header-inner { min-height:78px; }
+    .brand { font-size:22px; letter-spacing:.04em; }
+    .search-trigger { display:flex; align-items:center; justify-content:center; gap:9px; min-width:95px; min-height:40px; padding:0 15px; border:1px solid rgba(255,255,255,.9); border-radius:999px; background:var(--glass); color:var(--ink); box-shadow:0 4px 16px rgba(37,43,58,.08),inset 0 1px 0 #fff; font-size:13px; font-weight:600; -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px); }
+    .search-trigger:hover,.close-search:hover { background:#fff; box-shadow:0 7px 22px rgba(37,43,58,.13); }
+    .search-trigger svg,.search-field svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; }
+    .home { padding:61px 34px 92px; }
+    .home-lead { max-width:1030px; margin:0 auto 39px; }
+    .section-kicker { color:var(--accent); font-size:10px; font-weight:700; letter-spacing:.2em; }
+    .home-lead h1 { margin:13px 0 7px; font-family:var(--serif); font-size:clamp(39px,4vw,57px); font-weight:600; line-height:1.2; letter-spacing:.05em; }
+    .home-lead p { margin:0; color:var(--muted); font-size:13px; }
+    .shelf { gap:clamp(20px,3vw,41px); max-width:1030px; }
+    .shelf button { position:relative; border-radius:24px; }
+    .cover-frame { padding:12px; border:1px solid rgba(255,255,255,.92); border-radius:22px; background:rgba(255,255,255,.58); box-shadow:0 17px 35px rgba(42,45,59,.13),inset 0 1px 0 #fff; }
+    .cover-frame img { border-radius:11px; }
+    .shelf button:hover .cover-frame,.shelf button:focus-visible .cover-frame { transform:translateY(-7px); box-shadow:0 25px 44px rgba(42,45,59,.17),inset 0 1px 0 #fff; }
+    .cover-action { display:inline-flex; align-items:center; gap:8px; margin-top:12px; padding:9px 12px; border:1px solid rgba(255,255,255,.8); border-radius:999px; background:rgba(255,255,255,.82); color:#252834; box-shadow:0 4px 18px rgba(25,28,38,.09); font-size:11px; font-weight:650; -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); }
+    .shelf button { text-align:right; }
+    .cover-action span { font-size:14px; }
+    .magazine { padding-top:60px; }
+    .mag-head { display:flex; align-items:end; justify-content:space-between; gap:16px; margin-bottom:31px; }
+    .mag-head h1 { margin-top:11px; font-size:clamp(43px,5vw,66px); }
+    .mag-count { margin-bottom:7px; color:var(--muted); font-size:12px; }
+    .mag-tabs { display:inline-flex; gap:3px; padding:5px; border:1px solid rgba(255,255,255,.95); border-radius:18px; background:rgba(255,255,255,.57); box-shadow:0 5px 20px rgba(37,43,58,.06),inset 0 1px 0 #fff; -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px); }
+    .mag-tabs button { min-width:76px; min-height:38px; padding:0 16px; border:0; border-radius:13px; color:var(--muted); }
+    .mag-tabs button.active { background:#fff; color:var(--ink); box-shadow:0 2px 8px rgba(37,43,58,.12); }
+    .issue-layout { grid-template-columns:minmax(220px,315px) minmax(0,1fr); gap:clamp(37px,6vw,78px); padding-top:38px; }
+    .issue-aside img { padding:8px; border:1px solid rgba(255,255,255,.88); border-radius:18px; background:rgba(255,255,255,.52); box-shadow:0 17px 35px rgba(42,45,59,.12); }
+    .issue-main { align-self:start; padding:26px 29px 20px; border:1px solid rgba(255,255,255,.85); border-radius:25px; background:rgba(255,255,255,.66); box-shadow:0 15px 40px rgba(39,45,59,.07),inset 0 1px 0 #fff; }
+    .issue-topline { padding-bottom:13px; border-bottom:1px solid var(--line); }
+    .issue-topline h2 { font-size:27px; }
+    .issue-row { grid-template-columns:32px minmax(0,1fr) 20px; align-items:center; min-height:67px; padding:12px 0; }
+    .issue-row:last-child { border-bottom:0; }
+    .issue-row strong { font-size:18px; }
+    .issue-row .arrow { font-size:17px; }
+    .reading { background:#fffdf9; }
+    .reading-head { max-width:920px; padding-top:55px; }
+    .reading-head .crumb { margin-bottom:37px; }
+    .reading-head .crumb button { padding:8px 13px; border:1px solid #e7e4de; border-radius:999px; background:#f5f2ed; color:#5f5d58; }
+    .reading-head .crumb button:hover { background:#ebe6de; }
+    .reader-dock { right:50%; bottom:18px; left:auto; width:min(460px,calc(100% - 28px)); min-height:56px; padding:5px; border:1px solid rgba(255,255,255,.88); border-radius:20px; background:rgba(250,249,247,.77); box-shadow:0 9px 32px rgba(32,35,45,.14),inset 0 1px 0 #fff; transform:translateX(50%); -webkit-backdrop-filter:blur(22px) saturate(145%); backdrop-filter:blur(22px) saturate(145%); }
+    .reader-dock button { width:33.333%; min-height:44px; border-radius:15px; font-size:13px; }
+    .reader-dock button:hover,.reader-dock button.active { background:rgba(255,255,255,.85); }
+    .reader-panel { right:max(20px,calc((100vw - 460px)/2)); bottom:91px; border:1px solid rgba(255,255,255,.9); border-radius:21px; background:rgba(255,255,255,.9); box-shadow:0 14px 45px rgba(30,34,45,.15); -webkit-backdrop-filter:blur(22px); backdrop-filter:blur(22px); }
+    .reading.warm .reader-dock,.reading.warm .reader-panel { background:rgba(244,237,223,.91); }
+    .search-backdrop { position:fixed; inset:0; z-index:39; background:rgba(26,31,42,.3); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+    .search-sheet { position:fixed; top:min(13vh,110px); right:50%; z-index:40; width:min(660px,calc(100vw - 28px)); max-height:min(76vh,740px); display:flex; flex-direction:column; overflow:hidden; padding:25px; border:1px solid rgba(255,255,255,.95); border-radius:28px; background:rgba(250,251,253,.95); box-shadow:0 30px 90px rgba(14,22,40,.27),inset 0 1px 0 #fff; transform:translateX(50%); -webkit-backdrop-filter:blur(30px) saturate(145%); backdrop-filter:blur(30px) saturate(145%); }
+    .search-sheet-head { display:flex; align-items:start; justify-content:space-between; gap:20px; margin-bottom:22px; }
+    .search-sheet-head h2 { margin:7px 0 0; font-family:var(--serif); font-size:30px; font-weight:600; }
+    .close-search { width:36px; height:36px; border:1px solid #fff; border-radius:50%; background:#f2f3f6; color:var(--muted); font-size:24px; line-height:1; }
+    .search-field { display:flex; align-items:center; gap:11px; min-height:52px; padding:0 15px; border:1px solid #dfe2e9; border-radius:15px; background:#fff; color:#777f8e; box-shadow:0 2px 7px rgba(26,34,50,.04); }
+    .search-field:focus-within { border-color:#8694aa; box-shadow:0 0 0 3px rgba(98,119,151,.15); }
+    .search-field svg { flex:none; width:19px; height:19px; }
+    .search-field input { flex:1; min-width:0; border:0; outline:0; background:none; color:var(--ink); font:inherit; font-size:15px; }
+    .search-field input::placeholder { color:#9ca3ae; }
+    .search-shortcut { color:#a2a7b0; font-size:11px; }
+    .search-filters { display:flex; gap:7px; overflow-x:auto; margin:18px 0 21px; padding-bottom:2px; }
+    .search-filters button { flex:none; min-height:34px; padding:0 13px; border:1px solid #e4e6eb; border-radius:999px; background:#fff; color:var(--muted); font-size:12px; }
+    .search-filters button.selected { border-color:#333945; background:#333945; color:#fff; }
+    .search-result-head { margin-bottom:9px; color:var(--muted); font-size:12px; }
+    .search-results { min-height:70px; overflow-y:auto; padding-right:4px; }
+    .search-result { display:flex; align-items:center; justify-content:space-between; gap:16px; width:100%; min-height:66px; padding:11px 5px; border:0; border-bottom:1px solid var(--line); background:none; color:var(--ink); text-align:left; }
+    .search-result:hover { color:var(--accent); }
+    .search-result strong { display:block; font-family:var(--serif); font-size:17px; font-weight:600; }
+    .search-result small { display:block; margin-top:5px; color:var(--muted); font-size:11px; }
+    .search-result > span:last-child { color:var(--faint); font-size:19px; }
+    .search-empty { padding:26px 8px; color:var(--muted); font-size:13px; }
+    .search-footnote { margin:17px 0 0; color:#9aa0aa; font-size:11px; }
+    body.search-open { overflow:hidden; }
+    @media (max-width:780px) {
+      .site-header-inner { min-height:66px; padding:0 21px; }
+      .search-trigger { min-width:42px; width:42px; height:42px; padding:0; }
+      .search-trigger span { display:none; }
+      .home { padding:40px 19px 70px; }
+      .home-lead { max-width:340px; margin-bottom:27px; }
+      .home-lead h1 { font-size:40px; }
+      .shelf { gap:27px; }
+      .magazine { padding:39px 19px 75px; }
+      .mag-head { margin-bottom:25px; }
+      .mag-head h1 { font-size:48px; }
+      .mag-count { display:none; }
+      .issue-layout { grid-template-columns:1fr; padding-top:27px; }
+      .issue-main { padding:21px 18px 12px; border-radius:21px; }
+      .issue-topline h2 { font-size:23px; }
+      .issue-row strong { font-size:16px; }
+      .reader-dock { bottom:max(11px,env(safe-area-inset-bottom)); }
+      .reader-panel { right:14px; bottom:82px; }
+      .search-sheet { top:auto; right:0; bottom:0; width:100%; max-height:90dvh; padding:24px 18px max(23px,env(safe-area-inset-bottom)); border-radius:26px 26px 0 0; transform:none; }
+      .search-sheet-head h2 { font-size:25px; }
+    }
+    @media (prefers-reduced-transparency:reduce) { .site-header,.search-trigger,.mag-tabs,.reader-dock,.reader-panel,.search-sheet { background:#fff; -webkit-backdrop-filter:none; backdrop-filter:none; } }
+    @media (prefers-reduced-motion:reduce) { .cover-frame { transition:none; } }
   </style>
 </head>
 <body>
   <header class="site-header">
     <div class="site-header-inner">
       <button class="brand" type="button" data-view="home" aria-label="返回网站首页">党内刊物</button>
+      <button class="search-trigger" id="searchTrigger" type="button" aria-label="搜索刊物与文章" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 4.5 4.5"></path></svg><span>搜索</span></button>
     </div>
   </header>
   <main>
     <section class="view home" id="homeView" aria-label="首页预览">
+      <div class="home-lead"><span class="section-kicker">THE READING ROOM</span><h1>期刊书架</h1><p>选一本刊物，开始阅读。</p></div>
       <div class="shelf">
-        <button type="button" data-mag="qs" aria-label="浏览求是"><span class="cover-frame"><img src="../assets/img/cover_qs.jpg" alt="求是刊物封面"></span></button>
-        <button type="button" data-mag="hqwg" aria-label="浏览红旗文稿"><span class="cover-frame"><img src="../assets/img/cover_hqwg.jpg" alt="红旗文稿刊物封面"></span></button>
-        <button type="button" data-mag="djyj" aria-label="浏览党建研究"><span class="cover-frame"><img src="../assets/img/cover_djyj.jpg" alt="党建研究刊物封面"></span></button>
+        <button type="button" data-mag="qs" aria-label="浏览求是"><span class="cover-frame"><img src="../assets/img/cover_qs.jpg" alt="求是刊物封面"></span><span class="cover-action" aria-hidden="true">打开目录 <span>↗</span></span></button>
+        <button type="button" data-mag="hqwg" aria-label="浏览红旗文稿"><span class="cover-frame"><img src="../assets/img/cover_hqwg.jpg" alt="红旗文稿刊物封面"></span><span class="cover-action" aria-hidden="true">打开目录 <span>↗</span></span></button>
+        <button type="button" data-mag="djyj" aria-label="浏览党建研究"><span class="cover-frame"><img src="../assets/img/cover_djyj.jpg" alt="党建研究刊物封面"></span><span class="cover-action" aria-hidden="true">打开目录 <span>↗</span></span></button>
       </div>
     </section>
 
     <section class="view magazine" id="magazineView" aria-label="杂志页预览" hidden>
-      <div class="mag-head"><h1 id="magTitle">求是</h1></div>
-      <div class="mag-tabs"><button type="button" class="active" data-mag-tab="catalog">目录</button><button type="button" data-mag-tab="section">板块</button><button type="button" data-mag-tab="saved">收藏</button></div>
+      <div class="mag-head"><div><span class="section-kicker">JOURNAL</span><h1 id="magTitle">求是</h1></div><span class="mag-count">本期 · 5 篇文章</span></div>
+      <div class="mag-tabs" role="tablist" aria-label="刊物内容"><button type="button" class="active" role="tab" aria-selected="true" data-mag-tab="catalog">目录</button><button type="button" role="tab" aria-selected="false" data-mag-tab="section">板块</button><button type="button" role="tab" aria-selected="false" data-mag-tab="saved">收藏</button></div>
       <div class="issue-layout">
         <aside class="issue-aside"><img id="magCover" src="../assets/img/cover_qs.jpg" alt="求是封面"></aside>
         <div class="issue-main"><div class="issue-topline"><h2 id="issueHeading">2026 年第 20 期</h2></div><div id="issueRows"></div></div>
@@ -133,30 +230,48 @@
     </section>
   </main>
 
+  <div class="search-backdrop" id="searchBackdrop" hidden></div>
+  <section class="search-sheet" id="searchSheet" role="dialog" aria-modal="true" aria-labelledby="searchTitle" hidden>
+    <div class="search-sheet-head"><div><span class="section-kicker">DISCOVER</span><h2 id="searchTitle">搜索刊物与文章</h2></div><button class="close-search" id="searchClose" type="button" aria-label="关闭搜索">×</button></div>
+    <label class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 4.5 4.5"></path></svg><input id="searchInput" type="search" placeholder="输入刊物、期号或文章标题" autocomplete="off"><span class="search-shortcut">Esc</span></label>
+    <div class="search-filters" aria-label="筛选刊物"><button type="button" class="selected" data-search-mag="all">全部</button><button type="button" data-search-mag="qs">求是</button><button type="button" data-search-mag="hqwg">红旗文稿</button><button type="button" data-search-mag="djyj">党建研究</button></div>
+    <div class="search-result-head" id="searchCount" aria-live="polite"></div>
+    <div class="search-results" id="searchResults"></div>
+    <p class="search-footnote">演示搜索仅覆盖此预览中的刊物与示意文章。</p>
+  </section>
+
   <script>
     const magazines = {
       qs: {name:'求是', cover:'../assets/img/cover_qs.jpg', issue:'2026 年第 20 期', rows:['在发展中增进民生福祉','把握高质量发展的实践要求','持续提升基层治理效能','以改革精神推进制度创新','推动文化建设迈出新步伐']},
       hqwg: {name:'红旗文稿', cover:'../assets/img/cover_hqwg.jpg', issue:'2026 年第 20 期', rows:['深刻把握新时代的新使命','以实际行动推动高质量发展','把调查研究做深做实','凝聚团结奋斗的力量','在实践中提高工作本领']},
       djyj: {name:'党建研究', cover:'../assets/img/cover_djyj.jpg', issue:'2026 年第 10 期', rows:['不断提高党的建设质量','把基层党组织建设得更加坚强有力','以严实作风抓好工作落实','建设忠诚干净担当的干部队伍','推动党建与业务深度融合']}
     };
-    let activeMag='qs', articleIndex=0, activeTab='catalog', fontSize=20;
+    let activeMag='qs', articleIndex=0, activeTab='catalog', fontSize=20, searchMag='all';
     const $=id=>document.getElementById(id);
     function closePanels(){ $('tocPanel').hidden=true; $('settingsPanel').hidden=true; for(const id of ['tocToggle','settingsToggle']) {$(id).classList.remove('active');$(id).setAttribute('aria-expanded','false');} }
     function showView(view){ for(const [name,id] of [['home','homeView'],['magazine','magazineView'],['reading','readingView']]) $(id).hidden=name!==view; closePanels(); window.scrollTo(0,0); }
-    function setMagazine(key){ activeMag=key; articleIndex=0; activeTab='catalog'; document.querySelectorAll('[data-mag-tab]').forEach(b=>b.classList.toggle('active',b.dataset.magTab==='catalog')); const m=magazines[key]; $('magTitle').textContent=m.name; $('magCover').src=m.cover; $('magCover').alt=m.name+'封面'; renderRows(); renderToc(); showView('magazine'); }
+    function setMagazine(key){ activeMag=key; articleIndex=0; activeTab='catalog'; document.querySelectorAll('[data-mag-tab]').forEach(b=>{const selected=b.dataset.magTab==='catalog';b.classList.toggle('active',selected);b.setAttribute('aria-selected',String(selected));}); const m=magazines[key]; $('magTitle').textContent=m.name; $('magCover').src=m.cover; $('magCover').alt=m.name+'封面'; renderRows(); renderToc(); showView('magazine'); }
     function renderRows(){ const m=magazines[activeMag]; const choices=activeTab==='catalog'?[0,1,2,3,4]:activeTab==='section'?[0,2,4]:[1,3]; $('issueHeading').textContent=activeTab==='catalog'?m.issue:activeTab==='section'?'板块':'我的收藏'; $('issueRows').replaceChildren(); choices.forEach(i=>{const title=m.rows[i];const b=document.createElement('button'); b.type='button';b.className='issue-row';b.innerHTML='<span class="num">'+String(i+1).padStart(2,'0')+'</span><strong></strong><span class="arrow">↗</span>';b.querySelector('strong').textContent=title;b.addEventListener('click',()=>openArticle(i));$('issueRows').append(b);}); }
     function renderToc(){ $('tocRows').replaceChildren(); magazines[activeMag].rows.forEach((title,i)=>{const b=document.createElement('button');b.type='button';b.className='panel-row';b.textContent=String(i+1).padStart(2,'0')+'　'+title;b.addEventListener('click',()=>openArticle(i));$('tocRows').append(b);}); }
     function openArticle(i){ articleIndex=i;const m=magazines[activeMag];$('articleTitle').textContent=m.rows[i];$('readingBack').textContent='← '+m.name+' · '+m.issue;showView('reading'); }
+    function openSearch(){ $('searchSheet').hidden=false; $('searchBackdrop').hidden=false; $('searchTrigger').setAttribute('aria-expanded','true'); document.body.classList.add('search-open'); renderSearch(); requestAnimationFrame(()=>$('searchInput').focus()); }
+    function closeSearch(restoreFocus=true){ $('searchSheet').hidden=true; $('searchBackdrop').hidden=true; $('searchTrigger').setAttribute('aria-expanded','false'); document.body.classList.remove('search-open'); if(restoreFocus)$('searchTrigger').focus(); }
+    function renderSearch(){ const query=$('searchInput').value.trim().normalize('NFKC').toLocaleLowerCase('zh-CN').replace(/\s+/g,''); const results=[]; for(const [key,m] of Object.entries(magazines)){if(searchMag!=='all'&&searchMag!==key)continue;const matches=value=>value.normalize('NFKC').toLocaleLowerCase('zh-CN').replace(/\s+/g,'').includes(query);if(matches(m.name+' '+m.issue))results.push({key,type:'magazine',title:m.name,detail:m.issue});m.rows.forEach((title,index)=>{if(matches(title+' '+m.name+' '+m.issue))results.push({key,index,type:'article',title,detail:m.name+' · '+m.issue});});} $('searchCount').textContent=query?`找到 ${results.length} 项结果`:'浏览全部刊物与文章'; $('searchResults').replaceChildren(); if(!results.length){const p=document.createElement('p');p.className='search-empty';p.textContent='没有找到相关内容，试试其他关键词。';$('searchResults').append(p);return;} for(const item of results){const b=document.createElement('button');b.type='button';b.className='search-result';const info=document.createElement('span');const strong=document.createElement('strong');strong.textContent=item.title;const small=document.createElement('small');small.textContent=(item.type==='magazine'?'刊物 · ':'文章 · ')+item.detail;info.append(strong,small);const arrow=document.createElement('span');arrow.textContent='↗';arrow.setAttribute('aria-hidden','true');b.append(info,arrow);b.addEventListener('click',()=>{closeSearch(false);setMagazine(item.key);if(item.type==='article')openArticle(item.index);});$('searchResults').append(b);} }
     document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
     document.querySelectorAll('[data-mag]').forEach(b=>b.addEventListener('click',()=>setMagazine(b.dataset.mag)));
-    document.querySelectorAll('[data-mag-tab]').forEach(b=>b.addEventListener('click',()=>{activeTab=b.dataset.magTab;document.querySelectorAll('[data-mag-tab]').forEach(x=>x.classList.toggle('active',x===b));renderRows();}));
+    document.querySelectorAll('[data-mag-tab]').forEach(b=>b.addEventListener('click',()=>{activeTab=b.dataset.magTab;document.querySelectorAll('[data-mag-tab]').forEach(x=>{const selected=x===b;x.classList.toggle('active',selected);x.setAttribute('aria-selected',String(selected));});renderRows();}));
+    $('searchTrigger').addEventListener('click',openSearch);
+    $('searchClose').addEventListener('click',()=>closeSearch());
+    $('searchBackdrop').addEventListener('click',()=>closeSearch());
+    $('searchInput').addEventListener('input',renderSearch);
+    document.querySelectorAll('[data-search-mag]').forEach(b=>b.addEventListener('click',()=>{searchMag=b.dataset.searchMag;document.querySelectorAll('[data-search-mag]').forEach(x=>x.classList.toggle('selected',x===b));renderSearch();}));
     $('tocToggle').addEventListener('click',()=>{const open=$('tocPanel').hidden;closePanels();$('tocPanel').hidden=!open;$('tocToggle').classList.toggle('active',open);$('tocToggle').setAttribute('aria-expanded',String(open));});
     $('settingsToggle').addEventListener('click',()=>{const open=$('settingsPanel').hidden;closePanels();$('settingsPanel').hidden=!open;$('settingsToggle').classList.toggle('active',open);$('settingsToggle').setAttribute('aria-expanded',String(open));});
     $('smaller').addEventListener('click',()=>{$('prose').style.setProperty('--reader-size',(fontSize=Math.max(16,fontSize-2))+'px');});
     $('larger').addEventListener('click',()=>{$('prose').style.setProperty('--reader-size',(fontSize=Math.min(26,fontSize+2))+'px');});
     document.querySelectorAll('[data-paper]').forEach(b=>b.addEventListener('click',()=>{$('readingView').classList.toggle('warm',b.dataset.paper==='warm');document.querySelectorAll('[data-paper]').forEach(x=>x.classList.toggle('current',x===b));}));
     $('nextArticle').addEventListener('click',()=>openArticle((articleIndex+1)%magazines[activeMag].rows.length));
-    document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanels();});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('searchSheet').hidden)closeSearch();else closePanels();}else if($('searchSheet').hidden&&(e.key==='/'||(e.key.toLowerCase()==='k'&&(e.ctrlKey||e.metaKey)))){e.preventDefault();openSearch();}else if(e.key==='Tab'&&!$('searchSheet').hidden){const focusable=[...$('searchSheet').querySelectorAll('button,input')];const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
     document.addEventListener('click',e=>{if(!$('tocPanel').contains(e.target)&&!$('settingsPanel').contains(e.target)&&!$('tocToggle').contains(e.target)&&!$('settingsToggle').contains(e.target))closePanels();});
     renderRows();
     renderToc();
