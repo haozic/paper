@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101u';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101v';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -61,6 +61,7 @@ const state = {
     favorites: [],
     currentMode: 'section',
     currentArticleUrl: null,
+    lastCatalogArticle: null,
     fullTextReady: false,
     catalogRendered: false,
     catalogPending: false,
@@ -1062,6 +1063,11 @@ async function showArticle(encUrl, replaceHist) {
 
     state.currentArticleUrl = url;
     state.currentArticleIdx = idx;
+    state.lastCatalogArticle = { mag: state.currentMag, url: url };
+    document.querySelectorAll('#catalogContent .art-item.is-current').forEach(item => item.classList.remove('is-current'));
+    document.querySelectorAll('#catalogContent .art-item[data-url]').forEach(item => {
+        if (decodeURIComponent(item.dataset.url) === url) item.classList.add('is-current');
+    });
     closeReaderNavMenu();
 
     document.getElementById('articleTitle').textContent = a.t;
@@ -2359,7 +2365,7 @@ function toggleIssue(year, ik) {
             arts.forEach(a => {
                 const au = a.a ? ` <span class="ai-author">｜${escHtml(a.a)}</span>` : '';
                 const encUrl = encodeURIComponent(a.u);
-                html += `<div class="art-item" data-url="${encUrl}">${escHtml(a.t)}${au}</div>`;
+                html += `<div class="art-item${state.lastCatalogArticle && state.lastCatalogArticle.mag === state.currentMag && state.lastCatalogArticle.url === a.u ? ' is-current' : ''}" data-url="${encUrl}">${escHtml(a.t)}${au}</div>`;
             });
             html += `</div>`;
         });
