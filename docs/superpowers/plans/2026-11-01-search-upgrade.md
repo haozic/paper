@@ -196,10 +196,6 @@ def build_index(metas):
 
 def dump_index(index):
     return json.dumps(index, ensure_ascii=False, separators=(',', ':'))
-
-
-def index_bytes(index):
-    return dump_index(index).encode('utf-8')
 ```
 
 - [ ] **Step 2: 加生成 / 校验 / 体积守卫的 CLI**
@@ -298,7 +294,7 @@ Expected: 输出 `已生成 data/search_index.json：7415 行，... 字节`
 #   R1  索引行数 = 三刊 meta 条目数之和
 #   R2  索引 cols 固定为 ["m","y","i","t","u"]
 #   R3  每行都能在对应刊的 meta 里找到同一条（mag/y/i/u 四元组）
-#   R4  索引内 URL 无重复
+#   R4  同一刊物内 URL 无重复（跨刊允许重复：「网站公告」同时列在《求是》和《红旗文稿》）
 #   R5  体积不超过 MAX_INDEX_BYTES
 #   R6  行序：刊物展示顺序 qs → hqwg → djyj
 #   R7  行序：年份降序、期号降序，期内保持 meta 原有顺序
@@ -348,15 +344,22 @@ def _check_rules(index, metas):
         if not any(a['y'] == y and a['i'] == i and a['u'] == u and a['t'] == t for a in meta):
             add('R3', '索引行在 meta 中找不到对应条目：%r' % (row,))
 
-    urls = [r[4] for r in rows if len(r) == 5]
-    if len(urls) != len(set(urls)):
-        seen = set()
-        dup = set()
-        for u in urls:
-            if u in seen:
-                dup.add(u)
-            seen.add(u)
-        add('R4', '重复 URL %d 个，示例 %s' % (len(dup), sorted(dup)[0]))
+    # R4 同一刊物内 URL 无重复
+    # 注意：**跨刊**允许重复 —— 实测三刊 meta 合计 7415 行、唯一 URL 7413 个，
+    # 「网站公告」这篇文章同时列在《求是》和《红旗文稿》的目录里（http/https 各一组）。
+    # 那是真实数据，不是索引的错；全局去重会破坏 R1（行数必须等于 meta 条目数之和），
+    # 还会丢掉《红旗文稿》的目录条目。
+    counts = {}
+    uniques = {}
+    for row in rows:
+        if len(row) != 5:
+            continue
+        counts[row[0]] = counts.get(row[0], 0) + 1
+        uniques.setdefault(row[0], set()).add(row[4])
+    for mag in sorted(counts):
+        d = counts[mag] - len(uniques[mag])
+        if d:
+            add('R4', '%s 在索引内有 %d 条重复 URL' % (mag, d))
 
     size = len(dump_index(index).encode('utf-8'))
     if size > MAX_INDEX_BYTES:
@@ -416,7 +419,13 @@ def self_test():
     case('R8', json.loads(dump_index(index)) == index, '正对照：dump/load 往返一致')
     case('R12', build_index([])['rows'] == [], '空 meta 返回空 rows')
 
-    # ---- 反向自检：注入已知坏数据，必须被**对应规则**抓到 ----
+    # ---- 反向自检 R4：同一刊物内 URL 重复必须被 R4 抓到 ----
+    bad = build_index(metas)
+    bad['rows'].append(list(bad['rows'][0]))
+    e = _check_rules(bad, metas)
+    case('R4', 'R4' in e, '反向自检 R4：同刊 URL 重复 → 命中 R4（实际命中 %s）' % (sorted(e.keys()),))
+
+    # ---- 反向自检 R9：注入「漏一行」必须被 R1 抓到 ----
     bad = build_index(metas)
     bad['rows'] = bad['rows'][:-1]
     e = _check_rules(bad, metas)
@@ -475,7 +484,7 @@ if __name__ == '__main__':
 - [ ] **Step 6: 跑自检，确认全绿**
 
 Run: `python -u scripts/build_search_index.py --self-test`
-Expected: `用例 13 条，失败 0 条` + `✅ 自检通过`
+Expected: `用例 14 条，失败 0 条` + `✅ 自检通过`
 
 - [ ] **Step 7: 确认 `--check` 在文件不存在时以非 0 退出**
 
@@ -491,8 +500,8 @@ git -C E:/cursor/djyj commit -m "新增跨刊标题索引生成器
 从三份 meta.json 生成紧凑的全局标题索引（m/y/i/t/u 五列），
 行序按刊物展示顺序 qs→hqwg→djyj、年份降序、期号降序、期内保持官网目录顺序。
 
---self-test 内置 13 条用例，含 3 条反向自检（漏一行/刊别写错/顺序打乱），
-且反向自检断言到规则编号一级（R1/R6/R7）。
+--self-test 内置 14 条用例，含 4 条反向自检（同刊 URL 重复/漏一行/刊别写错/顺序打乱），
+且反向自检断言到规则编号一级（R4/R1/R6/R7）。
 
 验证范围：--self-test 全绿；已用真实三刊 meta 生成一次索引。
 已实现但未独立审查。"
@@ -1148,7 +1157,11 @@ async function loadSearchIndex() {
 }
 
 /* 跨刊标题检索：只匹配标题（不含作者与板块）。
-   返回顺序即索引行序：刊物展示顺序 → 年降 → 期降 → 期内官网目录顺序。 */
+   返回顺序即索引行序：刊物展示顺序 → 年降 → 期降 → 期内官网目录顺序。
+
+   **不要按 URL 去重**：真实数据里「网站公告」这篇文章同时列在《求是》和
+   《红旗文稿》的目录里（http/https 各一组），按 URL 去重会把《红旗文稿》
+   那两条目录条目吞掉。每行都是一条独立的目录条目，条目身份是整行。 */
 function searchAllTitles(index, query) {
     const out = [];
     if (!index || !index.rows) return out;
@@ -2177,9 +2190,10 @@ git -C E:/cursor/djyj -c credential.helper= -c credential.helper="!gh auth git-c
 
 ```javascript
 /* 每期正文分片的实测均值（字节），用于在下载前告知用户预计流量。
-   实测来源见 docs/superpowers/specs/2026-11-01-search-upgrade-design.md §2.2；
-   数据更新后用 python scripts/build_search_index.py --print-avg 重新测量后更新这里。 */
-const BODY_AVG_BYTES = { qs: 236000, hqwg: 172000, djyj: 194000 };
+   由 python scripts/build_search_index.py --print-avg 实测得出
+   （qs 188 期 43.3 MB / hqwg 164 期 27.5 MB / djyj 70 期 13.2 MB）。
+   数据更新后重跑该命令并更新这里。 */
+const BODY_AVG_BYTES = { qs: 241619, hqwg: 176044, djyj: 198248 };
 ```
 
 - [ ] **Step 6: `assets/js/app.js` 加估算与按钮渲染函数**
@@ -3244,7 +3258,7 @@ Expected: `4 处版本号`（index.html 的四处 `?v=`）
 | 3 | `check_search_upgrade.js` 在 vm 沙箱里用 `ctx.__api` 取不到（`ctx` 不在沙箱作用域内） | 改用 `globalThis.__api`（与 `check_related.js` 同一套路；因是字符串字面量，不触发 `check_compat.py` 的 `globalThis` 黑名单） |
 | 4 | Node 脚本的 R4（组内顺序）**没有样本可查** —— 查询词只命中每刊一篇，组内没有相邻对 | 查询词改用「新篇」，能同时命中求是的两篇，R4 才有意义；R10/R11 同步改 |
 | 5 | Node 的 `console.log('%-4s')` 不支持 printf 补位，字面输出 `%-4s` | 改用 `c.rule.padEnd(4)` |
-| 6 | **S3「索引内 URL 无重复」在真实数据上不成立** —— 三刊 7415 行、唯一 URL 7413 个，「网站声明」同时出现在《求是》和《红旗文稿》目录里 | S3 改为「同一刊物内 URL 无重复」；全局去重会破坏 S1（行数必须等于 meta 条目数之和） |
+| 6 | **S3「索引内 URL 无重复」在真实数据上不成立** —— 三刊 7415 行、唯一 URL 7413 个，「网站声明」同时出现在《求是》和《红旗文稿》目录里 | S3 改为「同一刊物内 URL 无重复」；全局去重会破坏 S1（行数必须等于 meta 条目数之和）。**生成器里的 R4 规则同病**，一并改成同一刊物口径，并补一条 R4 反向自检（Task 1 实施时独立复核真实数据发现） |
 | 7 | 跨刊分支的 `loadSearchIndex().then(...)` 缺令牌校验，等索引期间改了关键词会把过期结果写回界面 | 加 `tok` 校验，与正文搜索用同一个 `state.searchToken` 机制 |
 | 8 | 三刊模式下正文按钮区不会被收起（`finishSearch` 在跨刊分支不执行） | 跨刊分支显式清空并隐藏 `#bodySearchActions`；`performSearch` 里补 `updateBodySearchActions()` |
 | 9 | 计划新增的 CSS 里有三处 `display:flex` + `gap` 容器（`.result-group` / `.result-group-head` / `.body-search-actions`），Chrome 69 会丢间距 | 三个都补了 `@supports not (aspect-ratio: 3 / 4)` 兜底条目，`check_compat.py` 实跑已确认零失败 |
@@ -3252,7 +3266,7 @@ Expected: `4 处版本号`（index.html 的四处 `?v=`）
 **实跑结果（全部零失败）：**
 
 ```
-build_search_index.py --self-test      13 条用例全绿（含 3 条反向自检，断言到规则编号一级）
+build_search_index.py --self-test      14 条用例全绿（含 4 条反向自检，断言到规则编号一级）
 build_search_index.py --check          OK  7415 行 / 1000280 字节
 check_search_upgrade.js                12 条用例全绿（含 3 条反向自检）
 check_data.py（含 S1~S4）              索引问题数: 0
