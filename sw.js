@@ -39,9 +39,9 @@
 var VERSION = (function () {
     try {
         var m = /[?&]v=([^&]+)/.exec(self.location.search);
-        return m ? decodeURIComponent(m[1]) : '20261031b';
+        return m ? decodeURIComponent(m[1]) : '20261101a';
     } catch (e) {
-        return '20261031b';
+        return '20261101a';
     }
 })();
 
@@ -72,7 +72,8 @@ var DATA_ASSETS = [
     './data/article_index.json?v=' + VERSION,
     './data/meta.json?v=' + VERSION,
     './data/qs/meta.json?v=' + VERSION,
-    './data/hqwg/meta.json?v=' + VERSION
+    './data/hqwg/meta.json?v=' + VERSION,
+    './data/search_index.json?v=' + VERSION
 ];
 
 /* 运行时缓存条目上限，超出后按插入顺序淘汰最旧的，防止无限膨胀 */
