@@ -34,6 +34,7 @@ Fetch 规范"在 navigate 模式下把重定向响应过滤成 opaque"的假 fet
       干净响应，且绝不是缓存里的 index.html
   T3  非外壳路径（备考指南等独立静态页）→ SW **不接管**，直接放行给网络
   T4  断网时首页 → 回落到缓存里的 index.html（离线能力不能丢）
+  T5  缓存写入停滞时首页 → 仍立即返回网络响应
 
 用法：
   python scripts/check_sw_navigate.py              # 跑行为检查（需要 node）
@@ -112,6 +113,7 @@ MockResponse.error = function () {
 
 /* ---- 假 fetch：按 Fetch 规范模拟 navigate 模式下的 opaque 过滤 ---- */
 let networkFails = false;
+let cacheWriteStalls = false;
 function mockFetch(input, init) {
   init = init || {};
   let url, mode;
@@ -151,7 +153,11 @@ const cacheStore = {};
 const mockCaches = {
   open: function (name) {
     return Promise.resolve({
-      put: function (k, v) { cacheStore[name + '|' + (k.url || k)] = v; return Promise.resolve(); },
+      put: function (k, v) {
+        if (cacheWriteStalls) return new Promise(function () {});
+        cacheStore[name + '|' + (k.url || k)] = v;
+        return Promise.resolve();
+      },
       keys: function () { return Promise.resolve([]); },
       delete: function () { return Promise.resolve(false); }
     });
@@ -201,6 +207,7 @@ if (!listeners.fetch) {
 function runNavigate(path, opts) {
   opts = opts || {};
   if (opts.offline) networkFails = true;
+  cacheWriteStalls = !!opts.stallCache;
   const url = ORIGIN + path;
   const request = new MockRequest(url, { mode: 'navigate' });
   let responded = false;
@@ -209,19 +216,27 @@ function runNavigate(path, opts) {
 
   const event = {
     request: request,
+    waitUntil: function () {},
     respondWith: function (p) {
       responded = true;
       result = p;
     }
   };
   listeners.fetch(event);
-  return Promise.resolve(result)
+  const response = opts.stallCache
+    ? Promise.race([Promise.resolve(result), new Promise(function (resolve) {
+        setTimeout(function () { resolve({ __stalled: true }); }, 150);
+      })])
+    : Promise.resolve(result);
+  return response
     .catch(function (e) { errored = (e && e.name) + ': ' + (e && e.message); return null; })
     .then(function (resolved) {
       networkFails = false;
+      cacheWriteStalls = false;
       let kind = 'none';
       if (errored) kind = 'rejected';
       else if (!responded) kind = 'not-handled';
+      else if (resolved && resolved.__stalled) kind = 'cache-stalled';
       else if (resolved && resolved.__sentinel) kind = 'cached-index';
       else if (resolved && resolved.__isError) kind = 'response-error';
       else if (resolved && resolved.redirected) kind = 'redirected';
@@ -238,7 +253,8 @@ Promise.resolve()
   .then(function (r) { cases.push({ id: 'T1', ...r }); return runNavigate('/index.html'); })
   .then(function (r) { cases.push({ id: 'T2', ...r }); return runNavigate('/linxuan-beikao-zhinan/linxuan-beikao-zhinan.html'); })
   .then(function (r) { cases.push({ id: 'T3', ...r }); return runNavigate('/', { offline: true }); })
-  .then(function (r) { cases.push({ id: 'T4', ...r }); })
+  .then(function (r) { cases.push({ id: 'T4', ...r }); return runNavigate('/', { stallCache: true }); })
+  .then(function (r) { cases.push({ id: 'T5', ...r }); })
   .then(function () { console.log(JSON.stringify({ cases: cases })); })
   .catch(function (e) {
     console.log(JSON.stringify({ fatal: 'HARNESS_ERROR ' + (e && e.message) }));
@@ -253,6 +269,7 @@ EXPECT = {
     'T2': ('ok', '外壳路径 /index.html 线上会 308：应返回干净响应，既不能是缓存首页，也不能是带 redirected 标记的响应'),
     'T3': ('not-handled', '非外壳路径（备考指南等）应由 SW 放行，不接管导航'),
     'T4': ('cached-index', '断网时应回落到缓存里的 index.html（离线能力不能丢）'),
+    'T5': ('ok', '缓存写入卡住时，首页网络响应仍应立即返回'),
 }
 
 # 判定"干净响应"：kind == 'ok'
@@ -296,7 +313,7 @@ def judge(payload):
     """把 harness 输出判成 [(用例id, 通过?, 说明)]。"""
     results = []
     got = {c['id']: c for c in payload.get('cases', [])}
-    for cid in ('T1', 'T2', 'T3', 'T4'):
+    for cid in ('T1', 'T2', 'T3', 'T4', 'T5'):
         want, desc = EXPECT[cid]
         c = got.get(cid)
         if c is None:
@@ -388,7 +405,7 @@ def main():
     print('=' * 72)
 
     if '--list' in argv:
-        for cid in ('T1', 'T2', 'T3', 'T4'):
+        for cid in ('T1', 'T2', 'T3', 'T4', 'T5'):
             print('  %s  %s' % (cid, EXPECT[cid][1]))
         print('')
         return 0

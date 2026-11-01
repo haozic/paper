@@ -28,8 +28,8 @@
     --search-h: 96px;
     --bottom-h: 56px;
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
-    --font-sans: -apple-system, "Noto Sans CJK SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
-    --font-serif: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+    --font-sans: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    --font-serif: "Songti SC", "STSong", "SimSun", serif;
     /* 阅读排版偏好（可由阅读设置面板调整，存 localStorage） */
     --article-fs: 20px;        /* 字号 */
     --article-lh: 2.05;        /* 行距 */

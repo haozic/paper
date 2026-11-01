@@ -27,8 +27,8 @@
   --library-ink: var(--text);
   --library-muted: var(--text-3);
   --library-accent: var(--primary);
-  --font-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
-  --font-serif: "Noto Serif SC", "Songti SC", "STSong", serif;
+  --font-sans: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-serif: "Songti SC", "STSong", "SimSun", serif;
 }
 html[data-theme="dark"] {
   --primary: #d59083;
@@ -324,12 +324,6 @@ body.article-active { --reading-dock-height: 58px; }
 .ap-header-inner { grid-template-columns: 1fr; grid-template-areas: "toc" "title" "meta"; }
 .reader-toc-toggle { min-height: 36px; }
 
-/* Quiet destinations stay inside the issue contents instead of the reading canvas. */
-.reading-issue-header { position: sticky; top: 0; z-index: 1; background: var(--card); }
-.reading-issue-destinations { display: flex; align-items: center; gap: 8px; padding: 0 10px 12px; }
-.reading-issue-destinations button { min-height: 44px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: transparent; color: var(--text-2); font: 12px var(--font-sans); cursor: pointer; }
-.reading-issue-destinations button:hover, .reading-issue-destinations button:focus-visible { border-color: var(--primary); color: var(--primary); }
-
 /* Settings float above the dock and leave the article visible while they change. */
 .reading-dock .reading-operation-menu { position: absolute; right: max(18px, calc((100vw - 1000px) / 2)); bottom: calc(100% + 10px); left: auto; box-sizing: border-box; width: min(376px, calc(100vw - 36px)); max-width: none; max-height: min(50vh, 420px); margin: 0; padding: 16px 18px 12px; overflow-y: auto; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); }
 .reading-operation-menu .ap-settings-panel { margin: 0; padding: 6px 0 0; border: 0; }
@@ -339,6 +333,5 @@ body.article-active { --reading-dock-height: 58px; }
 .article-page:has(.reading-operation-menu:not([hidden])) .back-to-top { opacity: 0; visibility: hidden; pointer-events: none; }
 
 @media (max-width: 767px) {
-  .reading-issue-destinations { padding-inline: 2px; }
   .reading-dock .reading-operation-menu { right: 12px; width: min(376px, calc(100vw - 24px)); max-height: 50vh; padding-inline: 16px; }
 }

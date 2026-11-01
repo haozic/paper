@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101q';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101r';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -1264,18 +1264,6 @@ function goBack() {
     }
 }
 
-function leaveReader(destination) {
-    const magKey = state.currentMag;
-    closeArticlePage();
-    if (magKey) history.replaceState({ mag: magKey }, '', `#m=${magKey}`);
-    if (destination === 'home' || !magKey) {
-        goHome();
-        return;
-    }
-    document.body.classList.remove('section-active', 'about-active');
-    switchMode('catalog');
-}
-
 function closeArticlePage() {
     // 关闭前先记录当前阅读位置（此时页面仍在 article-active 状态，滚动高度有效）
     if (document.body.classList.contains('article-active')) {
@@ -1672,10 +1660,7 @@ function renderArticleFooter(url, cur) {
     const next = nb.next;
     const issueArticles = ordered.filter(item => item.a.y === cur.y && item.a.i === cur.i);
     const issueMenu = document.getElementById('readingIssueMenu');
-    issueMenu.innerHTML = '<div class="reading-issue-header"><nav class="reading-issue-destinations" aria-label="离开阅读页">' +
-        '<button type="button" onclick="leaveReader(\'home\')">网站首页</button>' +
-        '<button type="button" onclick="leaveReader(\'magazine\')">' + escHtml(MAGAZINES[state.currentMag].name) + '首页</button>' +
-        '</nav><div class="reading-issue-heading"><strong>' + escHtml(MAGAZINES[state.currentMag].name) + ' · ' + issueLabel(cur) + '</strong><span>' + issueArticles.length + ' 篇</span></div></div>' +
+    issueMenu.innerHTML = '<div class="reading-issue-heading"><strong>' + escHtml(MAGAZINES[state.currentMag].name) + ' · ' + issueLabel(cur) + '</strong><span>' + issueArticles.length + ' 篇</span></div>' +
         '<div class="reading-issue-list">' + issueArticles.map((item, index) => {
             const a = item.a;
             const active = a.u === url;

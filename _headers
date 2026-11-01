@@ -3,9 +3,9 @@
 /data/*
   Cache-Control: public, max-age=31536000, immutable
 
-# CSS/JS 文件使用短期缓存，避免更新后用户仍看到旧版本
+# CSS/JS/封面图片使用带版本号的 URL；重复访问时直接用浏览器缓存
 /assets/*
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: public, max-age=86400
 
 # HTML 文件不缓存（确保更新及时）
 /*.html

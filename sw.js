@@ -4,7 +4,7 @@
  * ----
  * 1. 应用外壳（index.html / CSS / JS / manifest / 图标 / 封面）预缓存，
  *    断网也能正常打开并显示完整样式；
- * 2. 三刊的 meta / article_index 预缓存，断网后仍能浏览目录、打开已读文章；
+ * 2. 三刊的 meta 在后台预缓存；搜索索引和文章索引按需加载，避免每次更新重下大文件；
  * 3. 用户读过的正文（articles 目录下的 .md）与正文分片（data 各刊的 issues 目录）运行时缓存，
  *    断网后仍可阅读已缓存的正文。
  *
@@ -39,9 +39,9 @@
 var VERSION = (function () {
     try {
         var m = /[?&]v=([^&]+)/.exec(self.location.search);
-        return m ? decodeURIComponent(m[1]) : '20261101q';
+        return m ? decodeURIComponent(m[1]) : '20261101r';
     } catch (e) {
-        return '20261101q';
+        return '20261101r';
     }
 })();
 
@@ -70,13 +70,11 @@ var SHELL_ASSETS = [
     './data/counts.json?v=' + VERSION
 ];
 
-/* 三刊元数据与索引：activate 后台补齐（断网后仍能浏览目录） */
+/* 三刊元数据：activate 后台补齐；大索引在首次使用时再缓存。 */
 var DATA_ASSETS = [
-    './data/article_index.json?v=' + VERSION,
     './data/meta.json?v=' + VERSION,
     './data/qs/meta.json?v=' + VERSION,
-    './data/hqwg/meta.json?v=' + VERSION,
-    './data/search_index.json?v=' + VERSION
+    './data/hqwg/meta.json?v=' + VERSION
 ];
 
 /* 运行时缓存条目上限，超出后按插入顺序淘汰最旧的，防止无限膨胀 */
@@ -122,13 +120,15 @@ function trimCache(cacheName, max) {
 function putInRuntime(cacheName, request, response, max) {
     if (!response || !response.ok) return Promise.resolve(null);
     var key;
+    var copy;
     try {
         key = cacheKeyFor(request);
+        copy = response.clone();
     } catch (e) {
         return Promise.resolve(null);
     }
     return caches.open(cacheName).then(function (cache) {
-        return cache.put(key, response.clone()).then(function () {
+        return cache.put(key, copy).then(function () {
             return trimCache(cacheName, max);
         });
     }).catch(function () {
@@ -238,19 +238,21 @@ function fetchShell(request) {
 }
 
 /* 导航请求：优先联网拿最新版，断网时回落到缓存的首页 */
-function handleNavigate(request) {
+function handleNavigate(request, event) {
     var key;
     try {
         key = cacheKeyFor(request);
     } catch (e) {
         key = request;
     }
-    return fetchShell(request).then(function (response) {
-        if (response) {
-            return putInRuntime(SHELL_CACHE, key, response, 9999).then(function () {
-                return response;
-            });
-        }
+    var network = fetchShell(request);
+    if (event && event.waitUntil) {
+        event.waitUntil(network.then(function (response) {
+            return response ? putInRuntime(SHELL_CACHE, key, response, 9999) : null;
+        }).catch(function () { return null; }));
+    }
+    return network.then(function (response) {
+        if (response) return response;
         /* 没拿到正文：回落到缓存里的首页（仅限应用外壳路由） */
         return caches.match('./index.html').then(function (fallback) {
             return fallback || Response.error();
@@ -263,7 +265,7 @@ function handleNavigate(request) {
 }
 
 /* 静态资源与数据：缓存优先 */
-function handleCacheFirst(request) {
+function handleCacheFirst(request, event) {
     var key;
     try {
         key = cacheKeyFor(request);
@@ -275,7 +277,8 @@ function handleCacheFirst(request) {
     var cacheName = isMd ? MD_CACHE : RT_CACHE;
     var max = isMd ? MAX_MD_ENTRIES : MAX_RT_ENTRIES;
 
-    return caches.match(key).then(function (cached) {
+    var fromNetwork = null;
+    var result = caches.match(key).then(function (cached) {
         if (cached) return cached;
         return fetch(request).then(function (response) {
             /* Cloudflare Pages 的 SPA 回退会把 404 变成 200 的 index.html。
@@ -284,13 +287,18 @@ function handleCacheFirst(request) {
             if (response && response.ok && !contentTypeMatches(path, response)) {
                 return new Response('', { status: 404, statusText: 'Not Found' });
             }
-            return putInRuntime(cacheName, key, response, max).then(function () {
-                return response;
-            });
+            fromNetwork = response;
+            return response;
         }).catch(function () {
             return Response.error();
         });
     });
+    if (event && event.waitUntil) {
+        event.waitUntil(result.then(function (response) {
+            return response && response === fromNetwork ? putInRuntime(cacheName, key, response, max) : null;
+        }).catch(function () { return null; }));
+    }
+    return result;
 }
 
 self.addEventListener('fetch', function (event) {
@@ -309,10 +317,10 @@ self.addEventListener('fetch', function (event) {
         /* 只有应用外壳路由才接管导航；备考指南等独立静态页放行给网络，
            避免 SW 参与它们的 308 重定向处理（见 fetchShell 注释里的坑 1）。 */
         if (!isShellPath(url.pathname)) return;
-        event.respondWith(handleNavigate(request));
+        event.respondWith(handleNavigate(request, event));
         return;
     }
-    event.respondWith(handleCacheFirst(request));
+    event.respondWith(handleCacheFirst(request, event));
 });
 
 /* 允许页面主动要求新 SW 立即生效 */
