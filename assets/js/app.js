@@ -38,6 +38,10 @@ const MAGAZINES = {
     },
 };
 
+/* 刊物展示顺序：跨刊检索结果按这个顺序分组。
+   与 scripts/build_search_index.py 的 MAG_ORDER、scripts/check_data.py 的 MAGAZINES 一致。 */
+const MAGAZINE_ORDER = ['qs', 'hqwg', 'djyj'];
+
 /* ===== 状态管理 ===== */
 const state = {
     currentMag: null,       // null=首页, 'qs'|'hqwg'|'djyj'
@@ -53,6 +57,8 @@ const state = {
     searchResults: [],
     searchToken: 0,         // 递增令牌：查询词变化时让旧的正文搜索立即作废
     lastQuery: '',         // 最近一次已提交的搜索词
+    searchIndex: null,     // 跨刊标题索引（懒加载，data/search_index.json）
+    searchIndexStatus: 'idle',   // idle / loading / ready / error
     currentPage: 1,
     pageSize: 20,
     readingFs: 20,          // 文章字号
@@ -369,6 +375,100 @@ function updateFavBadges() {
 }
 
 /* ===== 搜索 ===== */
+
+/* 载入跨刊标题索引。
+   失败时不抛错、不影响本刊搜索：状态置 'error'，调用方负责提示与降级。 */
+async function loadSearchIndex() {
+    if (state.searchIndexStatus === 'ready' && state.searchIndex) return true;
+    if (state.searchIndexStatus === 'loading') return false;
+    state.searchIndexStatus = 'loading';
+    try {
+        const resp = await fetch(dataUrl('data/search_index.json'));
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const idx = await resp.json();
+        if (!idx || !Array.isArray(idx.rows) || !Array.isArray(idx.cols)) {
+            throw new Error('索引结构不正确');
+        }
+        if (idx.cols.join(',') !== 'm,y,i,t,u') {
+            throw new Error('索引列序不正确：' + idx.cols.join(','));
+        }
+        state.searchIndex = idx;
+        state.searchIndexStatus = 'ready';
+        return true;
+    } catch (e) {
+        console.warn('跨刊标题索引加载失败：', e);
+        state.searchIndex = null;
+        state.searchIndexStatus = 'error';
+        return false;
+    }
+}
+
+/* 跨刊标题检索：只匹配标题（不含作者与板块）。
+   返回顺序即索引行序：刊物展示顺序 → 年降 → 期降 → 期内官网目录顺序。 */
+function searchAllTitles(index, query) {
+    const out = [];
+    if (!index || !index.rows) return out;
+    const q = String(query || '').trim().toLowerCase();
+    if (!q) return out;
+    for (const row of index.rows) {
+        if (!row || row.length < 4) continue;
+        if (String(row[3]).toLowerCase().indexOf(q) >= 0) {
+            out.push({ m: row[0], y: row[1], i: row[2], t: row[3], u: row[4] });
+        }
+    }
+    return out;
+}
+
+/* 把跨刊命中切成组：{mag, name, count, items} */
+function groupCrossMagResults(results) {
+    const groups = [];
+    let cur = null;
+    for (const r of results) {
+        if (!cur || cur.mag !== r.m) {
+            const conf = MAGAZINES[r.m];
+            cur = { mag: r.m, name: conf ? conf.name : r.m, count: 0, items: [] };
+            groups.push(cur);
+        }
+        cur.count++;
+        cur.items.push(r);
+    }
+    return groups;
+}
+
+/* 正文搜索窗口：从已按 (y,i) 降序的期次表里取最新年份起的 yearSpan 年。
+   基准是期次表里最大的年份（不读浏览器时间，避免用户机器日期算错）。 */
+function pickBodyWindow(issues, yearSpan) {
+    if (!issues || !issues.length) return [];
+    const span = yearSpan || 1;
+    const maxYear = issues[0].y;
+    const minYear = maxYear - span + 1;
+    return issues.filter(it => it.y >= minYear);
+}
+
+/* 字节数转可读文本 */
+function formatBytes(n) {
+    const num = Number(n) || 0;
+    if (num < 1024) return num + ' B';
+    if (num < 1024 * 1024) return (num / 1024).toFixed(1) + ' KB';
+    return (num / 1024 / 1024).toFixed(1) + ' MB';
+}
+
+/* 检索范围：本刊 / 三刊 */
+function getMagScope() {
+    const checked = document.querySelector('input[name="magScope"]:checked');
+    return checked ? checked.value : 'current';
+}
+
+/* 同步「本刊 / 三刊」开关的选中态。
+   Chrome 69 不支持 CSS :has()，用 .checked 类兜底（与 syncScopeChecked 同一套路）。 */
+function syncMagScopeChecked() {
+    document.querySelectorAll('.mag-scope-option').forEach(opt => {
+        const input = opt.querySelector('input[name="magScope"]');
+        if (input && input.checked) opt.classList.add('checked');
+        else opt.classList.remove('checked');
+    });
+}
+
 function getSearchScope() {
     const checked = document.querySelector('input[name="searchScope"]:checked');
     return checked ? checked.value : 'all';
