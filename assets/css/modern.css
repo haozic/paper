@@ -69,13 +69,12 @@ html[data-theme="dark"] .article-page { --bg: #191c22; --card: #2b3039; --border
 body.mag-active #app { min-height: 100vh; }
 .app-sidebar { border: 0; }
 .sidebar-header { box-sizing: border-box; position: relative; max-width: 1190px; margin: auto; text-align: left; }
-.sidebar-brand { position: relative; }
-.journal-kicker { display: block; margin-bottom: 14px; color: var(--primary); font: 700 10px/1 var(--font-sans); letter-spacing: .22em; }
-.sidebar-brand h1 { font-family: var(--font-sans); font-weight: 680; letter-spacing: -.025em; }
+.sidebar-brand { position: static; }
+.sidebar-brand h1 { font-family: var(--font-sans); font-weight: 660; letter-spacing: -.025em; }
 .sidebar-meta { justify-content: flex-start; color: var(--text-3); }
 .sidebar-meta .app-subtitle { font-size: 13px; }
 .sidebar-meta .search-status { margin-left: 0; font-size: 12px; }
-.header-home-btn, .header-search-btn, .header-about-btn { border-radius: 14px; }
+.header-home-btn, .header-search-btn, .header-about-btn { z-index: 2; border-radius: 12px; }
 .app-sidebar .search-bar { display: none; box-sizing: border-box; max-width: 1138px; margin: 0 auto 12px; padding: 22px 26px; border: 1px solid var(--border); border-radius: 20px; background: var(--card); box-shadow: var(--shadow-md); }
 body.mag-search-open .app-sidebar .search-bar { display: block; }
 .app-sidebar .search-box { gap: 8px; }
@@ -180,9 +179,9 @@ body.article-active { --reading-dock-height: 74px; --reader-shortcut-size: 44px;
 .reader-nav-menu button:hover, .reader-nav-shortcut:hover, .article-page .back-to-top:hover { background: var(--card); }
 
 @media (min-width: 768px) {
-  .sidebar-header { padding: 51px 26px 32px; }
-  .sidebar-brand h1 { margin-bottom: 10px; font-size: clamp(43px, 4.4vw, 56px); line-height: 1.13; }
-  .header-home-btn, .header-search-btn, .header-about-btn { top: 49px; width: 42px; height: 42px; }
+  .sidebar-header { padding: 97px 26px 30px; }
+  .sidebar-brand h1 { margin-bottom: 7px; font-size: clamp(39px, 4vw, 48px); line-height: 1.17; }
+  .header-home-btn, .header-search-btn, .header-about-btn { top: 31px; width: 42px; height: 42px; }
   .header-home-btn { right: 126px; }
   .header-search-btn { right: 75px; }
   .header-about-btn { right: 24px; }
@@ -203,9 +202,8 @@ body.article-active { --reading-dock-height: 74px; --reader-shortcut-size: 44px;
   .mag-info h2 { font-size: 19px; }
   .home-guides { margin-top: 10px; }
   .gs-panel { max-height: calc(100vh - 28px); margin-block: 14px; }
-  .sidebar-header { min-height: 145px; padding: 72px 20px 19px; border-bottom: 0; }
-  .sidebar-brand h1 { margin: 0 0 7px; font-size: 34px; line-height: 1.15; }
-  .journal-kicker { margin-bottom: 8px; font-size: 9px; }
+  .sidebar-header { min-height: 135px; padding: 76px 20px 18px; border-bottom: 0; }
+  .sidebar-brand h1 { margin: 0 0 5px; font-size: 29px; line-height: 1.2; }
   .sidebar-meta { gap: 6px; justify-content: flex-start; }
   .sidebar-meta .search-status { display: none; }
   .header-home-btn, .header-search-btn, .header-about-btn { top: 18px; width: 42px; height: 42px; transform: none; }
