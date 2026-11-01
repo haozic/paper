@@ -1,0 +1,217 @@
+/* Shared editorial system for the reading site. The three guide pages keep their own styles. */
+:root {
+  --primary: #96382f;
+  --primary-light: #ad5145;
+  --primary-dark: #722b25;
+  --mag-color: var(--primary);
+  --mag-color-dark: var(--primary-dark);
+  --accent: var(--primary);
+  --fav: var(--primary);
+  --bg: #f7f5f0;
+  --bg-2: #f0ede6;
+  --card: #fffefb;
+  --text: #292723;
+  --text-2: #625e57;
+  --text-3: #827c73;
+  --border: #e4dfd6;
+  --border-2: #d4cdc1;
+  --highlight: #e9dfb9;
+  --highlight-text: #392b1c;
+  --radius: 7px;
+  --radius-sm: 5px;
+  --radius-lg: 9px;
+  --shadow: none;
+  --shadow-md: 0 5px 20px rgba(36, 32, 26, .06);
+  --shadow-lg: 0 14px 36px rgba(36, 32, 26, .1);
+  --library-bg: var(--bg);
+  --library-ink: var(--text);
+  --library-muted: var(--text-3);
+  --library-accent: var(--primary);
+  --font-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-serif: "Noto Serif SC", "Songti SC", "STSong", serif;
+}
+html[data-theme="dark"] {
+  --primary: #d59083;
+  --primary-light: #e5a79c;
+  --primary-dark: #c67c70;
+  --mag-color: var(--primary);
+  --mag-color-dark: var(--primary-dark);
+  --fav: var(--primary);
+  --bg: #201f1d;
+  --bg-2: #292722;
+  --card: #302e29;
+  --text: #eeeae2;
+  --text-2: #c8c1b5;
+  --text-3: #a9a194;
+  --border: #48443d;
+  --border-2: #5a554b;
+  --highlight: #62532b;
+  --highlight-text: #f4e4bf;
+}
+html[data-theme="dark"] .home-page,
+html[data-theme="dark"] body.mag-active #app {
+  --library-bg: var(--bg);
+  --library-ink: var(--text);
+  --library-muted: var(--text-3);
+  background: var(--bg);
+}
+html[data-theme="dark"] .home-search-form,
+html[data-theme="dark"] .app-sidebar,
+html[data-theme="dark"] .sidebar-header,
+html[data-theme="dark"] .search-bar,
+html[data-theme="dark"] .nav-tab.active,
+html[data-theme="dark"] .section-card,
+html[data-theme="dark"] .result-card,
+html[data-theme="dark"] .year-block { background: var(--bg); border-color: var(--border); }
+html[data-theme="dark"] .nav-tabs { background: var(--card); border-color: var(--border); }
+@media (prefers-color-scheme: dark) {
+  html[data-theme="auto"] {
+    --primary: #d59083;
+    --primary-light: #e5a79c;
+    --primary-dark: #c67c70;
+    --mag-color: var(--primary);
+    --mag-color-dark: var(--primary-dark);
+    --fav: var(--primary);
+    --bg: #201f1d;
+    --bg-2: #292722;
+    --card: #302e29;
+    --text: #eeeae2;
+    --text-2: #c8c1b5;
+    --text-3: #a9a194;
+    --border: #48443d;
+    --border-2: #5a554b;
+    --highlight: #62532b;
+    --highlight-text: #f4e4bf;
+  }
+  html[data-theme="auto"] .home-page,
+  html[data-theme="auto"] body.mag-active #app {
+    --library-bg: var(--bg);
+    --library-ink: var(--text);
+    --library-muted: var(--text-3);
+    background: var(--bg);
+  }
+  html[data-theme="auto"] .home-search-form,
+  html[data-theme="auto"] .app-sidebar,
+  html[data-theme="auto"] .sidebar-header,
+  html[data-theme="auto"] .search-bar,
+  html[data-theme="auto"] .nav-tab.active,
+  html[data-theme="auto"] .section-card,
+  html[data-theme="auto"] .result-card,
+  html[data-theme="auto"] .year-block { background: var(--bg); border-color: var(--border); }
+  html[data-theme="auto"] .nav-tabs { background: var(--card); border-color: var(--border); }
+}
+
+body, button, input { font-family: var(--font-sans); }
+body { background: var(--bg); color: var(--text); }
+button, a, input { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.icon { stroke-linecap: round; stroke-linejoin: round; }
+
+/* Pages, surface and navigation. */
+.home-page, body.mag-active #app, .article-page, .section-page, .about-page, .global-search { background: var(--bg); color: var(--text); }
+.home-header, .article-page-header, .section-page-header, .about-page-header { background: var(--bg); border-bottom: 1px solid var(--border); box-shadow: none; }
+.home-title, .sidebar-brand h1, .ap-title, .sp-title, .ab-title, .gate-title { font-family: var(--font-serif); color: var(--text); font-weight: 600; }
+.home-title, .mag-info h2, .sidebar-brand h1 { color: var(--text); }
+.home-about-btn, .header-home-btn, .header-about-btn, .header-search-btn { border: 0; border-radius: var(--radius-sm); background: transparent; box-shadow: none; color: var(--text-2); }
+.home-about-btn:hover, .header-home-btn:hover, .header-about-btn:hover, .header-search-btn:hover, body.mag-search-open .header-search-btn { background: var(--bg-2); color: var(--text); }
+.header-home-btn .icon, .header-about-btn .icon, .header-search-btn .icon, .home-about-btn .icon { width: 18px; height: 18px; }
+.app-sidebar { background: var(--bg); border-right: 1px solid var(--border); }
+.sidebar-header, .search-bar { background: var(--bg); box-shadow: none; }
+.sidebar-brand h1 { letter-spacing: .03em; }
+.sidebar-meta, .app-subtitle, .search-status { color: var(--text-3); }
+.search-status { opacity: 1; }
+.nav-tabs, .bottom-nav { background: var(--card); border-color: var(--border); box-shadow: none; }
+.nav-tab, .bn-item { color: var(--text-2); }
+.nav-tab:hover { background: var(--bg-2); color: var(--text); }
+.nav-tab.active { background: transparent; color: var(--text); border-bottom: 2px solid var(--primary); border-radius: 0; box-shadow: none; }
+.bn-item.active { color: var(--primary); }
+.nav-tab .icon, .bn-item .icon { width: 20px; height: 20px; stroke-width: 1.8; }
+.fav-badge { background: var(--primary); color: var(--card); border-radius: 3px; }
+
+/* Search and controls use the same quiet geometry. */
+.home-search-form, .gs-box, #searchInput, .sp-search-input, .search-box, .gate-input-wrap { border-color: var(--border-2); border-radius: var(--radius-sm); background: var(--card); box-shadow: none; }
+.home-search-form { border: 1px solid var(--border); }
+.home-search-form input, #searchInput, #globalSearchInput, .sp-search-input { color: var(--text); }
+.home-search-form input::placeholder, #searchInput::placeholder, #globalSearchInput::placeholder, .sp-search-input::placeholder { color: var(--text-3); }
+#searchInput:focus-visible, #globalSearchInput:focus-visible, .sp-search-input:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.home-search-form button, .search-btn { border-radius: var(--radius-sm); background: var(--primary); color: var(--card); box-shadow: none; }
+.home-search-form button:hover, .search-btn:hover { background: var(--primary-dark); color: var(--card); opacity: 1; }
+.gs-head { background: var(--bg); }
+.gs-close, .ab-back-btn, .sp-back-btn, .ap-back-btn, .reader-toc-toggle { color: var(--text-2); }
+.gs-close:hover, .ab-back-btn:hover, .sp-back-btn:hover, .ap-back-btn:hover, .reader-toc-toggle:hover { color: var(--primary); }
+.scope-group, .asp-btn-group { border-color: var(--border); border-radius: var(--radius-sm); background: var(--bg-2); }
+.scope-option, .asp-btn { border-radius: 3px; color: var(--text-2); }
+.scope-option.checked, .scope-option:has(input:checked), .asp-btn.active { background: var(--primary); color: var(--card); }
+.scope-option input[type="radio"]:checked, .filter-check input[type="checkbox"]:checked { border-color: var(--primary); background-color: var(--primary); }
+.asp-label { color: var(--text-3); }
+.btn-ghost, .page-btn { border-color: var(--border); border-radius: var(--radius-sm); background: var(--card); color: var(--text-2); box-shadow: none; }
+.btn-ghost:hover, .page-btn:hover { border-color: var(--primary); color: var(--primary); }
+.page-btn.active { background: var(--primary); border-color: var(--primary); color: var(--card); }
+
+/* Catalog, sections, results and favorites read as one continuous index. */
+.content { max-width: 1040px; }
+.year-block, .section-card, .result-card, .fav-card, .fav-header { border: 0; border-bottom: 1px solid var(--border); border-radius: 0; background: transparent; box-shadow: none; }
+.year-block:hover, .section-card:hover, .result-card:hover, .fav-card:hover { border-color: var(--border-2); background: var(--bg-2); box-shadow: none; transform: none; }
+.yb-header { background: transparent; color: var(--text); border-bottom: 1px solid var(--border); }
+.yb-header h3, .sp-year-header { font-family: var(--font-serif); color: var(--text); font-weight: 600; letter-spacing: 0; }
+.yb-info, .yb-toggle, .ir-count, .rc-meta, .sc-count, .sp-meta { color: var(--text-3); }
+.ir-count, .rc-tag, .sp-no-body-tag { background: var(--bg-2); border-radius: 3px; color: var(--text-2); }
+.ir-header, .art-item, .sp-article, .ap-related-item, .reading-issue-item { border-radius: 0; }
+.ir-header:hover, .art-item:hover, .sp-article:hover, .ap-related-item:hover, .reading-issue-item:hover { background: var(--bg-2); color: var(--text); }
+.sec-group, .sp-article, .article-toc { border-left-color: var(--border); }
+.sg-title, .rc-author, .result-group-name { color: var(--primary); }
+.rc-fav-btn, .ap-fav-btn { color: var(--text-3); }
+.rc-fav-btn.active, .ap-fav-btn.active { color: var(--primary); background: transparent; }
+.rc-fav-btn:hover { background: var(--bg-2); color: var(--primary); }
+.hl { background: var(--highlight); color: var(--highlight-text); border-radius: 2px; }
+
+/* Secondary pages follow the reading page's typography and rules. */
+.section-page-header, .about-page-header { box-shadow: none; }
+.sp-title, .ab-title { font-size: clamp(21px, 2.4vw, 27px); line-height: 1.45; }
+.section-page-body, .about-page-body { padding-top: 28px; }
+.about-section h2 { font-family: var(--font-serif); font-size: 17px; font-weight: 600; color: var(--text); border-bottom: 1px solid var(--border); }
+.about-section p, .about-mag-list li { color: var(--text-2); }
+.about-link { background: transparent; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; padding: 7px 0; color: var(--primary); }
+.about-link:hover { background: transparent; border-color: var(--primary); }
+.sp-article { border-left-width: 2px; }
+.sp-article:hover { border-left-color: var(--primary); }
+
+/* Article controls share the catalog's line and accent treatment. */
+.article-page-body { color: var(--text); }
+.ap-continue { border-color: var(--border); }
+.ap-continue-btn, .article-page-body .retry-btn { border-radius: var(--radius-sm); background: var(--primary); color: var(--card); }
+.reading-dock { background: var(--card); border-color: var(--border); box-shadow: 0 -6px 24px rgba(36, 32, 26, .06); }
+.reading-dock .ap-nav > button, .reading-operation-menu .ap-actions > * { color: var(--text-2); }
+.reading-dock .ap-nav > button:hover:not(:disabled), .reading-dock .ap-nav > button.active, .reading-operation-menu .ap-actions > *:hover { background: var(--bg-2); color: var(--primary); }
+.reading-issue-item.active { background: var(--bg-2); color: var(--primary); }
+.reading-operation-menu .ap-settings-panel { background: transparent; box-shadow: none; }
+.article-page .back-to-top { background: var(--card); color: var(--primary); border: 1px solid var(--border); box-shadow: var(--shadow-md); }
+.article-page .back-to-top .progress-ring-fg { stroke: var(--primary); }
+
+/* The access gate uses the same paper, ink and restrained accent. */
+.gate-bg { background: var(--bg-2); }
+.gate-bg-pattern { background: none; animation: none; }
+.gate-card { max-width: 420px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
+.gate-emblem { width: 64px; height: 64px; border-radius: var(--radius-sm); background: var(--bg-2); color: var(--primary); box-shadow: none; }
+.gate-emblem svg { stroke-width: 1.8; }
+.gate-emblem::after { display: none; }
+.gate-title { color: var(--text); letter-spacing: .04em; }
+.gate-subtitle, .gate-hint, .gate-footer { color: var(--text-3); }
+.gate-input-wrap:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 13%, transparent); }
+.gate-input { color: var(--text); }
+.gate-toggle { color: var(--text-2); }
+.gate-submit { background: var(--primary); color: var(--card); border-radius: var(--radius-sm); box-shadow: none; }
+.gate-submit:hover { background: var(--primary-dark); box-shadow: none; }
+.gate-footer { border-top: 1px solid var(--border); }
+
+@media (max-width: 767px) {
+  .app-sidebar { background: var(--bg); }
+  .sidebar-header { background: var(--bg); border-bottom: 1px solid var(--border); }
+  .bottom-nav { background: var(--card); }
+  .content { padding-inline: 18px; }
+  .section-page-body, .about-page-body { padding-top: 22px; }
+}
+@media print {
+  .reading-dock, .bottom-nav, .gate { display: none !important; }
+  .home-page, .article-page, .section-page, .about-page { background: white !important; color: black !important; }
+}

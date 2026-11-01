@@ -2,30 +2,32 @@
 
 ## 当前任务
 
-党内刊物静态阅读网站通过 GitHub `main` 和 Cloudflare Pages 部署。用户要求首页简约，以三本居中的大封面为主体；正文页固定底栏为“目录、设置、下一篇”，其中目录展示本期文章。用户希望直接完成并同步 GitHub。
+党内刊物静态阅读网站通过 GitHub `main` 和 Cloudflare Pages 部署。用户本轮要求除首页三个专题及其独立页面外，统一网站样式、配色、图标和边角。用户希望持续做完并同步 GitHub。
 
 ## 已完成
 
-- 首页移除重复的《求是》本期精选主视觉和冗余小标题；三本杂志封面成为首页主体，桌面三列居中、手机单列居中，封面加大并保持完整显示；搜索移到封面下方。
-- 正文页固定底栏改为“目录、设置、下一篇”。目录由当前期元数据生成文章列表，标出当前篇，可点击切换；设置按钮直接展开阅读设置，并保留收藏、分享、原文操作。
-- “本文目录”顶栏按钮改称“本文小节”，避免与底栏的本期文章目录混淆。目录/设置弹层支持再次点击、点击外部和 Escape 关闭，切换文章时重置。
-- Service Worker 不再预缓存首页已不用的 `data/latest.json`。资源版本为 `20261101l`。
-- 之前已修复进度环与返回顶部按钮定位，阅读底栏独立固定，首页专题链接缩小。
+- 新增 `assets/css/system.css`，作为 `style.css`、`books.css`、`one.css` 之后的统一设计层；HTML 与 Service Worker 均加载它。
+- 统一首页、杂志目录、搜索、收藏、板块、正文、关于及访问密码页的纸色背景、深墨文字、朱红强调色、边框、圆角、阴影、控件状态和中文字体。三个专题独立页面不加载新样式。
+- 全站 SVG 图标线宽统一为 1.8；桌面和手机导航图标统一为 20px；浏览器主题色、favicon 与 manifest 主题色改为新版朱红。
+- 阅读设置的夜间模式及自动夜间模式有专门覆盖，避免旧书库 CSS 回到冷灰配色；文章纸张选项仍由原 JS 控制。
+- “关于本站”页面移除直接显示访问密码的文字。
+- 静态资源版本更新为 `20261101m`。
+- 之前已完成：首页三刊大封面居中；正文固定底栏“目录、设置、下一篇”；本期目录列表和进度环定位修复。
 
 ## 验收与限制
 
-- `node --check assets/js/app.js`、`node --check sw.js`、`git -c core.whitespace=cr-at-eol diff --check` 通过。
-- 站点有访问密码门，无法直接核对登录后的实际浏览器画面；此前临时移除遮罩的自动审批被拒绝，不能绕过。
-- 旧数据问题：红旗文稿有 1 篇标记有全文但正文缺失；党建研究 2026 年第 10 期目录有 31 篇文章但正文分片缺失。本轮未改数据。
+- `tinycss2` 解析 `system.css` 无错误；`node --check assets/js/app.js`、`node --check sw.js`、`git -c core.whitespace=cr-at-eol diff --check` 通过。提交前再运行一次。
+- Playwright 尝试打开本地 `http://127.0.0.1:8765/`，环境返回 `net::ERR_NETWORK_ACCESS_DENIED`；本地浏览器视觉检查未能完成。此前移除访问门做视觉核对被自动审批拒绝，不绕过。
+- 旧数据问题：红旗文稿 1 篇标记有全文但正文缺失；党建研究 2026 年第 10 期目录有 31 篇文章但正文分片缺失。本轮未改数据。
 
 ## 下一步
 
-- 如有登录后的手机/桌面截图，可继续精修首页封面比例及底栏弹层细节。
+- 如有登录后的桌面/手机截图，可继续检查统一设计在真实视口中的细节。
 
 ## 踩过的坑
 
-- CSS 顺序为 `style.css`、`books.css`、`one.css`。首页封面旧规则在 `one.css` 中多次覆盖，本轮最终规则放在末尾；手机旧横滑规则也需要覆盖。
-- 固定底栏不能包含相关阅读，故 `readingDock` 与文末 `articleFooter` 分开。
-- 底栏设置按钮由 `renderArticleFooter` 动态创建，关闭/重置弹层时应先判空；阅读设置面板在 `init()` 中移动到菜单。
-- `.git` 写入可能需要 `require_escalated`。推送偶有凭据程序输出 `fatal: Cannot prompt`，即使命令退出码为 0 也必须用 `git ls-remote` 核对远端。
-- CSS 使用 CRLF，diff 检查需指定 `core.whitespace=cr-at-eol`。
+- CSS 加载顺序为 `style.css`、`books.css`、`one.css`、`system.css`；旧夜间规则选择器权重较高，需在最后一层用同等级选择器覆盖。
+- 三个专题是独立 HTML 页面，未引用 `system.css`；首页三个入口也未单独改造。
+- 用 Python 字节替换 HTML SVG 属性时曾产生字面量反斜杠，已修复并用 `rg` 核对属性是 `stroke-width="1.8"`。
+- `.git` 写入可能需要 `require_escalated`。推送偶有凭据程序输出 `fatal: Cannot prompt`，即使命令退出码为 0 也要用 `git ls-remote` 核对远端。
+- CSS 有 CRLF，diff 检查用 `core.whitespace=cr-at-eol`。

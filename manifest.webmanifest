@@ -9,8 +9,8 @@
   "id": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#fbf6f3",
-  "theme_color": "#8b0000",
+  "background_color": "#f7f5f0",
+  "theme_color": "#96382f",
   "categories": ["books", "education", "news"],
   "icons": [
     {
