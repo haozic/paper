@@ -42,6 +42,15 @@ const MAGAZINES = {
    与 scripts/build_search_index.py 的 MAG_ORDER、scripts/check_data.py 的 MAGAZINES 一致。 */
 const MAGAZINE_ORDER = ['qs', 'hqwg', 'djyj'];
 
+/* 每期正文分片的实测均值（字节），用于在下载前告知用户预计流量。
+   由 python scripts/build_search_index.py --print-avg 实测得出
+   （qs 188 期 43.3 MB / hqwg 164 期 27.5 MB / djyj 70 期 13.2 MB）。
+   数据更新后重跑该命令并更新这里。 */
+const BODY_AVG_BYTES = { qs: 241619, hqwg: 176044, djyj: 198248 };
+
+/* 正文搜索窗口：最新年份起几年（基准是该刊数据里的最新年份，不是浏览器时间） */
+const BODY_YEAR_SPAN = 3;
+
 /* ===== 状态管理 ===== */
 const state = {
     currentMag: null,       // null=首页, 'qs'|'hqwg'|'djyj'
@@ -59,6 +68,11 @@ const state = {
     lastQuery: '',         // 最近一次已提交的搜索词
     searchIndex: null,     // 跨刊标题索引（懒加载，data/search_index.json）
     searchIndexStatus: 'idle',   // idle / loading / ready / error
+    bodySearchKey: '',      // 当前正文搜索的（词|范围|仅全文）指纹，用于判断是否续跑
+    bodySearchCursor: 0,    // 已搜过的期次数量（断点，停止后再次触发从此处续）
+    bodySearchTotal: 0,     // 该刊有正文的期次总数
+    bodySearchRunning: false,
+    bodySearchDone: 0,      // 本轮已处理的期次数（进度显示用）
     globalSearchResults: [],   // 主页浮层里的跨刊命中
     currentPage: 1,
     pageSize: 20,
@@ -507,6 +521,8 @@ function performSearch() {
         document.getElementById('resultInfo').textContent = '';
         document.getElementById('searchResults').innerHTML = '';
         document.getElementById('pagination').innerHTML = '';
+        const bsBox0 = document.getElementById('bodySearchActions');
+        if (bsBox0) { bsBox0.innerHTML = ''; bsBox0.hidden = true; }
         return;
     }
 
@@ -516,6 +532,17 @@ function performSearch() {
     state.lastQuery = input.value;
     // 使上一次尚未结束的正文搜索失效
     state.searchToken++;
+
+    // 正文搜索断点：查询词 / 范围 / 仅有全文 任一变化就从头开始，
+    // 否则保留断点（停止后再次触发要能续跑）
+    const scope0 = getSearchScope();
+    const bo0 = document.getElementById('bodyOnly').checked;
+    const bodyKey = query + '|' + scope0 + '|' + (bo0 ? '1' : '0');
+    if (bodyKey !== state.bodySearchKey) {
+        state.bodySearchKey = bodyKey;
+        state.bodySearchCursor = 0;
+        state.bodySearchRunning = false;
+    }
 
     const scope = getSearchScope();
     const bo = document.getElementById('bodyOnly').checked;
@@ -559,12 +586,9 @@ function performSearch() {
     if (scope === 'title') {
         results = collectMatches(ms, query, scope, bo);
     } else {
-        // 正文相关范围：先给出当前已加载正文能命中的结果，再按期增量补全
+        // 正文相关范围：**不自动下载正文**。先把已加载正文能命中的结果给出来，
+        // 正文部分等用户点「开始搜正文」再跑（见 startBodySearch）。
         results = collectMatches(ms, query, scope, bo);
-        if (!ms.fullTextReady) {
-            performBodySearch(query, results, scope, bo, state.searchToken);
-            return;
-        }
     }
 
     finishSearch(results, query, scope, input);
@@ -591,52 +615,158 @@ function collectMatches(ms, query, scope, bo) {
     });
 }
 
-/* 正文搜索：按"期"增量加载，每批加载完立刻刷新结果，而不是等全部下载完 */
-async function performBodySearch(query, initialResults, scope, bo, token) {
+/* 正文搜索：点「开始搜正文」后才跑。
+   先跑该刊数据最新年份起的 BODY_YEAR_SPAN 年，跑完可继续搜更早年份；
+   任何时候都能「停止」，停止后保留已命中结果与断点，再次触发从断点续。 */
+function startBodySearch() {
+    if (state.bodySearchRunning) return;
     const ms = getMagState();
     if (!ms) return;
     const input = document.getElementById('searchInput');
-    const infoEl = document.getElementById('resultInfo');
+    const query = (input.value || '').trim().toLowerCase();
+    if (!query) return;
+    const scope = getSearchScope();
+    const bo = document.getElementById('bodyOnly').checked;
 
-    // 先显示标题搜索结果，不让学生等
-    if (initialResults && initialResults.length > 0) {
-        state.searchResults = initialResults;
-        state.currentPage = 1;
-        const qDisplay = input.value.trim();
-        infoEl.textContent = `共 ${initialResults.length} 篇（标题匹配）· 正在按期加载正文搜索更多...`;
-        renderSearchPage();
-    } else {
-        infoEl.textContent = '正在按期加载正文用于搜索...';
-        document.getElementById('searchResults').innerHTML = '<div class="loading"><div class="spinner"></div><div>加载正文数据中...</div></div>';
+    const key = query + '|' + scope + '|' + (bo ? '1' : '0');
+    if (key !== state.bodySearchKey) {
+        state.bodySearchKey = key;
+        state.bodySearchCursor = 0;
     }
 
     const issues = listBodyIssues(ms);
-    const BATCH = 6;          // 每批并发的期次数
-    const qDisplay = input.value.trim();
-    const scopeLabel = scope === 'all' ? '标题+正文' : '仅正文';
-    let done = 0;
+    state.bodySearchTotal = issues.length;
+    const cursor = Math.min(state.bodySearchCursor || 0, issues.length);
+    const rest = issues.slice(cursor);
+    if (!rest.length) {
+        updateBodySearchActions();
+        return;
+    }
+    const win = pickBodyWindow(rest, BODY_YEAR_SPAN);
+    state.bodySearchRunning = true;
+    state.bodySearchDone = cursor;
+    updateBodySearchActions();
+    runBodySearch(query, scope, bo, state.searchToken, win, cursor);
+}
 
-    for (let k = 0; k < issues.length; k += BATCH) {
-        if (state.searchToken !== token) return;      // 查询词已变，放弃这次搜索
-        const batch = issues.slice(k, k + BATCH);
+/* 跑一个窗口的期次：每批 6 期并发加载，每批完成即刷新结果。 */
+async function runBodySearch(query, scope, bo, token, win, startAt) {
+    const ms = getMagState();
+    if (!ms) {
+        state.bodySearchRunning = false;
+        updateBodySearchActions();
+        return;
+    }
+    const input = document.getElementById('searchInput');
+    const infoEl = document.getElementById('resultInfo');
+    const qDisplay = (input.value || '').trim();
+    const scopeLabel = scope === 'all' ? '标题+正文' : '仅正文';
+    const BATCH = 6;          // 每批并发的期次数
+    let done = startAt;
+
+    for (let k = 0; k < win.length; k += BATCH) {
+        if (state.searchToken !== token) {
+            state.bodySearchRunning = false;
+            updateBodySearchActions();
+            return;
+        }
+        const batch = win.slice(k, k + BATCH);
         await Promise.all(batch.map(it => loadIssueData(it.y, it.i)));
         // 等这一批的工夫里，用户可能已经改了关键词 / 换了范围 / 切了视图。
-        // 慢网下这一等可达数秒，不重新校验就会把过期结果写回界面
-        // （已用反向对照实测：撤掉本行会让"仅标题"被旧搜索覆盖成"仅正文"）。
-        if (state.searchToken !== token) return;
+        // 慢网下这一等可达数秒，不重新校验就会把过期结果写回界面。
+        if (state.searchToken !== token) {
+            state.bodySearchRunning = false;
+            updateBodySearchActions();
+            return;
+        }
         done += batch.length;
+        state.bodySearchDone = done;
+        state.bodySearchCursor = done;
 
         // 每批加载完立刻用最新的正文重新匹配并刷新结果
         const results = collectMatches(ms, query, scope, bo);
         state.searchResults = results;
-        infoEl.textContent = `共 ${results.length} 篇文章（关键词："${qDisplay}" ｜ 范围：${scopeLabel}） · 正文已加载 ${done}/${issues.length} 期`;
+        state.currentPage = 1;
+        infoEl.textContent = '共 ' + results.length + ' 篇（关键词："' + qDisplay + '" ｜ 范围：' + scopeLabel + '）'
+            + ' · 本刊 · 正文已加载 ' + done + '/' + state.bodySearchTotal + ' 期';
         renderSearchPage();
+        updateBodySearchActions();
     }
 
-    if (state.searchToken !== token) return;
-    ms.fullTextReady = true;
-    state.fullTextReady = true;
-    document.getElementById('searchStatus').textContent = '全文搜索就绪';
+    state.bodySearchRunning = false;
+    if (state.bodySearchCursor >= state.bodySearchTotal) {
+        ms.fullTextReady = true;
+        state.fullTextReady = true;
+        const statusEl = document.getElementById('searchStatus');
+        if (statusEl) statusEl.textContent = '全文搜索就绪';
+    }
+    updateBodySearchActions();
+}
+
+/* 停止正文搜索：作废当前批次循环，保留已命中结果与断点。 */
+function stopBodySearch() {
+    if (!state.bodySearchRunning) return;
+    state.searchToken++;              // 让正在跑的循环立刻作废
+    state.bodySearchRunning = false;
+    updateBodySearchActions();
+}
+
+/* 正文搜索的预计下载量：期次数 × 该刊每期均值 */
+function estimateBodyBytes(mag, issues) {
+    const avg = BODY_AVG_BYTES[mag] || 0;
+    return (issues ? issues.length : 0) * avg;
+}
+
+/* 正文搜索按钮区：默认不下载正文，必须用户点「开始搜正文」才跑。
+   四种形态互不相同，任何一档退化成别的样子，用户就会以为"点了没反应"：
+     ① 开始搜正文（近 N 年 X 期 · 约 Y MB）
+     ② 继续搜索更早年份（a–b 年 · 约 Y MB）
+     ③ 正在加载正文...（已处理 X/Y 期）+ 停止
+     ④ 本刊正文已全部搜索完毕 */
+function updateBodySearchActions() {
+    const box = document.getElementById('bodySearchActions');
+    if (!box) return;
+    const scope = getSearchScope();
+    const magScope = getMagScope();
+    // 三刊模式只搜标题；「仅标题」也不涉及正文 —— 两种情况都不给正文按钮
+    if (magScope === 'all' || (scope !== 'all' && scope !== 'body')) {
+        box.innerHTML = '';
+        box.hidden = true;
+        return;
+    }
+    const ms = getMagState();
+    const input = document.getElementById('searchInput');
+    const query = input ? (input.value || '').trim() : '';
+    if (!ms || !query) {
+        box.innerHTML = '';
+        box.hidden = true;
+        return;
+    }
+    const issues = listBodyIssues(ms);
+    state.bodySearchTotal = issues.length;
+    box.hidden = false;
+
+    if (state.bodySearchRunning) {
+        box.innerHTML =
+            '<span class="bs-progress">正在加载正文...（' + state.bodySearchDone + '/' + state.bodySearchTotal + ' 期）</span>'
+            + '<button class="btn-ghost btn-ghost--warn" onclick="stopBodySearch()">停止</button>';
+        return;
+    }
+
+    const cursor = Math.min(state.bodySearchCursor || 0, issues.length);
+    if (cursor >= issues.length) {
+        box.innerHTML = '<span class="bs-done">本刊正文已全部搜索完毕</span>';
+        return;
+    }
+
+    const rest = issues.slice(cursor);
+    const win = pickBodyWindow(rest, BODY_YEAR_SPAN);
+    const est = estimateBodyBytes(state.currentMag, win);
+    const label = cursor === 0
+        ? '开始搜正文（近 ' + BODY_YEAR_SPAN + ' 年 ' + win.length + ' 期 · 约 ' + formatBytes(est) + '）'
+        : '继续搜索更早年份（' + win[win.length - 1].y + '–' + win[0].y + ' 年 · 约 ' + formatBytes(est) + '）';
+
+    box.innerHTML = '<button class="btn-ghost" id="bodySearchBtn" onclick="startBodySearch()">' + label + '</button>';
 }
 
 function finishSearch(results, query, scope, input) {
@@ -647,10 +777,11 @@ function finishSearch(results, query, scope, input) {
     const scopeLabel = scope === 'all' ? '标题+正文' : (scope === 'title' ? '仅标题' : '仅正文');
     let infoText = `共 ${results.length} 篇文章`;
     if (qDisplay) infoText += `（关键词："${qDisplay}" ｜ 范围：${scopeLabel}）`;
-    if (scope !== 'title' && !state.fullTextReady) infoText += ' · 全文搜索加载中，当前仅搜索标题/作者';
+    if (scope !== 'title' && !state.fullTextReady) infoText += ' · 正文未加载，点下方按钮再搜正文';
     document.getElementById('resultInfo').textContent = infoText;
 
     renderSearchPage();
+    updateBodySearchActions();
 }
 
 /* 跨刊结果卡片 HTML —— 杂志内结果区与主页搜索浮层**共用这一份**，

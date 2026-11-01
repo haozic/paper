@@ -233,8 +233,8 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
             <label class="scope-option mag-scope-option"><input type="radio" name="magScope" value="all"> 三刊</label>
         </div>
         <div class="scope-group scope-group--content" id="scopeContentGroup">
-            <label class="scope-option"><input type="radio" name="searchScope" value="all" checked> 标题+正文</label>
-            <label class="scope-option"><input type="radio" name="searchScope" value="title"> 仅标题</label>
+            <label class="scope-option"><input type="radio" name="searchScope" value="all"> 标题+正文</label>
+            <label class="scope-option"><input type="radio" name="searchScope" value="title" checked> 仅标题</label>
             <label class="scope-option"><input type="radio" name="searchScope" value="body"> 仅正文</label>
         </div>
         <label class="filter-check filter-check--content" id="bodyOnlyWrap"><input type="checkbox" id="bodyOnly"> 仅有全文</label>
@@ -252,6 +252,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 <main class="content">
     <div class="view" id="searchView">
         <div class="result-info" id="resultInfo"></div>
+        <div class="body-search-actions" id="bodySearchActions" hidden></div>
         <div id="searchResults" class="results-list"></div>
         <div id="pagination" class="pagination"></div>
     </div>

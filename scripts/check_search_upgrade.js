@@ -100,7 +100,187 @@ function singleMagHits(api, meta, query) {
   });
 }
 
-function main() {
+/* =====================================================================
+ * 正文搜索显式触发部分
+ * =====================================================================
+ *
+ * 「开始搜正文 / 继续搜索更早年份 / 停止」是**用户能点的开关**。
+ * 这类开关最危险的坏法不是报错，而是"点了之后没有任何可测量的差异"：
+ * 变量改了、函数跑了，界面文案却纹丝不动，用户只会觉得"这站坏了"。
+ *
+ * 所以这里断言：四种形态的按钮文案必须**互不相同**，
+ * 并且每种形态的期数 / 字节数 / 年份区间必须与真实窗口算出来的一致。
+ */
+
+/* 造一份假 meta：2017~2026 每年一期，共 10 期 */
+function fakeMeta() {
+  const rows = [];
+  for (let y = 2026; y >= 2017; y--) {
+    rows.push({ y: y, i: 1, t: '标题' + y, a: '某作者', s: '某板块', u: 'http://x/' + y, h: 1 });
+  }
+  return rows;
+}
+
+function makeBodyEnv(opts) {
+  const o = opts || {};
+  const box = { innerHTML: '', hidden: false };
+  const env = {
+    scope: o.scope || 'all',
+    magScope: o.magScope || 'current',
+    query: o.query === undefined ? '中国' : o.query,
+    bo: !!o.bo,
+    ms: o.ms === undefined ? { meta: fakeMeta(), bodyText: {} } : o.ms,
+    box: box,
+    state: {
+      currentMag: o.mag || 'qs',
+      searchToken: 0,
+      searchResults: [],
+      bodySearchKey: '',
+      bodySearchCursor: o.cursor || 0,
+      bodySearchTotal: 0,
+      bodySearchRunning: !!o.running,
+      bodySearchDone: o.done || 0,
+    },
+  };
+  return env;
+}
+
+/* 把正文搜索相关的实现原样抽出来跑，DOM 与状态用桩顶掉。
+   overrides.pickBodyWindow 可以换成坏实现（反向自检用）。 */
+function loadBodyApi(env, overrides) {
+  const src = fs.readFileSync(APP_JS, 'utf8');
+  const parts = [
+    grabConst(src, 'BODY_AVG_BYTES'),
+    grabConst(src, 'BODY_YEAR_SPAN'),
+    grab(src, 'listBodyIssues'),
+    grab(src, 'pickBodyWindow'),
+    grab(src, 'formatBytes'),
+    grab(src, 'estimateBodyBytes'),
+    grab(src, 'updateBodySearchActions'),
+    grab(src, 'articleMatches'),
+    grab(src, 'collectMatches'),
+    grab(src, 'startBodySearch'),
+    grab(src, 'runBodySearch'),
+    grab(src, 'stopBodySearch'),
+  ];
+  if (overrides && overrides.pickBodyWindow) parts[3] = overrides.pickBodyWindow;
+  if (overrides && overrides.stopBodySearch) parts[11] = overrides.stopBodySearch;
+  parts.push('globalThis.__api = { listBodyIssues, pickBodyWindow, formatBytes, estimateBodyBytes, updateBodySearchActions, collectMatches, startBodySearch, runBodySearch, stopBodySearch };');
+  parts.push('globalThis.__avg = BODY_AVG_BYTES;');
+  parts.push('globalThis.__span = BODY_YEAR_SPAN;');
+
+  const ctx = {
+    console: console,
+    Math: Math, Object: Object, Array: Array, String: String, Number: Number, JSON: JSON,
+    Boolean: Boolean, Set: Set, Promise: Promise,
+    state: env.state,
+    document: {
+      getElementById: function (id) {
+        if (id === 'bodySearchActions') return env.box;
+        if (id === 'searchInput') return { value: env.query };
+        if (id === 'bodyOnly') return { checked: env.bo };
+        if (id === 'resultInfo') return { textContent: '' };
+        return null;
+      }
+    },
+    getSearchScope: function () { return env.scope; },
+    getMagScope: function () { return env.magScope; },
+    getMagState: function () { return env.ms; },
+    /* 正文加载用桩：默认立刻返回；测「停止」时换成可控的 pending promise */
+    loadIssueData: env.loadIssueData || function () { return Promise.resolve(); },
+    renderSearchPage: env.renderSearchPage || function () {},
+  };
+  vm.createContext(ctx);
+  vm.runInContext(parts.join('\n'), ctx, { filename: 'app.js#body-search' });
+  ctx.__api.__avg = ctx.__avg;
+  ctx.__api.__span = ctx.__span;
+  return ctx.__api;
+}
+
+/* 窗口里跨了几个不同的年份 */
+function distinctYears(win) {
+  const s = {};
+  win.forEach(function (it) { s[it.y] = true; });
+  return Object.keys(s).length;
+}
+
+/* 四种形态：开始搜正文 / 继续搜索更早年份 / 正在加载 / 已全部完毕。
+   返回违规列表（空数组 = 全部通过）。 */
+function fourFormViolations(apiFactory) {
+  const violations = [];
+  const specs = [
+    { cursor: 0, running: false, expect: '开始搜正文' },
+    { cursor: 3, running: false, expect: '继续搜索更早年份' },
+    { cursor: 3, running: true, expect: '正在加载正文' },
+    { cursor: 10, running: false, expect: '已全部搜索完毕' },
+  ];
+  const htmls = [];
+  specs.forEach(function (sp) {
+    const env = makeBodyEnv({
+      scope: 'all', magScope: 'current', cursor: sp.cursor,
+      running: sp.running, done: sp.running ? 3 : 0,
+    });
+    const api = apiFactory(env);
+    api.updateBodySearchActions();
+    const h = env.box.innerHTML;
+    htmls.push(h);
+    if (h.indexOf(sp.expect) < 0) violations.push('形态缺「' + sp.expect + '」');
+  });
+  for (let i = 0; i < htmls.length; i++) {
+    for (let j = i + 1; j < htmls.length; j++) {
+      if (htmls[i] === htmls[j]) violations.push('形态 ' + i + ' 与形态 ' + j + ' 文案完全相同');
+    }
+  }
+  return violations;
+}
+
+/* 渐进窗口的违规列表：第二个窗口必须严格更早，且不超过 BODY_YEAR_SPAN 年 */
+function progressiveViolations(api) {
+  const v = [];
+  const issues = [];
+  for (let y = 2026; y >= 2017; y--) issues.push({ y: y, i: 1, key: String(y) });
+  const span = api.__span || 3;
+  const first = api.pickBodyWindow(issues, span);
+  const rest = issues.slice(first.length);
+  const second = api.pickBodyWindow(rest, span);
+  if (distinctYears(first) !== span) v.push('首个窗口跨 ' + distinctYears(first) + ' 年，应为 ' + span + ' 年');
+  if (distinctYears(second) !== span) v.push('第二个窗口跨 ' + distinctYears(second) + ' 年，应为 ' + span + ' 年');
+  if (first.length && second.length) {
+    const firstOldest = Math.min.apply(null, first.map(function (it) { return it.y; }));
+    const secondNewest = Math.max.apply(null, second.map(function (it) { return it.y; }));
+    if (secondNewest >= firstOldest) v.push('第二个窗口没有严格更早（最新 ' + secondNewest + ' ≥ 首个窗口最旧 ' + firstOldest + '）');
+  }
+  if (first.length + second.length > issues.length) v.push('两个窗口加起来超过期次总数（会重复搜）');
+  return v;
+}
+
+/* 跑一次「触发 → 停止 → 放行挂起数据」的流程。
+   loadIssueData 换成永不自动兑现的 promise，这样「停止」发生在批次加载途中，
+   正好检验停止之后过期循环会不会把结果写回界面。 */
+function stopFlow(overrides) {
+  const pending = [];
+  const env = makeBodyEnv({ cursor: 0 });
+  env.loadIssueData = function () {
+    return new Promise(function (resolve) { pending.push(resolve); });
+  };
+  const api = loadBodyApi(env, overrides);
+  api.startBodySearch();
+  const runningHtml = env.box.innerHTML;
+  const runningOk = env.state.bodySearchRunning === true
+    && runningHtml.indexOf('正在加载正文') >= 0
+    && runningHtml.indexOf('停止') >= 0;
+  const tokenBefore = env.state.searchToken;
+  const cursorBefore = env.state.bodySearchCursor;
+  env.state.searchResults = ['sentinel'];
+  api.stopBodySearch();
+  const stoppedOk = env.state.bodySearchRunning === false
+    && env.state.searchToken === tokenBefore + 1
+    && env.state.bodySearchCursor === cursorBefore;
+  pending.forEach(function (r) { r(); });
+  return { env: env, runningOk: runningOk, stoppedOk: stoppedOk };
+}
+
+async function main() {
   console.log('='.repeat(72));
   console.log('跨刊检索内核体检');
   console.log('='.repeat(72));
@@ -283,6 +463,132 @@ function main() {
     caseRule('R12', violated > 0, '反向自检 R12：越界条目被 R6 抓到（' + violated + ' 条）');
   }
 
+  /* ---- R13 估算字节数：期次数 × 该刊均值，且三刊取值不同 ---- */
+  {
+    const env = makeBodyEnv({});
+    const api = loadBodyApi(env);
+    const three = [{ key: 'a' }, { key: 'b' }, { key: 'c' }];
+    const q = api.estimateBodyBytes('qs', three);
+    const h = api.estimateBodyBytes('hqwg', three);
+    const d = api.estimateBodyBytes('djyj', three);
+    const ok = q === 3 * api.__avg.qs
+      && h === 3 * api.__avg.hqwg
+      && d === 3 * api.__avg.djyj
+      && q !== h && h !== d && q !== d
+      && api.estimateBodyBytes('qs', []) === 0;
+    caseRule('R13', ok,
+      '估算字节数 = 期次数 × 该刊均值（qs 3 期 = ' + q + ' 字节），三刊取值互不相同');
+  }
+
+  /* ---- R14 四种形态互不相同 ---- */
+  {
+    const violations = fourFormViolations(function (env) { return loadBodyApi(env); });
+    caseRule('R14', violations.length === 0,
+      '按钮四种形态（开始/继续/加载中/已完成）文案互不相同'
+      + (violations.length ? '：' + violations.join('；') : ''));
+  }
+
+  /* ---- R15 三刊模式 / 仅标题模式：不给正文按钮 ---- */
+  {
+    const envAll = makeBodyEnv({ magScope: 'all', scope: 'all' });
+    const apiAll = loadBodyApi(envAll);
+    apiAll.updateBodySearchActions();
+    const envTitle = makeBodyEnv({ magScope: 'current', scope: 'title' });
+    const apiTitle = loadBodyApi(envTitle);
+    apiTitle.updateBodySearchActions();
+    const ok = envAll.box.hidden === true && envAll.box.innerHTML === ''
+      && envTitle.box.hidden === true && envTitle.box.innerHTML === '';
+    caseRule('R15', ok,
+      '三刊模式与「仅标题」模式下正文按钮区隐藏（三刊 hidden=' + envAll.box.hidden
+      + '，仅标题 hidden=' + envTitle.box.hidden + '）');
+  }
+
+  /* ---- R16 渐进窗口：第二个窗口严格更早且不超过窗口跨度 ---- */
+  {
+    const env = makeBodyEnv({});
+    const api = loadBodyApi(env);
+    const violations = progressiveViolations(api);
+    caseRule('R16', violations.length === 0,
+      '正文窗口由近及远渐进、第二个窗口严格更早且不超过 ' + api.__span + ' 年'
+      + (violations.length ? '：' + violations.join('；') : ''));
+  }
+
+  /* ---- R17 按钮文案里的期数 / 字节数必须与真实窗口一致 ---- */
+  {
+    const env = makeBodyEnv({ cursor: 0 });
+    const api = loadBodyApi(env);
+    api.updateBodySearchActions();
+    const html = env.box.innerHTML;
+    const issues = api.listBodyIssues(env.ms);
+    const win = api.pickBodyWindow(issues, api.__span);
+    const est = api.estimateBodyBytes('qs', win);
+    const wantNum = '近 ' + api.__span + ' 年 ' + win.length + ' 期';
+    const wantSize = '约 ' + api.formatBytes(est);
+    const ok = html.indexOf(wantNum) >= 0 && html.indexOf(wantSize) >= 0;
+    caseRule('R17', ok,
+      '按钮文案与真实窗口一致（期望含「' + wantNum + '」「' + wantSize + '」）');
+  }
+
+  /* ---- R18 反向自检：窗口函数无视年份跨度 → R16 必须报出 ---- */
+  {
+    const bad = 'function pickBodyWindow(issues) { return issues || []; }';
+    const env = makeBodyEnv({});
+    const api = loadBodyApi(env, { pickBodyWindow: bad });
+    const violations = progressiveViolations(api);
+    caseRule('R18', violations.length > 0,
+      '反向自检 R18：窗口函数坏掉 → R16 报出（' + violations.length + ' 条违规）');
+  }
+
+  /* ---- R19 反向自检：按钮渲染永远同一句 → R14 必须报出 ---- */
+  {
+    const violations = fourFormViolations(function (env) {
+      return {
+        updateBodySearchActions: function () {
+          env.box.innerHTML = '<button>开始搜正文</button>';
+          env.box.hidden = false;
+        }
+      };
+    });
+    caseRule('R19', violations.length > 0,
+      '反向自检 R19：按钮渲染不随状态变化 → R14 报出（' + violations.length + ' 条违规）');
+  }
+
+  /* ---- R20 停止：断点保留 + 过期循环不把结果写回界面 ---- */
+  {
+    const flow = stopFlow(null);
+    /* 放行挂起数据后让微任务队列跑完（await 一轮 macrotask 即可冲干净） */
+    await new Promise(function (r) { setTimeout(r, 0); });
+    const results = flow.env.state.searchResults;
+    const notOverwritten = Array.isArray(results) && results.length === 1 && results[0] === 'sentinel';
+    caseRule('R20', flow.runningOk && flow.stoppedOk && notOverwritten,
+      '停止后：运行中按钮含「正在加载/停止」，停止后令牌作废、断点保留、已命中结果不被改写'
+      + '（running=' + flow.runningOk + '，stopped=' + flow.stoppedOk + '，结果未改写=' + notOverwritten + '）');
+  }
+
+  /* ---- R21 反向自检：停止不作废令牌 → R20 必须报出 ---- */
+  {
+    const badStop = 'function stopBodySearch() { state.bodySearchRunning = false; updateBodySearchActions(); }';
+    const flow = stopFlow({ stopBodySearch: badStop });
+    await new Promise(function (r) { setTimeout(r, 0); });
+    const results = flow.env.state.searchResults;
+    const overwritten = !(Array.isArray(results) && results.length === 1 && results[0] === 'sentinel');
+    caseRule('R21', overwritten,
+      '反向自检 R21：停止不作废令牌 → R20 报出（过期循环改写了结果：' + overwritten + '）');
+  }
+
+  /* ---- R22 断点续跑：停止后再触发，窗口从断点继续而不是从头 ---- */
+  {
+    const env = makeBodyEnv({ cursor: 3 });
+    const api = loadBodyApi(env);
+    api.updateBodySearchActions();
+    const html = env.box.innerHTML;
+    /* 10 期假数据 2026~2017，断点 3 → 剩余 2023~2017 → 窗口 2021~2023 */
+    const ok = html.indexOf('继续搜索更早年份') >= 0
+      && html.indexOf('2021–2023 年') >= 0
+      && html.indexOf('近 3 年') < 0;
+    caseRule('R22', ok,
+      '从断点续跑：断点 3 时的窗口是 2021–2023 年（不是重新从近 3 年开始）');
+  }
   console.log('');
   let failed = 0;
   cases.forEach(function (c) {

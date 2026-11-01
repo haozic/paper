@@ -738,6 +738,47 @@ body.global-search-active { overflow: hidden; }
 }
 .gs-count:empty { display: none; }
 
+/* ===== 正文搜索：显式触发按钮 ===== */
+.body-search-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 10px 0 14px;
+}
+.body-search-actions[hidden] { display: none; }
+.btn-ghost {
+    padding: 8px 16px;
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius);
+    background: var(--card);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s var(--ease);
+}
+.btn-ghost:hover {
+    border-color: var(--mag-color, var(--primary));
+    color: var(--mag-color, var(--primary));
+}
+.btn-ghost:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.btn-ghost--warn {
+    color: var(--primary);
+    border-color: var(--primary-light);
+}
+.bs-progress {
+    font-size: 13px;
+    color: var(--text-2);
+}
+.bs-hint,
+.bs-done {
+    font-size: 12px;
+    color: var(--text-3);
+}
+
 /* ===== Desktop Nav ===== */
 .nav-tabs {
     gap: 4px;
@@ -2520,6 +2561,10 @@ html[data-theme="dark"] .asp-section--light-only { display: none; }
     /* ---- 主页搜索浮层 ---- */
     .gs-box { gap: 0; }
     .gs-box > * + * { margin-left: 8px; }
+
+    /* ---- 正文搜索显式触发按钮 ---- */
+    .body-search-actions { gap: 0; }
+    .body-search-actions > * + * { margin-left: 10px; }
 
     /* ---- .filters 基础为横向（可换行） ---- */
     .filters { gap: 0; }
