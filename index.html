@@ -109,6 +109,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
         <div class="home-header-inner">
             <h1 class="home-title">党内刊物</h1>
             <p class="home-subtitle">理论 · 党建 · 时政</p>
+            <button class="home-search-btn" onclick="openGlobalSearch()" title="搜索三刊标题"><svg class="icon"><use href="#i-search"/></svg></button>
             <button class="home-about-btn" onclick="showAboutPage()" title="关于本站"><svg class="icon"><use href="#i-info"/></svg></button>
         </div>
     </header>
@@ -438,6 +439,22 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
         </div>
     </header>
     <div class="section-page-body" id="sectionPageBody"></div>
+</div>
+
+<!-- ===== 主页：三刊标题搜索浮层 ===== -->
+<div id="globalSearch" class="global-search" hidden>
+    <div class="gs-panel">
+        <div class="gs-head">
+            <div class="search-box gs-box">
+                <svg class="icon search-icon"><use href="#i-search"/></svg>
+                <input type="text" id="globalSearchInput" placeholder="在三刊标题中搜索..." autocomplete="off">
+                <button class="gs-close" onclick="closeGlobalSearch()" title="关闭"><svg class="icon"><use href="#i-close"/></svg></button>
+            </div>
+            <p class="gs-hint">只搜索三刊文章标题（不含作者与板块） · 按 Esc 关闭</p>
+        </div>
+        <div class="gs-count" id="globalSearchCount"></div>
+        <div id="globalSearchResults" class="results-list"></div>
+    </div>
 </div>
 
 <script src="assets/js/app.js?v=20261031b"></script>

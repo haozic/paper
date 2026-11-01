@@ -59,6 +59,7 @@ const state = {
     lastQuery: '',         // 最近一次已提交的搜索词
     searchIndex: null,     // 跨刊标题索引（懒加载，data/search_index.json）
     searchIndexStatus: 'idle',   // idle / loading / ready / error
+    globalSearchResults: [],   // 主页浮层里的跨刊命中
     currentPage: 1,
     pageSize: 20,
     readingFs: 20,          // 文章字号
@@ -705,6 +706,57 @@ function renderCrossMagResults() {
     const total = results.length;
     infoEl.textContent = '共 ' + total + ' 篇（关键词："' + query + '" ｜ 范围：三刊标题 · 只匹配标题）';
     pagination.innerHTML = '<span class="page-info">共 ' + total + ' 条</span>';
+}
+
+/* 主页浮层：全屏三刊标题搜索 */
+function openGlobalSearch() {
+    const box = document.getElementById('globalSearch');
+    if (!box) return;
+    box.hidden = false;
+    document.body.classList.add('global-search-active');
+    const input = document.getElementById('globalSearchInput');
+    if (input) {
+        input.focus();
+        input.select();
+    }
+    runGlobalSearch();
+}
+
+function closeGlobalSearch() {
+    const box = document.getElementById('globalSearch');
+    if (!box) return;
+    box.hidden = true;
+    document.body.classList.remove('global-search-active');
+}
+
+async function runGlobalSearch() {
+    const input = document.getElementById('globalSearchInput');
+    const list = document.getElementById('globalSearchResults');
+    const count = document.getElementById('globalSearchCount');
+    if (!input || !list) return;
+    const query = input.value.trim();
+    if (!query) {
+        list.innerHTML = '';
+        count.textContent = '';
+        return;
+    }
+    count.textContent = '正在加载跨刊标题索引...';
+    const ok = await loadSearchIndex();
+    if (!ok) {
+        count.textContent = '索引不可用，请稍后再试或回到杂志内搜索';
+        list.innerHTML = '';
+        return;
+    }
+    const results = searchAllTitles(state.searchIndex, query);
+    state.globalSearchResults = results;
+    if (!results.length) {
+        count.textContent = '共 0 篇（关键词："' + query + '" ｜ 只匹配标题）';
+        list.innerHTML = '<div class="loading"><div>三刊标题中没有匹配的文章</div></div>';
+        return;
+    }
+    const groups = groupCrossMagResults(results);
+    list.innerHTML = crossMagCardsHtml(groups, query, false);
+    count.textContent = '共 ' + results.length + ' 篇（关键词："' + query + '" ｜ 只匹配标题）';
 }
 
 function renderSearchPage() {
@@ -2273,6 +2325,31 @@ async function init() {
         });
     });
     syncMagScopeChecked();
+
+    // 主页三刊搜索浮层
+    const gsInput = document.getElementById('globalSearchInput');
+    if (gsInput) {
+        let gsTimer = null;
+        gsInput.addEventListener('input', function () {
+            if (gsTimer) clearTimeout(gsTimer);
+            gsTimer = setTimeout(runGlobalSearch, 150);
+        });
+        gsInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                if (gsTimer) clearTimeout(gsTimer);
+                runGlobalSearch();
+            } else if (e.key === 'Escape') {
+                closeGlobalSearch();
+            }
+        });
+    }
+    // 点结果进文章前先收起浮层，否则浮层会盖在文章上面
+    const gsResults = document.getElementById('globalSearchResults');
+    if (gsResults) {
+        gsResults.addEventListener('click', function () {
+            closeGlobalSearch();
+        });
+    }
 
     // "继续阅读"按钮
     const continueBtn = document.getElementById('articleContinueBtn');

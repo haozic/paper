@@ -167,6 +167,30 @@ body.about-active { padding-bottom: 0; }
     letter-spacing: 4px;
     font-weight: 500;
 }
+.home-search-btn {
+    position: absolute;
+    top: 4px;
+    right: 42px;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s var(--ease);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+.home-search-btn .icon { width: 17px; height: 17px; }
+.home-search-btn:hover {
+    background: var(--card);
+    border-color: var(--primary-light);
+    color: var(--primary);
+}
 .home-about-btn {
     position: absolute;
     top: 4px;
@@ -647,6 +671,72 @@ body.about-active { padding-bottom: 0; }
     font-size: 12px;
     color: var(--text-3);
 }
+
+/* ===== 主页：三刊搜索浮层 ===== */
+.global-search {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg);
+    overflow-y: auto;
+    z-index: 300;
+    -webkit-overflow-scrolling: touch;
+}
+.global-search[hidden] { display: none; }
+/* 浮层打开时锁住背景滚动 */
+body.global-search-active { overflow: hidden; }
+.gs-panel {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 40px;
+}
+.gs-head {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    padding-bottom: 10px;
+    z-index: 2;
+}
+.gs-box {
+    background: var(--card);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius);
+    padding: 4px 6px 4px 2px;
+}
+.gs-box #globalSearchInput {
+    border: none;
+    background: transparent;
+    padding-left: 38px;
+}
+.gs-box #globalSearchInput:focus {
+    background: transparent;
+}
+.gs-close {
+    background: none;
+    border: none;
+    color: var(--text-3);
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.gs-close .icon { width: 16px; height: 16px; }
+.gs-hint {
+    font-size: 12px;
+    color: var(--text-3);
+    margin: 8px 2px 0;
+}
+.gs-count {
+    font-size: 13px;
+    color: var(--text-2);
+    margin: 12px 2px 8px;
+}
+.gs-count:empty { display: none; }
 
 /* ===== Desktop Nav ===== */
 .nav-tabs {
@@ -1719,6 +1809,8 @@ html[data-theme="dark"] .mag-cover { filter: brightness(0.85); }
     .home-subtitle { font-size: 14px; letter-spacing: 6px; }
     .home-about-btn { width: 38px; height: 38px; top: 8px; }
     .home-about-btn .icon { width: 19px; height: 19px; }
+    .home-search-btn { width: 38px; height: 38px; top: 8px; right: 50px; }
+    .home-search-btn .icon { width: 19px; height: 19px; }
     .magazine-grid {
         flex-direction: row;
         max-width: 900px;
@@ -2424,6 +2516,10 @@ html[data-theme="dark"] .asp-section--light-only { display: none; }
     .result-group > * + * { margin-top: 10px; }
     .result-group-head { gap: 0; }
     .result-group-head > * + * { margin-left: 8px; }
+
+    /* ---- 主页搜索浮层 ---- */
+    .gs-box { gap: 0; }
+    .gs-box > * + * { margin-left: 8px; }
 
     /* ---- .filters 基础为横向（可换行） ---- */
     .filters { gap: 0; }
