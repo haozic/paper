@@ -98,18 +98,17 @@
     .search-trigger:hover,.close-search:hover { background:#fff; box-shadow:0 7px 22px rgba(37,43,58,.13); }
     .search-trigger svg,.search-field svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; }
     .home { padding:61px 34px 92px; }
-    .home-lead { max-width:1030px; margin:0 auto 39px; }
     .section-kicker { color:var(--accent); font-size:10px; font-weight:700; letter-spacing:.2em; }
-    .home-lead h1 { margin:13px 0 7px; font-family:var(--serif); font-size:clamp(39px,4vw,57px); font-weight:600; line-height:1.2; letter-spacing:.05em; }
-    .home-lead p { margin:0; color:var(--muted); font-size:13px; }
     .shelf { gap:clamp(20px,3vw,41px); max-width:1030px; }
     .shelf button { position:relative; border-radius:24px; }
     .cover-frame { padding:12px; border:1px solid rgba(255,255,255,.92); border-radius:22px; background:rgba(255,255,255,.58); box-shadow:0 17px 35px rgba(42,45,59,.13),inset 0 1px 0 #fff; }
     .cover-frame img { border-radius:11px; }
     .shelf button:hover .cover-frame,.shelf button:focus-visible .cover-frame { transform:translateY(-7px); box-shadow:0 25px 44px rgba(42,45,59,.17),inset 0 1px 0 #fff; }
-    .cover-action { display:inline-flex; align-items:center; gap:8px; margin-top:12px; padding:9px 12px; border:1px solid rgba(255,255,255,.8); border-radius:999px; background:rgba(255,255,255,.82); color:#252834; box-shadow:0 4px 18px rgba(25,28,38,.09); font-size:11px; font-weight:650; -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); }
-    .shelf button { text-align:right; }
-    .cover-action span { font-size:14px; }
+    .shelf button { text-align:left; }
+    .home { padding-top:88px; }
+    .cover-info { display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:18px 3px 0; }
+    .cover-info strong { font-family:var(--serif); font-size:22px; font-weight:600; line-height:1.4; }
+    .cover-info small { color:var(--muted); font-size:12px; white-space:nowrap; }
     .magazine { padding-top:60px; }
     .mag-head { display:flex; align-items:end; justify-content:space-between; gap:16px; margin-bottom:31px; }
     .mag-head h1 { margin-top:11px; font-size:clamp(43px,5vw,66px); }
@@ -136,6 +135,24 @@
     .reader-dock button:hover,.reader-dock button.active { background:rgba(255,255,255,.85); }
     .reader-panel { right:max(20px,calc((100vw - 460px)/2)); bottom:91px; border:1px solid rgba(255,255,255,.9); border-radius:21px; background:rgba(255,255,255,.9); box-shadow:0 14px 45px rgba(30,34,45,.15); -webkit-backdrop-filter:blur(22px); backdrop-filter:blur(22px); }
     .reading.warm .reader-dock,.reading.warm .reader-panel { background:rgba(244,237,223,.91); }
+    .prose { padding-bottom:35px; }
+    .related-reading { max-width:760px; margin:0 auto; padding:25px 28px 100px; border-top:1px solid #e9e6e0; }
+    .related-heading h2 { margin:8px 0 20px; font-family:var(--serif); font-size:25px; font-weight:600; }
+    .related-list { display:grid; gap:9px; }
+    .related-item { display:flex; align-items:center; justify-content:space-between; gap:18px; width:100%; min-height:68px; padding:12px 16px; border:1px solid #eeece7; border-radius:15px; background:#fff; color:var(--ink); text-align:left; }
+    .related-item:hover { border-color:#d6d0c7; background:#fbf8f3; }
+    .related-item strong { display:block; font-family:var(--serif); font-size:17px; font-weight:600; line-height:1.5; }
+    .related-item small { display:block; margin-top:3px; color:var(--muted); font-size:11px; }
+    .related-item .related-arrow { color:var(--faint); font-size:18px; }
+    .reader-quick-tools { position:fixed; right:max(18px,calc((100vw - 1200px)/2)); bottom:96px; z-index:24; display:grid; gap:9px; justify-items:end; }
+    .quick-nav-row { display:flex; align-items:center; gap:9px; }
+    .quick-nav-actions { display:flex; align-items:center; gap:9px; }
+    .quick-circle { position:relative; display:grid; place-items:center; flex:none; width:46px; height:46px; padding:0; border:1px solid rgba(255,255,255,.91); border-radius:50%; background:rgba(251,250,248,.87); color:#414753; box-shadow:0 5px 18px rgba(33,38,50,.13),inset 0 1px 0 #fff; -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px); }
+    .quick-circle:hover,.quick-circle.active { background:#fff; color:var(--accent); }
+    .quick-icon { position:absolute; width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .progress-ring { position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); fill:none; stroke-width:1.5; }
+    .ring-track { stroke:#e4e3e0; }
+    .ring-value { stroke:var(--accent); stroke-dasharray:132; stroke-dashoffset:132; transition:stroke-dashoffset .15s linear; }
     .search-backdrop { position:fixed; inset:0; z-index:39; background:rgba(26,31,42,.3); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
     .search-sheet { position:fixed; top:min(13vh,110px); right:50%; z-index:40; width:min(660px,calc(100vw - 28px)); max-height:min(76vh,740px); display:flex; flex-direction:column; overflow:hidden; padding:25px; border:1px solid rgba(255,255,255,.95); border-radius:28px; background:rgba(250,251,253,.95); box-shadow:0 30px 90px rgba(14,22,40,.27),inset 0 1px 0 #fff; transform:translateX(50%); -webkit-backdrop-filter:blur(30px) saturate(145%); backdrop-filter:blur(30px) saturate(145%); }
     .search-sheet-head { display:flex; align-items:start; justify-content:space-between; gap:20px; margin-bottom:22px; }
@@ -165,8 +182,10 @@
       .search-trigger { min-width:42px; width:42px; height:42px; padding:0; }
       .search-trigger span { display:none; }
       .home { padding:40px 19px 70px; }
-      .home-lead { max-width:340px; margin-bottom:27px; }
-      .home-lead h1 { font-size:40px; }
+      .home { padding-top:48px; }
+      .cover-info { display:block; padding-top:13px; }
+      .cover-info strong { display:block; font-size:20px; }
+      .cover-info small { display:block; margin-top:3px; }
       .shelf { gap:27px; }
       .magazine { padding:39px 19px 75px; }
       .mag-head { margin-bottom:25px; }
@@ -178,10 +197,14 @@
       .issue-row strong { font-size:16px; }
       .reader-dock { bottom:max(11px,env(safe-area-inset-bottom)); }
       .reader-panel { right:14px; bottom:82px; }
+      .related-reading { padding:20px 22px 95px; }
+      .reader-quick-tools { right:12px; bottom:calc(83px + env(safe-area-inset-bottom)); }
+      .quick-circle { width:42px; height:42px; }
+      .quick-icon { width:18px; height:18px; }
       .search-sheet { top:auto; right:0; bottom:0; width:100%; max-height:90dvh; padding:24px 18px max(23px,env(safe-area-inset-bottom)); border-radius:26px 26px 0 0; transform:none; }
       .search-sheet-head h2 { font-size:25px; }
     }
-    @media (prefers-reduced-transparency:reduce) { .site-header,.search-trigger,.mag-tabs,.reader-dock,.reader-panel,.search-sheet { background:#fff; -webkit-backdrop-filter:none; backdrop-filter:none; } }
+    @media (prefers-reduced-transparency:reduce) { .site-header,.search-trigger,.mag-tabs,.reader-dock,.reader-panel,.search-sheet,.quick-circle { background:#fff; -webkit-backdrop-filter:none; backdrop-filter:none; } }
     @media (prefers-reduced-motion:reduce) { .cover-frame { transition:none; } }
   </style>
 </head>
@@ -194,11 +217,10 @@
   </header>
   <main>
     <section class="view home" id="homeView" aria-label="首页预览">
-      <div class="home-lead"><span class="section-kicker">THE READING ROOM</span><h1>期刊书架</h1><p>选一本刊物，开始阅读。</p></div>
       <div class="shelf">
-        <button type="button" data-mag="qs" aria-label="浏览求是"><span class="cover-frame"><img src="../assets/img/cover_qs.jpg" alt="求是刊物封面"></span><span class="cover-action" aria-hidden="true">打开目录 <span>↗</span></span></button>
-        <button type="button" data-mag="hqwg" aria-label="浏览红旗文稿"><span class="cover-frame"><img src="../assets/img/cover_hqwg.jpg" alt="红旗文稿刊物封面"></span><span class="cover-action" aria-hidden="true">打开目录 <span>↗</span></span></button>
-        <button type="button" data-mag="djyj" aria-label="浏览党建研究"><span class="cover-frame"><img src="../assets/img/cover_djyj.jpg" alt="党建研究刊物封面"></span><span class="cover-action" aria-hidden="true">打开目录 <span>↗</span></span></button>
+        <button type="button" data-mag="qs" aria-label="浏览求是，3402 篇文章，188 期"><span class="cover-frame"><img src="../assets/img/cover_qs.jpg" alt="求是刊物封面"></span><span class="cover-info"><strong>求是</strong><small>3402 篇 · 188 期</small></span></button>
+        <button type="button" data-mag="hqwg" aria-label="浏览红旗文稿，2265 篇文章，164 期"><span class="cover-frame"><img src="../assets/img/cover_hqwg.jpg" alt="红旗文稿刊物封面"></span><span class="cover-info"><strong>红旗文稿</strong><small>2265 篇 · 164 期</small></span></button>
+        <button type="button" data-mag="djyj" aria-label="浏览党建研究，1748 篇文章，71 期"><span class="cover-frame"><img src="../assets/img/cover_djyj.jpg" alt="党建研究刊物封面"></span><span class="cover-info"><strong>党建研究</strong><small>1748 篇 · 71 期</small></span></button>
       </div>
     </section>
 
@@ -224,9 +246,14 @@
         <p>文章越长，界面越要克制。固定底栏只保留高频动作，更多选项放在轻量面板中；改变字号或纸张时，仍能看见正文的变化。纸面感来自字距、行距与比例，而不是厚重的阴影与边框。</p>
         <p>这份预览展示的是方向，不是对现有内容和数据结构的迁移。待视觉方向确定后，再把它逐步用于实际首页、杂志页和正文页，并保留现有检索、收藏与离线能力。</p>
       </article>
+      <section class="related-reading" id="relatedReading" aria-labelledby="relatedTitle"><div class="related-heading"><span class="section-kicker">KEEP READING</span><h2 id="relatedTitle">相关阅读</h2></div><div class="related-list" id="relatedList"></div></section>
       <div class="reader-panel" id="tocPanel" hidden><h3>本期目录</h3><div id="tocRows"></div></div>
       <div class="reader-panel" id="settingsPanel" hidden><h3>阅读设置</h3><div class="setting-line"><span>字号</span><span class="controls"><button type="button" id="smaller" aria-label="缩小字号">−</button><button type="button" id="larger" aria-label="放大字号">＋</button></span></div><div class="setting-line"><span>纸张</span><span class="controls"><button type="button" class="swatch white current" data-paper="white" aria-label="白色纸张"></button><button type="button" class="swatch warm" data-paper="warm" aria-label="暖色纸张"></button></span></div></div>
       <div class="reader-dock"><button type="button" id="tocToggle" aria-expanded="false">目录</button><button type="button" id="settingsToggle" aria-expanded="false">设置</button><button type="button" id="nextArticle">下一篇　→</button></div>
+      <div class="reader-quick-tools" id="readerQuickTools" hidden>
+        <button class="quick-circle top-circle" id="backToTop" type="button" aria-label="返回顶部，外圈显示阅读进度" title="返回顶部"><svg class="progress-ring" viewBox="0 0 48 48" aria-hidden="true"><circle class="ring-track" cx="24" cy="24" r="21"></circle><circle class="ring-value" id="readingProgressRing" cx="24" cy="24" r="21"></circle></svg><svg class="quick-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-5 5 5-5 5 5"></path></svg></button>
+        <div class="quick-nav-row"><div class="quick-nav-actions" id="quickNavActions" hidden><button class="quick-circle" type="button" data-quick-destination="home" aria-label="网站首页" title="网站首页"><svg class="quick-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3.5 10 8.5-7 8.5 7v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V10Z"></path><path d="M9 21v-7h6v7"></path></svg></button><button class="quick-circle" type="button" data-quick-destination="magazine" aria-label="杂志首页" title="杂志首页"><svg class="quick-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-2.6-1.6-5.7-2-9-1v14c3.3-1 6.4-.6 9 1 2.6-1.6 5.7-2 9-1V4c-3.3-1-6.4-.6-9 1Z"></path><path d="M12 5v14"></path></svg></button></div><button class="quick-circle" id="quickNavToggle" type="button" aria-label="页面导航" aria-expanded="false" title="页面导航"><svg class="quick-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"></rect><rect x="14" y="4" width="6" height="6" rx="1"></rect><rect x="4" y="14" width="6" height="6" rx="1"></rect><rect x="14" y="14" width="6" height="6" rx="1"></rect></svg></button></div>
+      </div>
     </section>
   </main>
 
@@ -249,11 +276,14 @@
     let activeMag='qs', articleIndex=0, activeTab='catalog', fontSize=20, searchMag='all';
     const $=id=>document.getElementById(id);
     function closePanels(){ $('tocPanel').hidden=true; $('settingsPanel').hidden=true; for(const id of ['tocToggle','settingsToggle']) {$(id).classList.remove('active');$(id).setAttribute('aria-expanded','false');} }
-    function showView(view){ for(const [name,id] of [['home','homeView'],['magazine','magazineView'],['reading','readingView']]) $(id).hidden=name!==view; closePanels(); window.scrollTo(0,0); }
+    function closeQuickNav(){ $('quickNavActions').hidden=true; $('quickNavToggle').classList.remove('active'); $('quickNavToggle').setAttribute('aria-expanded','false'); }
+    function showView(view){ for(const [name,id] of [['home','homeView'],['magazine','magazineView'],['reading','readingView']]) $(id).hidden=name!==view; closePanels(); closeQuickNav(); window.scrollTo(0,0); requestAnimationFrame(updateReaderTools); }
     function setMagazine(key){ activeMag=key; articleIndex=0; activeTab='catalog'; document.querySelectorAll('[data-mag-tab]').forEach(b=>{const selected=b.dataset.magTab==='catalog';b.classList.toggle('active',selected);b.setAttribute('aria-selected',String(selected));}); const m=magazines[key]; $('magTitle').textContent=m.name; $('magCover').src=m.cover; $('magCover').alt=m.name+'封面'; renderRows(); renderToc(); showView('magazine'); }
     function renderRows(){ const m=magazines[activeMag]; const choices=activeTab==='catalog'?[0,1,2,3,4]:activeTab==='section'?[0,2,4]:[1,3]; $('issueHeading').textContent=activeTab==='catalog'?m.issue:activeTab==='section'?'板块':'我的收藏'; $('issueRows').replaceChildren(); choices.forEach(i=>{const title=m.rows[i];const b=document.createElement('button'); b.type='button';b.className='issue-row';b.innerHTML='<span class="num">'+String(i+1).padStart(2,'0')+'</span><strong></strong><span class="arrow">↗</span>';b.querySelector('strong').textContent=title;b.addEventListener('click',()=>openArticle(i));$('issueRows').append(b);}); }
     function renderToc(){ $('tocRows').replaceChildren(); magazines[activeMag].rows.forEach((title,i)=>{const b=document.createElement('button');b.type='button';b.className='panel-row';b.textContent=String(i+1).padStart(2,'0')+'　'+title;b.addEventListener('click',()=>openArticle(i));$('tocRows').append(b);}); }
-    function openArticle(i){ articleIndex=i;const m=magazines[activeMag];$('articleTitle').textContent=m.rows[i];$('readingBack').textContent='← '+m.name+' · '+m.issue;showView('reading'); }
+    function renderRelated(){ const m=magazines[activeMag]; $('relatedList').replaceChildren(); for(let offset=1;offset<=3;offset++){const i=(articleIndex+offset)%m.rows.length;const b=document.createElement('button');b.type='button';b.className='related-item';const text=document.createElement('span');const title=document.createElement('strong');title.textContent=m.rows[i];const meta=document.createElement('small');meta.textContent=m.name+' · '+m.issue;text.append(title,meta);const arrow=document.createElement('span');arrow.className='related-arrow';arrow.textContent='↗';arrow.setAttribute('aria-hidden','true');b.append(text,arrow);b.addEventListener('click',()=>openArticle(i));$('relatedList').append(b);} }
+    function openArticle(i){ articleIndex=i;const m=magazines[activeMag];$('articleTitle').textContent=m.rows[i];$('readingBack').textContent='← '+m.name+' · '+m.issue;renderRelated();showView('reading'); }
+    function updateReaderTools(){const visible=!$('readingView').hidden&&window.scrollY>220;$('readerQuickTools').hidden=!visible;if(!visible){closeQuickNav();return;}const article=$('prose').getBoundingClientRect();const distance=article.height||1;const progress=Math.min(1,Math.max(0,(innerHeight-article.top)/distance));$('readingProgressRing').style.strokeDashoffset=String(132*(1-progress));}
     function openSearch(){ $('searchSheet').hidden=false; $('searchBackdrop').hidden=false; $('searchTrigger').setAttribute('aria-expanded','true'); document.body.classList.add('search-open'); renderSearch(); requestAnimationFrame(()=>$('searchInput').focus()); }
     function closeSearch(restoreFocus=true){ $('searchSheet').hidden=true; $('searchBackdrop').hidden=true; $('searchTrigger').setAttribute('aria-expanded','false'); document.body.classList.remove('search-open'); if(restoreFocus)$('searchTrigger').focus(); }
     function renderSearch(){ const query=$('searchInput').value.trim().normalize('NFKC').toLocaleLowerCase('zh-CN').replace(/\s+/g,''); const results=[]; for(const [key,m] of Object.entries(magazines)){if(searchMag!=='all'&&searchMag!==key)continue;const matches=value=>value.normalize('NFKC').toLocaleLowerCase('zh-CN').replace(/\s+/g,'').includes(query);if(matches(m.name+' '+m.issue))results.push({key,type:'magazine',title:m.name,detail:m.issue});m.rows.forEach((title,index)=>{if(matches(title+' '+m.name+' '+m.issue))results.push({key,index,type:'article',title,detail:m.name+' · '+m.issue});});} $('searchCount').textContent=query?`找到 ${results.length} 项结果`:'浏览全部刊物与文章'; $('searchResults').replaceChildren(); if(!results.length){const p=document.createElement('p');p.className='search-empty';p.textContent='没有找到相关内容，试试其他关键词。';$('searchResults').append(p);return;} for(const item of results){const b=document.createElement('button');b.type='button';b.className='search-result';const info=document.createElement('span');const strong=document.createElement('strong');strong.textContent=item.title;const small=document.createElement('small');small.textContent=(item.type==='magazine'?'刊物 · ':'文章 · ')+item.detail;info.append(strong,small);const arrow=document.createElement('span');arrow.textContent='↗';arrow.setAttribute('aria-hidden','true');b.append(info,arrow);b.addEventListener('click',()=>{closeSearch(false);setMagazine(item.key);if(item.type==='article')openArticle(item.index);});$('searchResults').append(b);} }
@@ -271,8 +301,14 @@
     $('larger').addEventListener('click',()=>{$('prose').style.setProperty('--reader-size',(fontSize=Math.min(26,fontSize+2))+'px');});
     document.querySelectorAll('[data-paper]').forEach(b=>b.addEventListener('click',()=>{$('readingView').classList.toggle('warm',b.dataset.paper==='warm');document.querySelectorAll('[data-paper]').forEach(x=>x.classList.toggle('current',x===b));}));
     $('nextArticle').addEventListener('click',()=>openArticle((articleIndex+1)%magazines[activeMag].rows.length));
-    document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('searchSheet').hidden)closeSearch();else closePanels();}else if($('searchSheet').hidden&&(e.key==='/'||(e.key.toLowerCase()==='k'&&(e.ctrlKey||e.metaKey)))){e.preventDefault();openSearch();}else if(e.key==='Tab'&&!$('searchSheet').hidden){const focusable=[...$('searchSheet').querySelectorAll('button,input')];const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
+    $('backToTop').addEventListener('click',()=>window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}));
+    $('quickNavToggle').addEventListener('click',()=>{const open=$('quickNavActions').hidden;$('quickNavActions').hidden=!open;$('quickNavToggle').classList.toggle('active',open);$('quickNavToggle').setAttribute('aria-expanded',String(open));});
+    document.querySelectorAll('[data-quick-destination]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.quickDestination)));
+    window.addEventListener('scroll',updateReaderTools,{passive:true});
+    window.addEventListener('resize',updateReaderTools);
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('searchSheet').hidden)closeSearch();else {closePanels();closeQuickNav();}}else if($('searchSheet').hidden&&(e.key==='/'||(e.key.toLowerCase()==='k'&&(e.ctrlKey||e.metaKey)))){e.preventDefault();openSearch();}else if(e.key==='Tab'&&!$('searchSheet').hidden){const focusable=[...$('searchSheet').querySelectorAll('button,input')];const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
     document.addEventListener('click',e=>{if(!$('tocPanel').contains(e.target)&&!$('settingsPanel').contains(e.target)&&!$('tocToggle').contains(e.target)&&!$('settingsToggle').contains(e.target))closePanels();});
+    document.addEventListener('click',e=>{if(!$('quickNavActions').contains(e.target)&&!$('quickNavToggle').contains(e.target))closeQuickNav();});
     renderRows();
     renderToc();
   </script>
