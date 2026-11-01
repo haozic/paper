@@ -39,9 +39,9 @@
 var VERSION = (function () {
     try {
         var m = /[?&]v=([^&]+)/.exec(self.location.search);
-        return m ? decodeURIComponent(m[1]) : '20261101c';
+        return m ? decodeURIComponent(m[1]) : '20261101g';
     } catch (e) {
-        return '20261101c';
+        return '20261101g';
     }
 })();
 
@@ -56,6 +56,7 @@ var SHELL_ASSETS = [
     './index.html',
     './manifest.webmanifest?v=' + VERSION,
     './assets/css/style.css?v=' + VERSION,
+    './assets/css/books.css?v=' + VERSION,
     './assets/js/app.js?v=' + VERSION,
     './assets/img/icon-192.png',
     './assets/img/icon-512.png',
@@ -64,7 +65,8 @@ var SHELL_ASSETS = [
     './assets/img/cover_qs.jpg',
     './assets/img/cover_hqwg.jpg',
     './assets/img/cover_djyj.jpg',
-    './data/counts.json?v=' + VERSION
+    './data/counts.json?v=' + VERSION,
+    './data/latest.json?v=' + VERSION
 ];
 
 /* 三刊元数据与索引：activate 后台补齐（断网后仍能浏览目录） */

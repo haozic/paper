@@ -9,9 +9,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=20261101f">
-<link rel="manifest" href="manifest.webmanifest?v=20261101f">
-<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101f">
+<link rel="stylesheet" href="assets/css/style.css?v=20261101g">
+<link rel="stylesheet" href="assets/css/books.css?v=20261101g">
+<link rel="manifest" href="manifest.webmanifest?v=20261101g">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261101g">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b0000' stroke-width='2'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
 <script>
 (function(){try{
@@ -107,8 +108,9 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 <div id="homePage" class="home-page">
     <header class="home-header">
         <div class="home-header-inner">
+            <p class="home-eyebrow">数字书架 · 三刊合一</p>
             <h1 class="home-title">党内刊物</h1>
-            <p class="home-subtitle">理论 · 党建 · 时政</p>
+            <p class="home-subtitle">打开一本刊物，开始今天的阅读。</p>
             <button class="home-about-btn" onclick="showAboutPage()" title="关于本站"><svg class="icon"><use href="#i-info"/></svg></button>
         </div>
     </header>
@@ -121,9 +123,9 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
         </form>
     </section>
     <div class="home-body">
-        <div class="home-section-heading"><h2>选择刊物</h2><span>按期浏览 · 全文阅读</span></div>
+        <div class="home-section-heading"><h2>你的书架</h2><span>选择刊物，按期浏览</span></div>
         <div class="magazine-grid">
-            <div class="magazine-card" onclick="enterMagazine('qs')">
+            <a class="magazine-card" href="#m=qs" onclick="event.preventDefault();enterMagazine('qs')" aria-label="打开求是杂志">
                 <div class="mag-cover mag-cover-qs">
                     <div class="mag-cover-inner">
                         <div class="mag-cover-title">求是</div>
@@ -137,9 +139,9 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
                     <p class="mag-desc">中共中央委员会主办的理论刊物</p>
                     <p class="mag-meta"><span id="qsCount">-</span> 篇 · <span id="qsIssues">-</span> 期</p>
                 </div>
-            </div>
+            </a>
 
-            <div class="magazine-card" onclick="enterMagazine('hqwg')">
+            <a class="magazine-card" href="#m=hqwg" onclick="event.preventDefault();enterMagazine('hqwg')" aria-label="打开红旗文稿杂志">
                 <div class="mag-cover mag-cover-hqwg">
                     <div class="mag-cover-inner">
                         <div class="mag-cover-title">红旗文稿</div>
@@ -153,9 +155,9 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
                     <p class="mag-desc">政治理论半月刊</p>
                     <p class="mag-meta"><span id="hqwgCount">-</span> 篇 · <span id="hqwgIssues">-</span> 期</p>
                 </div>
-            </div>
+            </a>
 
-            <div class="magazine-card" onclick="enterMagazine('djyj')">
+            <a class="magazine-card" href="#m=djyj" onclick="event.preventDefault();enterMagazine('djyj')" aria-label="打开党建研究杂志">
                 <div class="mag-cover mag-cover-djyj">
                     <div class="mag-cover-inner">
                         <div class="mag-cover-title">党建研究</div>
@@ -169,7 +171,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
                     <p class="mag-desc">党建理论与实践研究月刊</p>
                     <p class="mag-meta"><span id="djyjCount">-</span> 篇 · <span id="djyjIssues">-</span> 期</p>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
     <section class="home-latest" aria-label="最新文章">
@@ -478,6 +480,6 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     </div>
 </div>
 
-<script src="assets/js/app.js?v=20261101f"></script>
+<script src="assets/js/app.js?v=20261101g"></script>
 </body>
 </html>
