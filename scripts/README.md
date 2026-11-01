@@ -607,3 +607,32 @@ git push origin main
 - 调慢 `time.sleep(1.0)` 后重试可绕开偶发 503
 - 抓取失败时，函数返回空列表，不会污染现有数据
 - 单元测试可单独 import `scrape_magazines`，对 `clean_text`、`element_to_md` 做回归
+
+---
+
+## 13. 跨刊标题索引
+
+站内检索原先锁死在当前这一本刊。现在有一份跨三刊的紧凑标题索引，
+让前端一次请求就能跨刊按标题匹配。
+
+```bash
+# 生成 data/search_index.json
+python scripts\build_search_index.py
+
+# 与三份 meta.json 逐字节比对，不一致退出码 1（提交前跑）
+python scripts\build_search_index.py --check
+
+# 内置自检（14 条，含 4 条反向自检）
+python scripts\build_search_index.py --self-test
+
+# 打印各刊每期正文分片的实测均值字节，供 app.js 的 BODY_AVG_BYTES 常量对账
+python scripts\build_search_index.py --print-avg
+```
+
+**索引是派生产物**，三份 `meta.json` 仍是唯一权威源。
+`scripts/check_data.py` 的 S1~S4 会强制断言二者一致。
+
+> **更新数据后必须做两步**：
+> 1. 升 `scripts/build_search_index.py` 里的 `INDEX_VERSION`（索引文件里的 `v` 字段）；
+> 2. 重新运行 `python scripts\build_search_index.py`。
+> 忘了升版本号的话，`--check` 会因为字节不一致而报错，索引也会被误认为"没变"。

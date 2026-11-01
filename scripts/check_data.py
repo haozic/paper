@@ -203,6 +203,100 @@ def check_catalog_order():
     return bad
 
 
+def check_search_index():
+    """跨刊标题索引体检（规则 S1~S4）。
+
+    索引 data/search_index.json 是派生产物，唯一权威源是三份 meta.json。
+    这里强制断言二者一致，避免改了 meta 却忘了重建索引。
+    """
+    print('\n[search_index] 跨刊标题索引')
+    path = 'data/search_index.json'
+    full = os.path.join(BASE_DIR, path)
+    if not os.path.exists(full):
+        print(f'    !! 缺少 {path}（跑一次 python scripts/build_search_index.py 生成）')
+        return 1
+
+    size = os.path.getsize(full)
+    with open(full, encoding='utf-8') as f:
+        idx = json.load(f)
+
+    rows = idx.get('rows') or []
+    cols = idx.get('cols') or []
+    bad = 0
+
+    # S2 逐行可寻址：先建 (mag) -> {(y,i,u)} 的集合
+    by_mag = {}
+    for key, _name, meta_path, _issues in MAGAZINES:
+        meta = load(meta_path) or []
+        by_mag[key] = set((a['y'], a['i'], a['u']) for a in meta)
+
+    # S1 行数
+    want_rows = sum(len(load(mp) or []) for _k, _n, mp, _i in MAGAZINES)
+    if len(rows) != want_rows:
+        print(f"    !! S1 行数不符：索引 {len(rows)} 行，三刊 meta 合计 {want_rows} 行")
+        bad += 1
+    else:
+        print(f'    S1 行数一致：{len(rows)} 行')
+
+    # S2 逐行可寻址
+    missing = 0
+    first_bad = None
+    for row in rows:
+        if len(row) != 5:
+            missing += 1
+            if first_bad is None:
+                first_bad = row
+            continue
+        mag, y, i, _t, u = row
+        if (y, i, u) not in by_mag.get(mag, set()):
+            missing += 1
+            if first_bad is None:
+                first_bad = row
+    if missing:
+        print(f'    !! S2 有 {missing} 行在 meta 中找不到对应条目，示例 {first_bad}')
+        bad += 1
+    else:
+        print('    S2 逐行可寻址：全部命中')
+
+    # S3 同一刊物内 URL 无重复
+    # 注意：**跨刊**允许重复 —— 实测三刊 meta 合计 7415 行、唯一 URL 7413 个，
+    # 差的两条是「网站声明」这篇文章同时出现在《求是》和《红旗文稿》的目录里
+    # （http / https 各一组）。那是真实数据，不是索引的错；
+    # 全局去重会破坏 S1（行数必须等于三刊 meta 条目数之和），也不能做。
+    counts = {}
+    uniques = {}
+    for r in rows:
+        if len(r) != 5:
+            continue
+        counts[r[0]] = counts.get(r[0], 0) + 1
+        uniques.setdefault(r[0], set()).add(r[4])
+    dup_total = 0
+    for mag in sorted(counts):
+        d = counts[mag] - len(uniques[mag])
+        if d:
+            print(f'    !! S3 {mag} 在索引内有 {d} 条重复 URL')
+        dup_total += d
+    if dup_total:
+        bad += 1
+    else:
+        print('    S3 同一刊物内 URL 无重复')
+
+    # S4 体积
+    limit = 1572864
+    if size > limit:
+        print(f'    !! S4 体积 {size} 字节，超过上限 {limit} 字节')
+        bad += 1
+    else:
+        print(f'    S4 体积 {size} 字节（上限 {limit}）')
+
+    if cols != ['m', 'y', 'i', 't', 'u']:
+        print(f"    !! cols 为 {cols}，应为 ['m', 'y', 'i', 't', 'u']")
+        bad += 1
+
+    print('    索引问题数: %d' % bad)
+    return bad
+
+
 def main():
     dedup = '--dedup' in sys.argv
 
@@ -249,6 +343,7 @@ def main():
     print(f'板块名体检: 兜底值 {ph_total} 条   未归一旧写法 {alias_total} 条')
 
     order_bad = check_catalog_order()
+    index_bad = check_search_index()
 
     if dedup and total_dup:
         print('\n开始去重...')

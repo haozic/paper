@@ -243,6 +243,15 @@ curl -I https://your-domain.pages.dev/sw.js
 正文 md 缓存跨版本保留，所以**每次发版不会重下 85 MB 正文**；而 meta / 索引会随版本清空重下，
 保证不会把上一期的目录当成本期。
 
+### 2.11 重建跨刊标题索引
+
+**重建跨刊标题索引**：`python scripts\build_search_index.py`
+（先升 `scripts\build_search_index.py` 里的 `INDEX_VERSION`，再运行；
+然后 `python scripts\build_search_index.py --check` 确认与 meta 一致）
+
+> `data/search_index.json` 由三份 `meta.json` 派生，是派生产物。
+> 改了 `meta.json` 就要重建这一步，必须在 §2.7 提交之前完成。
+
 ---
 
 ## 3. 一次性抓取多本多期
