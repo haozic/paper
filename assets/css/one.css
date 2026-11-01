@@ -200,3 +200,52 @@ body.article-active { --reading-dock-height: 86px; }
   .reading-dock { display: none !important; }
   .article-page-footer { padding-bottom: 0; }
 }
+
+/* Home: three journals are the primary composition. */
+.home-eyebrow { display: none; }
+.home-header { padding: 30px 22px 24px; }
+.home-title { font-family: var(--font-serif); font-size: 30px; letter-spacing: .12em; }
+.home-body { padding: 52px 26px 16px; }
+.magazine-grid { grid-template-columns: repeat(3, minmax(0, 330px)); justify-content: center; gap: clamp(28px, 4vw, 60px); width: 100%; max-width: 1120px; margin: 0 auto; }
+.magazine-card { text-align: center; }
+.mag-cover { aspect-ratio: 3 / 4; }
+.mag-info { align-items: center; text-align: center; padding-top: 20px; }
+.mag-info h2 { font-family: var(--font-serif); font-size: 22px; font-weight: 600; }
+.mag-meta { margin-top: 4px; font-size: 12px; }
+.home-search { width: calc(100% - 52px); max-width: 640px; margin: 30px auto 58px; }
+.home-search-form { min-height: 48px; }
+
+/* Current issue list and reading settings open above the fixed three-button dock. */
+body.article-active { --reading-dock-height: 70px; }
+.reading-dock .ap-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.reading-dock .ap-nav > button { min-height: 70px; padding: 14px 10px; text-align: center; font-size: 14px; font-weight: 500; }
+.reading-dock .ap-nav > button + button { border-left: 1px solid var(--border); }
+.reading-dock .ap-nav > button.active { background: var(--bg-2); }
+.reading-dock .ap-nav .ap-bottom-next { width: auto; }
+.reading-operation-menu .ap-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.reading-issue-menu[hidden] { display: none !important; }
+.reading-dock .reading-issue-menu { width: 100%; max-width: 900px; max-height: calc(100vh - var(--reading-dock-height, 70px) - 44px); margin: 0 auto; overflow-y: auto; overscroll-behavior: contain; padding: 20px 10px 24px; }
+.reading-issue-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 0 10px 16px; border-bottom: 1px solid var(--border); color: var(--text); }
+.reading-issue-heading strong { font-family: var(--font-serif); font-size: 16px; font-weight: 600; }
+.reading-issue-heading span { flex: none; color: var(--text-3); font-size: 12px; }
+.reading-issue-list { display: grid; }
+.reading-issue-item { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 12px; width: 100%; padding: 12px 10px; border: 0; border-bottom: 1px solid var(--border); background: transparent; color: var(--text); text-align: left; font-family: var(--font-sans); cursor: pointer; }
+.reading-issue-item:hover, .reading-issue-item.active { background: var(--bg-2); }
+.reading-issue-item.active .reading-issue-title { font-weight: 600; }
+.reading-issue-number { color: var(--text-3); font-size: 12px; font-variant-numeric: tabular-nums; }
+.reading-issue-title { font-size: 14px; line-height: 1.55; }
+
+@media (max-width: 767px) {
+  .home-header { padding: 24px 20px 19px; }
+  .home-title { font-size: 26px; }
+  .home-body { padding: 34px 20px 8px; }
+  .magazine-grid { display: grid; grid-template-columns: minmax(0, 340px); justify-content: center; gap: 45px; width: 100%; max-width: none; padding: 0; overflow: visible; }
+  .magazine-card { width: 100%; max-width: 340px; }
+  .mag-cover { width: 100%; aspect-ratio: 3 / 4; }
+  .mag-info { padding-top: 14px; }
+  .mag-info h2 { font-size: 19px; }
+  .home-search { width: calc(100% - 40px); margin: 32px auto 42px; }
+  body.article-active { --reading-dock-height: 64px; }
+  .reading-dock .ap-nav > button { min-height: 64px; font-size: 13px; }
+  .reading-dock .reading-issue-menu { padding-inline: 2px; }
+}

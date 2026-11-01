@@ -39,9 +39,9 @@
 var VERSION = (function () {
     try {
         var m = /[?&]v=([^&]+)/.exec(self.location.search);
-        return m ? decodeURIComponent(m[1]) : '20261101k';
+        return m ? decodeURIComponent(m[1]) : '20261101l';
     } catch (e) {
-        return '20261101k';
+        return '20261101l';
     }
 })();
 
@@ -66,8 +66,7 @@ var SHELL_ASSETS = [
     './assets/img/cover_qs.jpg',
     './assets/img/cover_hqwg.jpg',
     './assets/img/cover_djyj.jpg',
-    './data/counts.json?v=' + VERSION,
-    './data/latest.json?v=' + VERSION
+    './data/counts.json?v=' + VERSION
 ];
 
 /* 三刊元数据与索引：activate 后台补齐（断网后仍能浏览目录） */

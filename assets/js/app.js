@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101k';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261101l';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -857,27 +857,6 @@ function openGlobalSearch(initialQuery) {
     runGlobalSearch();
 }
 
-async function loadHomeFeature() {
-    let picked;
-    try {
-        const resp = await fetch(dataUrl('data/latest.json'));
-        if (!resp.ok) throw new Error('latest unavailable');
-        picked = await resp.json();
-    } catch (e) { return; }
-    const feature = picked.qs;
-    if (feature) {
-        document.getElementById('homeFeatureIssue').textContent = feature.y + ' 年第 ' + feature.i + ' 期';
-        document.getElementById('homeFeatureTitle').textContent = feature.t;
-        document.getElementById('homeFeatureRead').dataset.url = encodeURIComponent(feature.u);
-    }
-}
-
-function readHomeFeature() {
-    const url = document.getElementById('homeFeatureRead').dataset.url;
-    enterMagazine('qs');
-    if (url) showArticle(url);
-}
-
 function closeGlobalSearch() {
     const box = document.getElementById('globalSearch');
     if (!box) return;
@@ -1302,11 +1281,7 @@ function closeArticlePage() {
     if (ring) ring.style.strokeDashoffset = RING_CIRCUMFERENCE;
     var btt = document.getElementById('backToTopBtn');
     if (btt) btt.classList.remove('show');
-    // 关闭设置面板
-    var sp = document.getElementById('articleSettingsPanel');
-    if (sp) sp.classList.remove('show');
-    var sb = document.getElementById('articleSettingsBtn');
-    if (sb) sb.classList.remove('active');
+    closeReadingTrays();
     // 隐藏"继续阅读"提示条与文末导航（下次进入文章时再按需显示）
     var banner = document.getElementById('articleContinue');
     if (banner) banner.hidden = true;
@@ -1454,10 +1429,42 @@ function applyTheme(theme) {
 
 function toggleArticleSettings(e) {
     if (e && e.stopPropagation) e.stopPropagation();
+    const menu = document.getElementById('readingOperationMenu');
     const panel = document.getElementById('articleSettingsPanel');
     const btn = document.getElementById('articleSettingsBtn');
-    const isOpen = panel.classList.toggle('show');
+    const isOpen = menu.hidden;
+    closeReadingTrays();
+    menu.hidden = !isOpen;
+    panel.classList.toggle('show', isOpen);
     btn.classList.toggle('active', isOpen);
+    btn.setAttribute('aria-expanded', String(isOpen));
+}
+
+function closeReadingTrays() {
+    const settings = document.getElementById('readingOperationMenu');
+    const issue = document.getElementById('readingIssueMenu');
+    if (settings) settings.hidden = true;
+    if (issue) issue.hidden = true;
+    const panel = document.getElementById('articleSettingsPanel');
+    if (panel) panel.classList.remove('show');
+    ['articleSettingsBtn', 'articleIssueBtn'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) { btn.classList.remove('active'); btn.setAttribute('aria-expanded', 'false'); }
+    });
+}
+
+function toggleIssueContents() {
+    const menu = document.getElementById('readingIssueMenu');
+    const btn = document.getElementById('articleIssueBtn');
+    const isOpen = menu.hidden;
+    closeReadingTrays();
+    menu.hidden = !isOpen;
+    btn.classList.toggle('active', isOpen);
+    btn.setAttribute('aria-expanded', String(isOpen));
+    if (isOpen) {
+        const current = menu.querySelector('[aria-current="page"]');
+        if (current) current.scrollIntoView({ block: 'nearest' });
+    }
 }
 
 function initReadingSettingsListeners() {
@@ -1512,17 +1519,10 @@ function initReadingSettingsListeners() {
         if (mq.addEventListener) mq.addEventListener('change', onSchemeChange);
         else if (mq.addListener) mq.addListener(onSchemeChange);
     }
-    // 点击外部关闭面板（排除滚动触发的 touchstart）
+    // 点击正文时收起底栏弹出的目录与设置。
     document.addEventListener('click', (e) => {
-        const panel = document.getElementById('articleSettingsPanel');
-        if (!panel || !panel.classList.contains('show')) return;
-        // 点击面板内或 Aa 按钮时不关闭
-        if (panel.contains(e.target) || e.target.id === 'articleSettingsBtn') return;
-        // 点击其他按钮（如收藏、原文链接）时不关闭
-        if (e.target.closest('.ap-fav-btn, .ap-original-link, .ap-copy-btn')) return;
-        panel.classList.remove('show');
-        var asb = document.getElementById('articleSettingsBtn');
-        if (asb) asb.classList.remove('active');
+        const dock = document.getElementById('readingDock');
+        if (dock && !dock.contains(e.target)) closeReadingTrays();
     });
 }
 
@@ -1652,20 +1652,23 @@ function renderArticleFooter(url, cur) {
     const nb = getArticleNeighbours(url);
     const ordered = nb.ordered;
     const pos = nb.pos;
-    const prev = nb.prev;
     const next = nb.next;
+    const issueArticles = ordered.filter(item => item.a.y === cur.y && item.a.i === cur.i);
+    const issueMenu = document.getElementById('readingIssueMenu');
+    issueMenu.innerHTML = '<div class="reading-issue-heading"><strong>' + escHtml(MAGAZINES[state.currentMag].name) + ' · ' + issueLabel(cur) + '</strong><span>' + issueArticles.length + ' 篇</span></div>' +
+        '<div class="reading-issue-list">' + issueArticles.map((item, index) => {
+            const a = item.a;
+            const active = a.u === url;
+            return '<button type="button" class="reading-issue-item' + (active ? ' active' : '') + '" data-url="' + encodeURIComponent(a.u) + '"' + (active ? ' aria-current="page"' : '') + '>' +
+                '<span class="reading-issue-number">' + String(index + 1).padStart(2, '0') + '</span><span class="reading-issue-title">' + escHtml(a.t) + '</span></button>';
+        }).join('') + '</div>';
+    issueMenu.querySelectorAll('[data-url]').forEach(btn => btn.addEventListener('click', () => showArticle(btn.dataset.url, true)));
 
-    let html = '<button class="ap-bottom-prev"' + (prev ? ' data-url="' + encodeURIComponent(prev.u) + '"' : ' disabled') + '>' +
-        '<span>← 上一篇</span><strong>' + (prev ? escHtml(prev.t) : '已经是第一篇') + '</strong></button>' +
-        '<button class="ap-bottom-action" type="button" onclick="toggleReadingActions()" aria-expanded="false" aria-controls="readingOperationMenu">操作 <span aria-hidden="true">＋</span></button>' +
-        '<button class="ap-bottom-next"' + (next ? ' data-url="' + encodeURIComponent(next.u) + '"' : ' disabled') + '>' +
-        '<span>下一篇 →</span><strong>' + (next ? escHtml(next.t) : '已经是最后一篇') + '</strong></button>';
+    let html = '<button class="ap-bottom-directory" id="articleIssueBtn" type="button" onclick="toggleIssueContents()" aria-expanded="false" aria-controls="readingIssueMenu">目录</button>' +
+        '<button class="ap-bottom-settings" id="articleSettingsBtn" type="button" onclick="toggleArticleSettings(event)" aria-expanded="false" aria-controls="readingOperationMenu">设置</button>' +
+        '<button class="ap-bottom-next" type="button"' + (next ? ' data-url="' + encodeURIComponent(next.u) + '"' : ' disabled') + '>下一篇 →</button>';
     navEl.innerHTML = html;
-    const menu = document.getElementById('readingOperationMenu');
-    if (menu) menu.hidden = true;
-    const panel = document.getElementById('articleSettingsPanel');
-    if (panel) panel.classList.remove('show');
-    document.getElementById('articleSettingsBtn').classList.remove('active');
+    closeReadingTrays();
 
     navEl.querySelectorAll('[data-url]').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -1677,19 +1680,6 @@ function renderArticleFooter(url, cur) {
 
     footer.hidden = false;
     document.getElementById('readingDock').hidden = false;
-}
-
-function toggleReadingActions() {
-    const menu = document.getElementById('readingOperationMenu');
-    const button = document.querySelector('.ap-bottom-action');
-    if (!menu || !button) return;
-    menu.hidden = !menu.hidden;
-    button.setAttribute('aria-expanded', String(!menu.hidden));
-    if (menu.hidden) {
-        const panel = document.getElementById('articleSettingsPanel');
-        if (panel) panel.classList.remove('show');
-        document.getElementById('articleSettingsBtn').classList.remove('active');
-    }
 }
 
 /* ===== 相关阅读：标题语义相似度 =====
@@ -2573,12 +2563,9 @@ async function init() {
     // 键盘
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
-            // 先关闭设置面板
-            const settingsPanel = document.getElementById('articleSettingsPanel');
-            if (settingsPanel && settingsPanel.classList.contains('show')) {
-                settingsPanel.classList.remove('show');
-                var asb2 = document.getElementById('articleSettingsBtn');
-                if (asb2) asb2.classList.remove('active');
+            // 先关闭阅读目录或设置面板
+            if (!document.getElementById('readingOperationMenu').hidden || !document.getElementById('readingIssueMenu').hidden) {
+                closeReadingTrays();
                 return;
             }
             // 搜索框内按 Esc：失焦并还原为上次已提交的查询词
@@ -2624,7 +2611,7 @@ async function init() {
         // 文章页 ← / →（或 J / K）：上一篇 / 下一篇
         const panelOpen = document.getElementById('articleSettingsPanel');
         if (document.body.classList.contains('article-active') &&
-            !(panelOpen && panelOpen.classList.contains('show')) &&
+            !(panelOpen && panelOpen.classList.contains('show')) && document.getElementById('readingIssueMenu').hidden &&
             (e.key === 'ArrowLeft' || e.key === 'ArrowRight' ||
              e.key === 'j' || e.key === 'J' || e.key === 'k' || e.key === 'K')) {
             const nb = getArticleNeighbours(state.currentArticleUrl);
@@ -2666,7 +2653,6 @@ async function init() {
 
     // 加载首页计数
     loadHomeCounts();
-    loadHomeFeature();
 
     // 注册 Service Worker（离线阅读）
     registerServiceWorker();

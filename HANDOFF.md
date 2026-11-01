@@ -2,30 +2,30 @@
 
 ## 当前任务
 
-党内刊物静态阅读网站通过 GitHub `main` 和 Cloudflare Pages 部署。用户希望首页封面醒目、正文阅读顺畅，并要求任务完成后同步 GitHub。本轮针对：首页三本刊物封面太小；正文页底部三按钮要固定；右下角阅读进度环与返回顶部按钮显示异常。
+党内刊物静态阅读网站通过 GitHub `main` 和 Cloudflare Pages 部署。用户要求首页简约，以三本居中的大封面为主体；正文页固定底栏为“目录、设置、下一篇”，其中目录展示本期文章。用户希望直接完成并同步 GitHub。
 
 ## 已完成
 
-- 首页三刊封面从桌面 92px、手机 70px 的小图恢复为主视觉。桌面三列大封面，手机横滑大封面；继续使用 `background-size: contain`，确保封面完整。
-- 将上一篇、操作、下一篇从文末 footer 拆到独立 `readingDock`，固定在视口底部；操作菜单从底栏向上展开，正文末尾留出安全空间。
-- 找到右下角按钮异常的原因：`books.css` 将 `.article-page .back-to-top` 改成 `position: static`。在最后加载的 `one.css` 恢复 fixed，并放在底栏上方；进度值夹在 0–1 范围内。
-- 文章关闭时隐藏底栏，新文章打开时重置操作菜单和阅读设置状态。资源版本为 `20261101k`。
-- 上轮已完成：首页移除重复最新文章区、缩小底部专题链接；正文页文末三按钮及阅读设置、收藏、分享、原文操作；杂志与正文统一简约风格。
+- 首页移除重复的《求是》本期精选主视觉和冗余小标题；三本杂志封面成为首页主体，桌面三列居中、手机单列居中，封面加大并保持完整显示；搜索移到封面下方。
+- 正文页固定底栏改为“目录、设置、下一篇”。目录由当前期元数据生成文章列表，标出当前篇，可点击切换；设置按钮直接展开阅读设置，并保留收藏、分享、原文操作。
+- “本文目录”顶栏按钮改称“本文小节”，避免与底栏的本期文章目录混淆。目录/设置弹层支持再次点击、点击外部和 Escape 关闭，切换文章时重置。
+- Service Worker 不再预缓存首页已不用的 `data/latest.json`。资源版本为 `20261101l`。
+- 之前已修复进度环与返回顶部按钮定位，阅读底栏独立固定，首页专题链接缩小。
 
 ## 验收与限制
 
-- `node --check assets/js/app.js`、`node --check sw.js`、`git -c core.whitespace=cr-at-eol diff --check` 已通过。
-- 站点存在访问密码门，无法直接核对登录后的真实浏览器画面；此前临时移除遮罩的自动审批被拒绝，不能绕过。
+- `node --check assets/js/app.js`、`node --check sw.js`、`git -c core.whitespace=cr-at-eol diff --check` 通过。
+- 站点有访问密码门，无法直接核对登录后的实际浏览器画面；此前临时移除遮罩的自动审批被拒绝，不能绕过。
 - 旧数据问题：红旗文稿有 1 篇标记有全文但正文缺失；党建研究 2026 年第 10 期目录有 31 篇文章但正文分片缺失。本轮未改数据。
 
 ## 下一步
 
-- 若用户能提供登录后的截图，可针对桌面与手机封面、固定底栏、菜单及进度按钮继续做视觉微调。
-- 更新正文数据时，按现有脚本维护首页精选数据 `data/latest.json`。
+- 如有登录后的手机/桌面截图，可继续精修首页封面比例及底栏弹层细节。
 
 ## 踩过的坑
 
-- CSS 加载顺序为 `style.css`、`books.css`、`one.css`。封面小图由 `one.css` 最后覆盖造成；进度按钮定位被 `books.css` 改为 static。
-- 固定底栏不能直接把含相关阅读的整个 footer 固定，否则相关阅读也会遮盖正文；导航和操作菜单放进单独的 dock。
-- `.git` 写入可能需要 `require_escalated`；`git push` 返回 session ID 时持续轮询。推送时偶有凭据程序打印 `fatal: Cannot prompt`，即使命令 exit 0 也要用 `git ls-remote` 核对远端提交。
-- 仓库 CSS 有 CRLF，diff whitespace 检查用 `core.whitespace=cr-at-eol`。
+- CSS 顺序为 `style.css`、`books.css`、`one.css`。首页封面旧规则在 `one.css` 中多次覆盖，本轮最终规则放在末尾；手机旧横滑规则也需要覆盖。
+- 固定底栏不能包含相关阅读，故 `readingDock` 与文末 `articleFooter` 分开。
+- 底栏设置按钮由 `renderArticleFooter` 动态创建，关闭/重置弹层时应先判空；阅读设置面板在 `init()` 中移动到菜单。
+- `.git` 写入可能需要 `require_escalated`。推送偶有凭据程序输出 `fatal: Cannot prompt`，即使命令退出码为 0 也必须用 `git ls-remote` 核对远端。
+- CSS 使用 CRLF，diff 检查需指定 `core.whitespace=cr-at-eol`。
