@@ -3868,10 +3868,6 @@ body.article-active { --reading-dock-height: 86px; --reader-shortcut-size: 44px;
 .reading-issue-heading strong { min-width: 0; font: 650 15px/1.4 var(--font-sans); }
 .reading-issue-heading span { font-size: 11px; }
 .reading-issue-list { gap: 3px; }
-.reading-article-sections { display: grid; gap: 3px; margin: 0 4px 12px; padding: 0 4px 8px; }
-.reading-article-sections strong { margin-bottom: 4px; color: var(--text-3); font: 600 12px/1.4 var(--font-sans); }
-.reading-article-sections button { width: 100%; padding: 8px 9px; border: 0; border-radius: 10px; background: transparent; color: var(--text-2); font: 500 13px/1.5 var(--font-sans); text-align: left; cursor: pointer; }
-.reading-article-sections button:hover, .reading-article-sections button:focus-visible { background: var(--bg-2); color: var(--text); }
 .reading-issue-item { gap: 10px; min-height: 47px; padding: 10px 9px; border: 0; border-radius: 12px; }
 .reading-issue-item:hover { border-radius: 12px; background: color-mix(in srgb, var(--card) 55%, var(--bg-2)); }
 .reading-issue-item.active { border-radius: 12px; background: color-mix(in srgb, var(--primary) 10%, var(--card)); color: var(--text); }

@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261102l';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261102m';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -1187,7 +1187,6 @@ async function showArticle(encUrl, replaceHist) {
                 const sepIdx = md.indexOf('\n---\n');
                 if (sepIdx >= 0) bodyMd = md.substring(sepIdx + 5).trim();
                 bodyEl.innerHTML = renderMarkdown(bodyMd, a.t);
-                buildArticleToc(bodyEl);
                 const wordCount = countWords(bodyEl.textContent);
                 updateArticleMeta(a, wordCount);
                 return;
@@ -1239,7 +1238,6 @@ function renderArticleBody(url, bodyEl) {
         const body = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
         const a = ms.meta.find(x => x.u === url);
         bodyEl.innerHTML = renderMarkdown(body, a && a.t);
-        buildArticleToc(bodyEl);
         if (a) {
             const wordCount = countWords(bodyEl.textContent);
             updateArticleMeta(a, wordCount);
@@ -1247,23 +1245,6 @@ function renderArticleBody(url, bodyEl) {
     } else {
         bodyEl.innerHTML = `<div class="no-body">未找到该文章的正文数据<br>
             <small>URL: ${escHtml(url.substring(0, 60))}...</small></div>`;
-    }
-}
-
-function buildArticleToc(bodyEl) {
-    const heads = Array.from(bodyEl.querySelectorAll('.md-heading,.md-subheading'));
-    if (heads.length < 3) return;
-    heads.forEach((head, index) => { head.id = 'article-section-' + index; });
-    const issueMenu = document.getElementById('readingIssueMenu');
-    if (issueMenu) {
-        issueMenu.querySelector('.reading-article-sections')?.remove();
-        issueMenu.insertAdjacentHTML('afterbegin', '<div class="reading-article-sections"><strong>本文</strong>' + heads.map((h, i) =>
-            `<button type="button" data-section-target="article-section-${i}">${escHtml(h.textContent)}</button>`).join('') + '</div>');
-        issueMenu.querySelectorAll('[data-section-target]').forEach(btn => btn.addEventListener('click', () => {
-            const target = document.getElementById(btn.dataset.sectionTarget);
-            closeReadingTrays();
-            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }));
     }
 }
 
@@ -1288,7 +1269,6 @@ async function retryShowArticle(encUrl) {
                 const sepIdx = md.indexOf('\n---\n');
                 if (sepIdx >= 0) bodyMd = md.substring(sepIdx + 5).trim();
                 bodyEl.innerHTML = renderMarkdown(bodyMd, a.t);
-                buildArticleToc(bodyEl);
                 const wordCount = countWords(bodyEl.textContent);
                 updateArticleMeta(a, wordCount);
                 return;
