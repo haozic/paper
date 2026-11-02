@@ -5,7 +5,7 @@ import json
 import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SOURCES = [('qs', 'data/qs/meta.json'), ('hqwg', 'data/hqwg/meta.json'), ('djyj', 'data/meta.json')]
+SOURCES = [('qs', 'data/qs/meta.json'), ('hqwg', 'data/hqwg/meta.json'), ('djyj', 'data/meta.json'), ('qz', 'data/qz/meta.json')]
 
 def main():
     latest = {}

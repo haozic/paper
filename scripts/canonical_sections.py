@@ -74,6 +74,7 @@ META_PATHS = {
     'qs': 'data/qs/meta.json',
     'hqwg': 'data/hqwg/meta.json',
     'djyj': 'data/meta.json',
+    'qz': 'data/qz/meta.json',
 }
 
 _WS_RE = re.compile(r'[\s　\xa0]+')

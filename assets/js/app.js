@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261102g';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261102i';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -39,17 +39,28 @@ const MAGAZINES = {
         desc: '党建理论与实践研究月刊',
         cover: 'assets/img/cover_djyj.jpg',
     },
+    qz: {
+        name: '旗帜',
+        fullName: '《旗帜》',
+        color: '#8b0000',
+        colorDark: '#8b0000',
+        dataPath: 'data/qz',
+        issuesPath: 'data/qz/issues',
+        source: 'https://www.qizhiwang.org.cn/GB/433029/433031/index.html',
+        desc: '中央和国家机关工委机关刊',
+        cover: 'assets/img/cover_qz.svg',
+    },
 };
 
 /* 刊物展示顺序：跨刊检索结果按这个顺序分组。
    与 scripts/build_search_index.py 的 MAG_ORDER、scripts/check_data.py 的 MAGAZINES 一致。 */
-const MAGAZINE_ORDER = ['qs', 'hqwg', 'djyj'];
+const MAGAZINE_ORDER = ['qs', 'hqwg', 'djyj', 'qz'];
 
 /* 每期正文分片的实测均值（字节），用于在下载前告知用户预计流量。
    由 python scripts/build_search_index.py --print-avg 实测得出
    （qs 188 期 43.3 MB / hqwg 164 期 27.5 MB / djyj 70 期 13.2 MB）。
    数据更新后重跑该命令并更新这里。 */
-const BODY_AVG_BYTES = { qs: 241619, hqwg: 176044, djyj: 198248 };
+const BODY_AVG_BYTES = { qs: 241619, hqwg: 176044, djyj: 198248, qz: 277117 };
 
 /* 正文搜索窗口：最新年份起几年（基准是该刊数据里的最新年份，不是浏览器时间） */
 const BODY_YEAR_SPAN = 3;
@@ -174,6 +185,7 @@ function enterMagazine(magKey) {
     state.currentMode = 'catalog';
     state.searchResults = [];
     state.currentPage = 1;
+    document.querySelectorAll('[data-mode="section"]').forEach(btn => { btn.hidden = magKey === 'qz'; });
     document.body.classList.remove('mag-search-open');
     document.getElementById('magSearchToggle').setAttribute('aria-expanded', 'false');
 
@@ -835,9 +847,9 @@ function renderCrossMagResults() {
     const query = document.getElementById('searchInput').value.trim().toLowerCase();
 
     if (!results.length) {
-        container.innerHTML = '<div class="loading"><div>三刊标题中没有匹配的文章</div></div>';
+        container.innerHTML = '<div class="loading"><div>四刊标题中没有匹配的文章</div></div>';
         pagination.innerHTML = '';
-        infoEl.textContent = query ? '共 0 篇（关键词："' + query + '" ｜ 范围：三刊标题）' : '';
+        infoEl.textContent = query ? '共 0 篇（关键词："' + query + '" ｜ 范围：四刊标题）' : '';
         return;
     }
 
@@ -845,7 +857,7 @@ function renderCrossMagResults() {
     container.innerHTML = crossMagCardsHtml(groups, query, true);
 
     const total = results.length;
-    infoEl.textContent = '共 ' + total + ' 篇（关键词："' + query + '" ｜ 范围：三刊标题 · 只匹配标题）';
+    infoEl.textContent = '共 ' + total + ' 篇（关键词："' + query + '" ｜ 范围：四刊标题 · 只匹配标题）';
     pagination.innerHTML = '<span class="page-info">共 ' + total + ' 条</span>';
 }
 
@@ -901,7 +913,7 @@ function updateGlobalSearchScope() {
     const bodyButton = document.getElementById('globalBodySearch');
     if (bodyButton) bodyButton.hidden = !state.globalSearchMag || state.globalSearchMag === 'all';
     const input = document.getElementById('globalSearchInput');
-    if (input) input.placeholder = state.globalSearchMag === 'all' ? '搜索三刊文章标题' : '搜索本刊文章标题';
+    if (input) input.placeholder = state.globalSearchMag === 'all' ? '搜索四刊文章标题' : '搜索本刊文章标题';
 }
 
 function openBodySearchFromGlobal() {
@@ -2125,7 +2137,7 @@ function renderMarkdown(md, articleTitle) {
             return;
         }
         if (p.startsWith('### ')) {
-            html += '<p class="md-heading">' + processInlineMarkdown(p.substring(4)) + '</p>';
+            html += '<p class="md-subheading">' + processInlineMarkdown(p.substring(4)) + '</p>';
         } else if (p.startsWith('## ')) {
             html += '<p class="md-heading" style="font-size:17px;">' + processInlineMarkdown(p.substring(3)) + '</p>';
         } else if (p.startsWith('# ')) {
@@ -2138,11 +2150,25 @@ function renderMarkdown(md, articleTitle) {
             if (processed.startsWith('<strong>') && processed.endsWith('</strong>') &&
                 processed.indexOf('<strong>') === processed.lastIndexOf('<strong>')) {
                 const label = p.slice(2, -2).trim();
-                const heading = label.length <= 90 && !/[。！？]$/.test(label);
-                html += '<p class="' + (heading ? 'md-heading' : 'md-bold') + '">' + processed + '</p>';
+                const heading = label.length <= 70 && !/[。！？]$/.test(label);
+                if (heading) {
+                    html += '<p class="md-heading">' + processed + '</p>';
+                } else if (label.length <= 70 || /^【\s*(摘\s*要|关键词)/.test(label)) {
+                    html += '<p class="md-subheading">' + processed + '</p>';
+                } else {
+                    // 旧网页有时把小标题和整段正文都放进同一个 <strong>。
+                    // 只保留开头短句的强调，正文恢复普通字重。
+                    const lead = label.match(/^(.{2,45}?[。！？：:])(.{20,})$/);
+                    html += '<p>' + (lead
+                        ? '<strong>' + processInlineMarkdown(lead[1]) + '</strong>' + processInlineMarkdown(lead[2])
+                        : processInlineMarkdown(label)) + '</p>';
+                }
             } else if (isChineseHeading(p)) {
-                // 中文数字标题（一、二、三、等）显示为小标题
-                html += '<p class="md-subheading">' + processed + '</p>';
+                // 编号与正文同段时，只强调编号后的短标题。
+                const lead = p.length > 90 && p.match(/^(.{2,60}?[。！？：:])(.{20,})$/);
+                html += lead
+                    ? '<p><strong>' + processInlineMarkdown(lead[1]) + '</strong>' + processInlineMarkdown(lead[2]) + '</p>'
+                    : '<p class="' + (p.length <= 90 ? 'md-subheading' : '') + '">' + processed + '</p>';
             } else {
                 html += '<p>' + processed + '</p>';
             }

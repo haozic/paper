@@ -39,9 +39,9 @@
 var VERSION = (function () {
     try {
         var m = /[?&]v=([^&]+)/.exec(self.location.search);
-        return m ? decodeURIComponent(m[1]) : '20261102g';
+        return m ? decodeURIComponent(m[1]) : '20261102i';
     } catch (e) {
-        return '20261102g';
+        return '20261102i';
     }
 })();
 
@@ -64,6 +64,7 @@ var SHELL_ASSETS = [
     './assets/img/cover_qs.jpg',
     './assets/img/cover_hqwg.jpg',
     './assets/img/cover_djyj.jpg',
+    './assets/img/cover_qz.svg',
     './data/counts.json?v=' + VERSION
 ];
 
@@ -71,7 +72,8 @@ var SHELL_ASSETS = [
 var DATA_ASSETS = [
     './data/meta.json?v=' + VERSION,
     './data/qs/meta.json?v=' + VERSION,
-    './data/hqwg/meta.json?v=' + VERSION
+    './data/hqwg/meta.json?v=' + VERSION,
+    './data/qz/meta.json?v=' + VERSION
 ];
 
 /* 运行时缓存条目上限，超出后按插入顺序淘汰最旧的，防止无限膨胀 */

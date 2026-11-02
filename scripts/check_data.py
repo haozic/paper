@@ -28,6 +28,7 @@ OFFICIAL_HOSTS = {
     'qs': {'qstheory.cn', 'www.qstheory.cn'},
     'hqwg': {'qstheory.cn', 'www.qstheory.cn'},
     'djyj': {'djyj.12371.cn'},
+    'qz': {'www.qizhiwang.org.cn'},
 }
 
 
@@ -71,6 +72,7 @@ MAGAZINES = [
     ('qs', '求是', 'data/qs/meta.json', 'data/qs/issues'),
     ('hqwg', '红旗文稿', 'data/hqwg/meta.json', 'data/hqwg/issues'),
     ('djyj', '党建研究', 'data/meta.json', 'data/issues'),
+    ('qz', '旗帜', 'data/qz/meta.json', 'data/qz/issues'),
 ]
 
 

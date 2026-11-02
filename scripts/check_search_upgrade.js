@@ -34,7 +34,7 @@ const ROOT = path.resolve(__dirname, '..');
 const APP_JS = path.join(ROOT, 'assets', 'js', 'app.js');
 const INDEX_JSON = path.join(ROOT, 'data', 'search_index.json');
 
-const MAG_ORDER = ['qs', 'hqwg', 'djyj'];
+const MAG_ORDER = ['qs', 'hqwg', 'djyj', 'qz'];
 
 /* 从 app.js 里原样抽出指定函数 */
 function grab(src, name) {
@@ -87,6 +87,7 @@ function makeIndex() {
   rows.push(['hqwg', 2020, 1, '红旗旧篇', 'http://h/2020-1-a']);
   // djyj：一期
   rows.push(['djyj', 2022, 1, '党建新篇甲', 'http://d/2022-1-a']);
+  rows.push(['qz', 2026, 1, '旗帜新篇甲', 'http://z/2026-1-a']);
   return { v: 'test', cols: ['m', 'y', 'i', 't', 'u'], rows: rows };
 }
 
@@ -312,13 +313,13 @@ async function main() {
   /* 查询词用「新篇」：能同时命中同一刊物里的两篇（求是 2020 年第 2 期与第 1 期），
      R4 的组内顺序断言才有样本可查（只命中一篇的话组内没有相邻对，断言会空转）。 */
   const hits = api.searchAllTitles(index, '新篇');
-  const fieldsOk = hits.length === 4
+  const fieldsOk = hits.length === 5
     && hits.every(function (h) {
       return 'm' in h && 'y' in h && 'i' in h && 't' in h && 'u' in h
         && typeof h.m === 'string' && typeof h.y === 'number'
         && typeof h.i === 'number' && typeof h.t === 'string' && typeof h.u === 'string';
     });
-  caseRule('R2', fieldsOk, '命中项字段齐全（' + hits.length + ' 条，期望 4 条）');
+  caseRule('R2', fieldsOk, '命中项字段齐全（' + hits.length + ' 条，期望 5 条）');
 
   /* ---- R3 组间顺序 ---- */
   const groups = api.groupCrossMagResults(hits);
@@ -361,6 +362,7 @@ async function main() {
       qs: JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'qs', 'meta.json'), 'utf8')),
       hqwg: JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'hqwg', 'meta.json'), 'utf8')),
       djyj: JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'meta.json'), 'utf8')),
+      qz: JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'qz', 'meta.json'), 'utf8')),
     };
     /* 抽样若干真实标题做子集验证 */
     const words = ['中国', '发展', '党', '建设', '思想'];

@@ -44,6 +44,7 @@ const MAGAZINES = [
   { key: 'qs', name: '求是', meta: 'data/qs/meta.json' },
   { key: 'hqwg', name: '红旗文稿', meta: 'data/hqwg/meta.json' },
   { key: 'djyj', name: '党建研究', meta: 'data/meta.json' },
+  { key: 'qz', name: '旗帜', meta: 'data/qz/meta.json' },
 ];
 
 /* 从 app.js 里原样抽出指定函数 */
@@ -77,6 +78,7 @@ function makeEl() {
 function loadApi() {
   const src = fs.readFileSync(APP_JS, 'utf8');
   const code = [
+    grabConst(src, 'MAGAZINES'),
     grabConst(src, 'CN'),
     grabConst(src, 'OTHER_SECTION'),
     grabConst(src, 'NOISE_TITLES'),
@@ -109,9 +111,9 @@ function loadApi() {
 /* 从 renderRelatedArticles 写出的 HTML 里回读推荐条目 */
 function parseRelated(html) {
   const out = [];
-  const re = /<span class="ap-related-meta">([^<]*)<\/span><span class="ap-related-name">([^<]*)<\/span>/g;
+  const re = /<strong class="ap-related-name">([^<]*)<\/strong><small class="ap-related-meta">([^<]*)<\/small>/g;
   let m;
-  while ((m = re.exec(html))) out.push({ meta: m[1], title: m[2] });
+  while ((m = re.exec(html))) out.push({ meta: m[2], title: m[1] });
   return out;
 }
 
@@ -153,13 +155,14 @@ function oldRelated(meta, curIdx) {
 }
 
 /* ===== 新算法：直接调用 app.js 里的 renderRelatedArticles ===== */
-function newRelated(ctx, ms, curIdx) {
+function newRelated(ctx, ms, curIdx, magKey) {
   const ordered = buildOrdered(ms.meta);
   let pos = -1;
   for (let i = 0; i < ordered.length; i++) {
     if (ordered[i].i === curIdx) { pos = i; break; }
   }
   ctx.__ms = ms;
+  ctx.state = { currentMag: magKey };
   ctx.__el._html = '';
   ctx.__api.renderRelatedArticles(ms.meta[curIdx], pos, ordered);
   return parseRelated(ctx.__el._html);
@@ -248,7 +251,7 @@ function main() {
       const idx = api.getTitleIndex(ms);
 
       const oldList = oldRelated(meta, curIdx);
-      const newList = newRelated(ctx, ms, curIdx);
+      const newList = newRelated(ctx, ms, curIdx, mag.key);
 
       const simOfTitle = t => {
         const i = meta.findIndex(function (a) { return a.t === t; });

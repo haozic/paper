@@ -1,6 +1,6 @@
 # 党内刊物检索系统
 
-收录《求是》《红旗文稿》《党建研究》三本中央级党刊，**2026 年 10 月** 在本仓库的 `data/` 目录下已累计 **7400+ 篇文章 / 104 MB** 的全文数据，提供**全文搜索、板块分类、目录浏览、文章收藏、自适应阅读**等功能。
+收录《求是》《红旗文稿》《党建研究》《旗帜》四本党刊，文章与期次目录只取各刊官方网站，提供**全文搜索、目录浏览、文章收藏、自适应阅读**等功能。
 
 > 配套的备考资料请见 [`linxuan-beikao-zhinan/`](./linxuan-beikao-zhinan/linxuan-beikao-zhinan.html) 子页。
 >
@@ -27,7 +27,7 @@
 
 | 功能 | 说明 |
 | --- | --- |
-| 三刊合一 | 求是 / 党建研究 / 红旗文稿 统一在一个站点浏览、检索 |
+| 四刊合一 | 求是 / 红旗文稿 / 党建研究 / 旗帜 统一在一个站点浏览、检索 |
 | 全文搜索 | 支持标题 / 作者 / 正文 / 组合多范围，含搜索词高亮 |
 | 板块 / 目录 | 板块统计 + 按"年→期→板块"展开的目录树 |
 | 文章收藏 | 基于 `localStorage`（键 `djyj_favorites`），可导出 JSON |
@@ -93,7 +93,7 @@ e:\cursor\xgkt\djyj
 │   └── linxuan-beikao-zhinan.html
 │
 ├── scripts/                        # 🛠 抓取与运维脚本
-│   ├── scrape_magazines.py         # 三刊抓取主脚本（详见 scripts/README.md）
+│   ├── scrape_magazines.py         # 四刊抓取主脚本（详见 scripts/README.md）
 │   ├── rebuild_data.py             # 正文重分片（years/<年> → issues/<年>-<期>）+ 去污染 + 索引瘦身
 │   ├── check_data.py               # 数据体检：期号覆盖 / 重复 / 正文缺失 / 分片与 counts 一致性 / 目录顺序
 │   ├── check_compat.py             # Chrome 69 兼容性体检：特性黑名单 + flex gap 兜底检查
@@ -131,6 +131,7 @@ python scripts\scrape_magazines.py --check
 python scripts\scrape_magazines.py qs 2026 21
 python scripts\scrape_magazines.py hqwg 2026 20
 python scripts\scrape_magazines.py djyj 2026 10
+python scripts\scrape_magazines.py qz 2026 6
 
 # 3. 同步 index.html 的"数据更新"区块（修改日期 + 各刊期号范围）
 # 4. 把 index.html / assets/js/app.js 中的 ?v=YYYYMMDDx 同步升级

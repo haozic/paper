@@ -5,11 +5,11 @@
 
 为什么要这个脚本
 ----------------
-站内检索原先锁死在"当前这一本刊"，想跨刊找一篇文章只能三本各搜一遍。
-本脚本从三份 meta.json 生成一份紧凑的全局标题索引 data/search_index.json，
-让前端一次请求就能跨三刊按标题匹配。
+站内检索原先锁死在"当前这一本刊"，想跨刊找一篇文章只能逐本搜索。
+本脚本从四份 meta.json 生成一份紧凑的全局标题索引 data/search_index.json，
+让前端一次请求就能跨四刊按标题匹配。
 
-索引是**派生产物**：三份 meta.json 仍是唯一权威源。
+索引是**派生产物**：四份 meta.json 仍是唯一权威源。
 `scripts/check_data.py` 的 S1~S4 规则会强制断言二者一致（**由 Task 2 落地**）。
 
 索引形状
@@ -52,13 +52,14 @@ INDEX_PATH = 'data/search_index.json'
 
 # 刊物**展示顺序**：与 app.js 的 MAGAZINES、check_data.py 的 MAGAZINES 一致。
 # 不是字母序（字母序会是 djyj → hqwg → qs），前端按这个顺序分组展示。
-MAG_ORDER = ['qs', 'hqwg', 'djyj']
+MAG_ORDER = ['qs', 'hqwg', 'djyj', 'qz']
 
-# 三刊 meta 路径，顺序同 MAG_ORDER
+# 四刊 meta 路径，顺序同 MAG_ORDER
 META_PATHS = [
     ('qs', 'data/qs/meta.json'),
     ('hqwg', 'data/hqwg/meta.json'),
     ('djyj', 'data/meta.json'),
+    ('qz', 'data/qz/meta.json'),
 ]
 
 MAX_INDEX_BYTES = 1_572_864     # 1.5 MB
@@ -359,10 +360,10 @@ def main():
             print('!! 缺少 %s，请先运行 python scripts/build_search_index.py' % INDEX_PATH)
             return 1
         if disk != text.encode('utf-8'):
-            print('!! %s 与三份 meta.json 不一致，请重新生成' % INDEX_PATH)
+            print('!! %s 与四份 meta.json 不一致，请重新生成' % INDEX_PATH)
             print('   磁盘 %d 字节 / 应为 %d 字节' % (len(disk), size))
             return 1
-        print('OK   %s 与三份 meta.json 一致（%d 字节 / %d 行）'
+        print('OK   %s 与四份 meta.json 一致（%d 字节 / %d 行）'
               % (INDEX_PATH, size, len(index['rows'])))
         return 0
 

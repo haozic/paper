@@ -1,6 +1,6 @@
 # 文章更新流程
 
-本文件描述"如何把最新一期的三本党刊抓取并发布到网站"的标准操作流程。
+本文件描述"如何把最新一期的四本党刊抓取并发布到网站"的标准操作流程。
 
 > **适用场景**：每月 1 日 / 15 日左右，新刊发布后的 1–2 天内需要更新。
 
@@ -13,8 +13,9 @@
 | 求是 | 半月刊 | 每月 1 日、15 日 | 发布后 1–2 天内 |
 | 红旗文稿 | 半月刊 | 每月 10 日、25 日左右 | 发布后 1–2 天内 |
 | 党建研究 | 月刊 | 每月 10 日左右 | 发布后 3–5 天内 |
+| 旗帜 | 月刊 | 以官网档案页为准 | 发布后检查 |
 
-> 三本杂志的"期号"和实际发布日期**不完全一一对应**（如国庆、春节会顺延），以 `https://www.qstheory.cn/qs/mulu.htm` 上显示的为准。
+> 期号与实际发布日期不一定对应，以各刊官方网站目录为准。
 
 ---
 
@@ -24,7 +25,7 @@
 
 ```bash
 # 进入项目根目录
-cd e:\cursor\xgkt\djyj
+cd e:\cursor\djyj
 
 # 确认 git 状态干净
 git status
@@ -35,6 +36,9 @@ git status
 
 ```bash
 python scripts\scrape_magazines.py --check
+
+# 《旗帜》首次回填官网档案页可见的全部期次
+python scripts\scrape_qizhi.py
 ```
 
 **输出示例**：
@@ -77,7 +81,7 @@ python scripts\scrape_magazines.py djyj 2026 10
 （先升 `scripts\build_search_index.py` 里的 `INDEX_VERSION`，再运行；
 然后 `python scripts\build_search_index.py --check` 确认与 meta 一致）
 
-> `data/search_index.json` 由三份 `meta.json` 派生，是派生产物。
+> `data/search_index.json` 由四份 `meta.json` 派生，是派生产物。
 > 改了 `meta.json` 就要重建这一步。本步要在 §2.5 验证数据之前完成
 > （否则体检会报「S1 行数不符」），也要在 §2.8 提交之前完成。
 
@@ -153,7 +157,7 @@ python scripts/check_data.py
 更新三处：
 
 1. 采集日期（用当天日期）
-2. 三本杂志的最新期号
+2. 四本杂志的最新期号
 
 ### 2.7 生成样式并同步资源版本
 
@@ -248,7 +252,7 @@ curl -I https://your-domain.pages.dev/sw.js
 1. **DevTools → Application → Service Workers**：状态应为 `activated and is running`
 2. **DevTools → Application → Cache Storage**：应看到 `djyj-shell-<版本号>`、`djyj-rt-<版本号>`、`djyj-md` 三个缓存
 3. **离线验证**：DevTools → Network 勾选 `Offline`，然后**普通刷新**（不是强制刷新）——
-   页面应照常渲染（样式完整、三刊计数正确），已读过的文章正文可继续打开
+   页面应照常渲染（样式完整、四刊计数正确），已读过的文章正文可继续打开
 4. **新版本提示**：改动版本号并部署后，页面底部应弹出"新版本已就绪，点击刷新"
 
 > **注意**：强制刷新（Ctrl+Shift+R）会绕过 Service Worker，看到的是"永远最新"的联网结果，
@@ -260,7 +264,7 @@ curl -I https://your-domain.pages.dev/sw.js
 | --- | --- | --- |
 | `djyj-shell-<v>` | index.html 按路径；CSS/JS/manifest/计数/meta/索引按完整 URL（含 `?v=`） | ❌ 随版本清空 |
 | `djyj-rt-<v>` | 正文分片按路径；meta/索引按完整 URL | ❌ 随版本清空 |
-| `djyj-md` | `articles/**/*.md` 按路径 | ✅ 永久保留（正文不可变） |
+| `djyj-md-v2` | `articles/**/*.md` 按路径 | ✅ 跨版本保留，正文修订时需升级缓存名 |
 
 正文 md 缓存跨版本保留，所以**每次发版不会重下 85 MB 正文**；而 meta / 索引会随版本清空重下，
 保证不会把上一期的目录当成本期。

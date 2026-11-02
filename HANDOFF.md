@@ -1,5 +1,27 @@
 # 交接记录
 
+## 2026-11-02：《旗帜》官网档案接入与正文标题修复
+
+### 当前任务与已完成
+
+用户最终要求继续抓取《旗帜》，并反馈文章内部大标题应恢复红色、次级标题保持黑色，部分小标题不应与整段正文一起加粗。已从旗帜网官方档案页 `https://www.qizhiwang.org.cn/GB/433029/433031/index.html` 接入 2021 年第 7 期至 2026 年第 6 期共 60 期，目录 2223 篇、正文 2218 篇；另 5 篇官网文章链接 403/404，保留目录并标记 `h=0`。新增 `scripts/scrape_qizhi.py`、`data/qz/`、`articles/qz/`、文字封面，以及首页、杂志页、搜索、数据校验和更新脚本的四刊支持。`data/search_index.json` 现为 9638 行、1312505 字节。
+
+正文渲染 `renderMarkdown` 已恢复红色大标题、黑色次级标题；遇到来源页将小标题与整段正文一起包在粗体内时，仅保留开头短句强调。长的中文编号段落也不再整段加粗。样式源码 `assets/css/modern.css` 已重新生成到 `assets/css/site.css`，资源版本 `20261102i`。
+
+### 验收、卡点与下一步
+
+- `python scripts/check_data.py`：四刊 9638 篇、无数据异常；`python scripts/build_search_index.py --check`、`node scripts/check_search_upgrade.js`、`node scripts/check_related.js`、`python scripts/build_styles.py --check`、`node --check assets/js/app.js` 通过。
+- Chrome 本地文件映射模拟 390px 和 1280px：首页封面和计数、旗帜目录及正文、相关阅读、跨刊搜索点击跳转通过，无 JS 错误或横向溢出。另在 390px 正文检查到大标题为红色、普通段落字重 400。临时浏览器夹具与截图应在提交前清理。
+- 待办：最终清理临时文件，检查 git diff，提交并推送 GitHub `main`，核实 Cloudflare Pages 发布结果。当前无代码卡点。若上线后用户给出具体标题仍误判，应针对该来源结构优化渲染规则，不要盲目把整段加粗。
+
+### 踩过的坑
+
+- 旗帜网 2022 年旧页为 GB2312；`BeautifulSoup(response.content, 'html.parser')` 能按网页声明解码。某些标题内有换行，必须在生成 Windows 文件名前归一空白，否则 `OSError 22 Invalid argument`。
+- 首次批量采集在写 `data/article_index.json` 时中断；改成临时文件加原子替换，并用 `reconcile_index()` 恢复已保存正文对应索引。
+- 旧 `check_related.js` 的 HTML 解析与新版相关阅读卡片不一致，测试假失败；已同步适配。单刊官网失效链接只标记无全文，不使用其他网站补正文。
+
+---
+
 ## 2026-11-02：首页、杂志页与正文浮动控件的玻璃风格精修
 
 ### 当前任务与已完成

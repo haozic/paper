@@ -1,6 +1,6 @@
 # 抓取脚本使用文档
 
-`scripts/scrape_magazines.py` 是本项目的数据采集入口，负责把三本中央级党刊（《求是》《党建研究》《红旗文稿》）从官方网站拉取到本地，**同时更新五类数据**：
+`scripts/scrape_magazines.py` 是本项目的数据采集入口，负责把《求是》《党建研究》《红旗文稿》《旗帜》从各刊官方网站拉取到本地，**同时更新五类数据**。《旗帜》的档案回填与旧版页面解析由 `scripts/scrape_qizhi.py` 实现。
 
 - `data/<mag>/meta.json` — 文章元数据
 - `data/<mag>/issues/<年>-<期>.json` — 文章正文（**按期分片**，2026-10 起）
@@ -56,7 +56,7 @@ python scripts\scrape_magazines.py qs
 
 参数顺序固定为：`<杂志> <年> <期> [杂志 年 期]...`
 
-合法 `杂志` 取值：`qs` / `hqwg` / `djyj`。
+合法 `杂志` 取值：`qs` / `hqwg` / `djyj` / `qz`。首次接入《旗帜》时运行 `python scripts/scrape_qizhi.py` 回填官网档案页可见期次；后续可运行 `python scripts/scrape_magazines.py qz 2026 7` 更新指定期次。
 
 ### 2.1 辅助脚本
 

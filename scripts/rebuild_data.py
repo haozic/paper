@@ -50,6 +50,12 @@ MAGAZINES = {
         'years': 'data/years',
         'issues': 'data/issues',
     },
+    'qz': {
+        'name': '旗帜',
+        'meta': 'data/qz/meta.json',
+        'years': 'data/qz/years',
+        'issues': 'data/qz/issues',
+    },
 }
 
 

@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#96382f">
 <meta name="description" content="党内刊物检索系统 — 求是、红旗文稿、党建研究">
 <title>党内刊物</title>
-<link rel="stylesheet" href="assets/css/site.css?v=20261102g">
-<link rel="manifest" href="manifest.webmanifest?v=20261102g">
-<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261102g">
+<link rel="stylesheet" href="assets/css/site.css?v=20261102i">
+<link rel="manifest" href="manifest.webmanifest?v=20261102i">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261102i">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2396382f' stroke-width='1.8'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
 <script>
 (function(){try{
@@ -105,10 +105,10 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 <div id="homePage" class="home-page">
     <header class="home-header">
         <div class="home-header-inner">
-            <p class="home-eyebrow">数字书架 · 三刊合一</p>
+            <p class="home-eyebrow">数字书架 · 四刊合一</p>
             <h1 class="home-title">党内刊物</h1>
             <div class="home-header-actions">
-                <button class="home-search-icon" type="button" onclick="openGlobalSearch()" title="搜索三刊文章" aria-label="搜索三刊文章"><svg class="icon"><use href="#i-search"/></svg><span>搜索</span></button>
+                <button class="home-search-icon" type="button" onclick="openGlobalSearch()" title="搜索四刊文章" aria-label="搜索四刊文章"><svg class="icon"><use href="#i-search"/></svg><span>搜索</span></button>
                 <button class="home-about-btn" onclick="showAboutPage()" title="关于本站" aria-label="关于本站"><svg class="icon"><use href="#i-info"/></svg></button>
             </div>
         </div>
@@ -139,6 +139,14 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
                     <h2>党建研究</h2>
                     <p class="mag-desc">党建理论与实践研究月刊</p>
                     <p class="mag-meta"><span id="djyjCount">-</span> 篇 · <span id="djyjIssues">-</span> 期</p>
+                </div>
+            </a>
+            <a class="magazine-card" href="#m=qz" onclick="event.preventDefault();enterMagazine('qz')" aria-label="打开旗帜杂志">
+                <div class="mag-cover mag-cover-qz"><img src="assets/img/cover_qz.svg" alt="旗帜文字封面" width="600" height="800" loading="lazy"></div>
+                <div class="mag-info">
+                    <h2>旗帜</h2>
+                    <p class="mag-desc">中央和国家机关工委机关刊</p>
+                    <p class="mag-meta"><span id="qzCount">-</span> 篇 · <span id="qzIssues">-</span> 期</p>
                 </div>
             </a>
         </div>
@@ -203,7 +211,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 </div>
 
 <section class="search-bar" id="searchBar">
-    <div class="search-intro"><strong>检索本刊文章</strong><span>默认搜标题；可切换到正文，三刊检索仅匹配标题</span></div>
+    <div class="search-intro"><strong>检索本刊文章</strong><span>默认搜标题；可切换到正文，四刊检索仅匹配标题</span></div>
     <div class="search-box">
         <svg class="icon search-icon"><use href="#i-search"/></svg>
         <input type="text" id="searchInput" placeholder="输入关键词搜索..." autocomplete="off" title="按 / 或 Ctrl+K 快速聚焦">
@@ -213,7 +221,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     <div class="filters" id="filters">
         <div class="scope-group mag-scope-group">
             <label class="scope-option mag-scope-option"><input type="radio" name="magScope" value="current" checked> 本刊</label>
-            <label class="scope-option mag-scope-option"><input type="radio" name="magScope" value="all"> 三刊</label>
+            <label class="scope-option mag-scope-option"><input type="radio" name="magScope" value="all"> 四刊</label>
         </div>
         <div class="scope-group scope-group--content" id="scopeContentGroup">
             <label class="scope-option"><input type="radio" name="searchScope" value="all"> 标题+正文</label>
@@ -278,12 +286,14 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     <div class="about-page-body">
         <div class="about-section">
             <h2>项目简介</h2>
-            <p>本网站是党内刊物检索阅读系统，收录三种重要理论刊物：</p>
+            <p>本网站是党内刊物检索阅读系统，收录四种重要理论刊物：</p>
             <ul class="about-mag-list">
                 <li><strong>《求是》</strong> — 中共中央委员会机关刊</li>
                 <li><strong>《红旗文稿》</strong> — 求是杂志社主管主办的政治理论半月刊</li>
                 <li><strong>《党建研究》</strong> — 中共中央组织部主管的党建理论与实践研究月刊</li>
+                <li><strong>《旗帜》</strong> — 中央和国家机关工委机关刊</li>
             </ul>
+            <p>《旗帜》官网目录未提供栏目划分，本站按期次和原目录顺序呈现。</p>
             <p>提供按板块浏览、目录导航、全文搜索和文章收藏等功能，支持移动端与桌面端自适应访问。</p>
         </div>
         <div class="about-section">
@@ -303,6 +313,11 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
                 <svg class="icon"><use href="#i-external"/></svg>
                 https://djyj.12371.cn/01/
             </a>
+            <p><strong>《旗帜》</strong> — 旗帜网：</p>
+            <a class="about-link" href="https://www.qizhiwang.org.cn/GB/433029/433031/index.html" target="_blank" rel="noopener">
+                <svg class="icon"><use href="#i-external"/></svg>
+                https://www.qizhiwang.org.cn/GB/433029/433031/index.html
+            </a>
             <p class="about-note">本站仅对公开内容进行整理归档与检索索引，不修改原文内容，版权归原出版方所有。</p>
         </div>
         <div class="about-section">
@@ -311,6 +326,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
             <p>《党建研究》：2020 年第 12 期 至 2026 年第 10 期</p>
             <p>《求是》：2019 年第 1 期 至 2026 年第 20 期</p>
             <p>《红旗文稿》：2020 年第 1 期 至 2026 年第 20 期</p>
+            <p>《旗帜》：2021 年第 7 期 至 2026 年第 6 期</p>
         </div>
         <div class="about-section">
             <h2>开源项目</h2>
@@ -449,10 +465,11 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
         </div>
         <p class="gs-hint">按标题搜索，选定刊物后可搜索正文</p>
         <div class="gs-filters" id="globalSearchFilters" aria-label="搜索范围">
-            <button type="button" data-gs-mag="all" class="active">三刊</button>
+            <button type="button" data-gs-mag="all" class="active">四刊</button>
             <button type="button" data-gs-mag="qs">求是</button>
             <button type="button" data-gs-mag="hqwg">红旗文稿</button>
             <button type="button" data-gs-mag="djyj">党建研究</button>
+            <button type="button" data-gs-mag="qz">旗帜</button>
         </div>
         <button type="button" class="gs-body-search" id="globalBodySearch" onclick="openBodySearchFromGlobal()" hidden>搜索本刊正文 <svg class="icon"><use href="#i-arrow-right"/></svg></button>
         <div class="gs-count" id="globalSearchCount"></div>
@@ -460,6 +477,6 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     </div>
 </div>
 
-<script src="assets/js/app.js?v=20261102g"></script>
+<script src="assets/js/app.js?v=20261102i"></script>
 </body>
 </html>

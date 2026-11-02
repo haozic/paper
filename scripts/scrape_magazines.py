@@ -62,12 +62,21 @@ MAGAZINES = {
         'articles_dir': 'articles/djyj',
         'cover_path': 'assets/img/cover_djyj.jpg',
     },
+    'qz': {
+        'name': '旗帜',
+        'catalog_url': 'https://www.qizhiwang.org.cn/GB/433029/433031/index.html',
+        'meta_path': 'data/qz/meta.json',
+        'issues_path': 'data/qz/issues',
+        'articles_dir': 'articles/qz',
+        'cover_path': 'assets/img/cover_qz.svg',
+    },
 }
 
 OFFICIAL_ARTICLE_HOSTS = {
     'qs': {'qstheory.cn', 'www.qstheory.cn'},
     'hqwg': {'qstheory.cn', 'www.qstheory.cn'},
     'djyj': {'djyj.12371.cn'},
+    'qz': {'www.qizhiwang.org.cn'},
 }
 
 def is_official_article_url(url, mag_type):
@@ -233,6 +242,10 @@ def element_to_md(element, base_url=''):
 # ===== 检查更新 =====
 def get_latest_issue(mag_key):
     """从杂志网站获取最新一期号"""
+    if mag_key == 'qz':
+        from scrape_qizhi import archive_issues
+        year, issue, _ = archive_issues()[0]
+        return year, issue
     conf = MAGAZINES[mag_key]
     resp = requests.get(conf['catalog_url'], headers=HEADERS, timeout=15, verify=False)
     resp.encoding = resp.apparent_encoding
@@ -545,6 +558,8 @@ def fetch_article_content(url, mag_type):
 # ===== 封面图下载 =====
 def download_cover(mag_key, year, issue):
     """下载杂志最新一期封面图"""
+    if mag_key == 'qz':
+        return True  # 官网无封面文件，站内使用文字封面
     conf = MAGAZINES[mag_key]
 
     if mag_key in ('qs', 'hqwg'):
@@ -592,6 +607,17 @@ def download_cover(mag_key, year, issue):
 # ===== 主流程 =====
 def process_magazine(mag_key, year, issue):
     """处理一个杂志的完整抓取流程"""
+    if mag_key == 'qz':
+        from scrape_qizhi import archive_issues, sync_issue
+        matches = [row for row in archive_issues() if row[:2] == (year, issue)]
+        if not matches:
+            raise RuntimeError(f'《旗帜》官网档案页没有 {year}年第{issue}期')
+        total = sync_issue(year, issue, matches[0][2])
+        write_counts()
+        from build_search_index import main as rebuild_search_index
+        if rebuild_search_index():
+            raise RuntimeError('跨刊搜索索引更新失败')
+        return [{'content': 'ok'} for _ in range(total)]
     conf = MAGAZINES[mag_key]
     print(f"\n{'='*60}")
     print(f"开始处理: {conf['name']} {year}年第{issue}期")
@@ -726,7 +752,7 @@ def main():
     while i < len(args):
         mag = args[i]
         if mag not in MAGAZINES:
-            print(f"未知杂志: {mag}（可选: qs, hqwg, djyj）")
+            print(f"未知杂志: {mag}（可选: qs, hqwg, djyj, qz）")
             return
         year = int(args[i+1]) if i+1 < len(args) else 2026
         issue = int(args[i+2]) if i+2 < len(args) else None
