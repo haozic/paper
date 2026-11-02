@@ -155,7 +155,9 @@ python scripts/check_data.py
 1. 采集日期（用当天日期）
 2. 三本杂志的最新期号
 
-### 2.7 同步缓存破坏三件套
+### 2.7 生成样式并同步资源版本
+
+如果修改了 `assets/css/` 中的五份源码，先运行 `python scripts/build_styles.py`，提交时包含生成的 `assets/css/site.css`。用 `python scripts/build_styles.py --check` 确认发布文件未落后。
 
 **这是最容易遗漏的关键步骤**。如果不同步，用户会因为 `immutable` 缓存而看不到新内容。
 
@@ -163,11 +165,11 @@ python scripts/check_data.py
 
 | 位置 | 查找 | 当前示例 |
 | --- | --- | --- |
-| `index.html` 第 12 行 | `<link rel="stylesheet" href="assets/css/style.css?v=...` | `?v=20261030h` |
-| `index.html` 第 13 行 | `<link rel="manifest" href="manifest.webmanifest?v=...` | `?v=20261030h` |
-| `index.html` 第 14 行 | `<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=...` | `?v=20261030h` |
-| `index.html` 第 427 行 | `<script src="assets/js/app.js?v=...` | `?v=20261030h` |
-| `assets/js/app.js` 第 4 行 | `const DATA_VERSION = ...` | `'20261030h'` |
+| `index.html` 样式链接 | `<link rel="stylesheet" href="assets/css/site.css?v=...` | `?v=YYYYMMDDx` |
+| `index.html` 清单链接 | `<link rel="manifest" href="manifest.webmanifest?v=...` | `?v=YYYYMMDDx` |
+| `index.html` 图标链接 | `<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=...` | `?v=YYYYMMDDx` |
+| `index.html` 脚本链接 | `<script src="assets/js/app.js?v=...` | `?v=YYYYMMDDx` |
+| `assets/js/app.js` 开头 | `const DATA_VERSION = ...` | `'YYYYMMDDx'` |
 
 > `sw.js` 里还有两处 `'20261030h'` 兜底值（第 42、44 行）。正常情况下 SW 从自身 URL 的
 > `?v=` 参数取版本（注册时用 `sw.js?v=<DATA_VERSION>`），兜底值只在 SW 被直接访问时才会用到；
@@ -187,7 +189,7 @@ python scripts/check_data.py
 
 **为什么是 5 处？**
 
-- HTML 的 `?v=` 决定浏览器是否会重新下载 `style.css`、`manifest` 与 `app.js`
+- HTML 的 `?v=` 决定浏览器是否会重新下载 `site.css`、`manifest` 与 `app.js`
 - `app.js` 的 `DATA_VERSION` 决定 `dataUrl()` 给数据 URL 加什么参数，从而决定浏览器是否会重新下载 `data/*.json`
 - manifest 的 `?v=` 保证浏览器不会用旧 manifest
 - `sw.js` 用同一个版本号注册，版本一变 → 浏览器装新 SW → 新 SW 的 `activate` 清掉旧的外壳与数据缓存

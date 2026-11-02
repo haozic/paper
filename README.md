@@ -160,6 +160,8 @@ python -m http.server 8765
 
 也可以用任何静态服务器（`npx serve .`、`php -S localhost:8000` 等）。
 
+修改 `assets/css/style.css`、`books.css`、`one.css`、`system.css` 或 `modern.css` 后，运行 `python scripts/build_styles.py` 更新发布用的 `assets/css/site.css`；提交前可用 `python scripts/build_styles.py --check` 检查是否遗漏。站点部署时仍直接发布仓库文件。
+
 > **不要直接 `file://` 打开 `index.html`**：浏览器对 `file://` 协议下的 `fetch()` 有限制，跨域读取 JSON 会失败。务必通过 HTTP 服务访问。
 
 ---
@@ -254,13 +256,13 @@ python scripts/check_compat.py
 ### 关键性能数据
 
 - **总数据量**：约 190 MB（data 目录 104 MB + 文章 md 备份 85 MB）
-- **首次访问**：仅下载首页 HTML + meta.json（~1.5 MB）+ CSS/JS（约 100 KB）
+- **样式加载**：五份源码按原有顺序合成一个发布文件，减少四次样式请求；原始样式约 172 KB，按 gzip 估算传输约 32 KB
 - **搜索体验**：先搜标题（立即响应），正文搜索按需加载当年份数据
 - **阅读文章**：通过 `article_index.json` 直接定位 md 文件，单文件加载 < 50 KB
 
 ### SEO & 性能
 
-- 站点为纯静态 HTML，**无构建步骤**，可直接部署
+- 站点为纯静态 HTML，发布用样式文件已提交仓库，Cloudflare Pages 无需运行构建命令
 - 单页应用（SPA-like）通过 History API 实现路由
 - 已支持 Service Worker 离线阅读：应用外壳预缓存，已读正文运行时缓存，断网仍可打开文章
 
