@@ -56,7 +56,7 @@ python scripts\scrape_magazines.py qs
 
 参数顺序固定为：`<杂志> <年> <期> [杂志 年 期]...`
 
-合法 `杂志` 取值：`qs` / `hqwg` / `djyj` / `qz`。首次接入《旗帜》时运行 `python scripts/scrape_qizhi.py` 回填官网档案页可见期次；后续可运行 `python scripts/scrape_magazines.py qz 2026 7` 更新指定期次。
+合法 `杂志` 取值：`qs` / `hqwg` / `djyj` / `qz`。首次接入《旗帜》时运行 `python scripts/scrape_qizhi.py` 回填官网档案页可见期次；后续可运行 `python scripts/scrape_magazines.py qz 2026 7` 更新指定期次。旧期目录若缺作者，可运行 `python scripts/scrape_qizhi.py --authors`，从官网文章标题下的作者字段补齐已有元数据，不重抓正文。
 
 ### 2.1 辅助脚本
 

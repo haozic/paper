@@ -3958,13 +3958,13 @@ body.article-active { --reading-dock-height: 86px; --reader-shortcut-size: 44px;
   .ap-related-title { font-size: 23px; }
   .ap-related-item { min-height: 68px; padding: 12px 14px; }
   .ap-related-name { font-size: 15px; }
-  body.article-active { --reading-dock-height: 102px; --dock-bottom: max(30px, calc(env(safe-area-inset-bottom, 0px) - 4px)); }
-  .reading-dock { width: calc(100% - 16px); border-radius: 21px; }
-  .reading-dock .ap-nav > button { min-height: 60px; font-size: 10px; }
+  body.article-active { --reading-dock-height: 64px; --dock-bottom: var(--mobile-dock-bottom); }
+  .reading-dock { width: min(420px, calc(100% - 28px)); border-radius: 21px; }
+  .reading-dock .ap-nav > button { min-height: 52px; font-size: 10px; }
   .reading-dock .ap-nav .icon { width: 20px; height: 20px; }
-  .article-page .back-to-top { right: 12px; bottom: calc(var(--dock-bottom) + 78px + 10px); }
+  .article-page .back-to-top { right: 12px; bottom: calc(var(--dock-bottom) + 64px + 10px); }
   .reading-dock .reading-operation-menu, .reading-dock .reading-issue-menu { right: 0; width: min(380px, calc(100vw - 28px)); }
-  .article-page-body { padding-bottom: 134px; }
+  .article-page-body { padding-bottom: 108px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .mag-cover { transition: none; }

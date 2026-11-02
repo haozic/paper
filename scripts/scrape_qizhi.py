@@ -5,6 +5,7 @@
 python scripts/scrape_qizhi.py                 # 同步官网档案页可见的全部期次
 python scripts/scrape_qizhi.py 2026 6          # 重抓指定一期
 python scripts/scrape_qizhi.py --check         # 只比较最新期次
+python scripts/scrape_qizhi.py --authors       # 从官网文章页补齐已有目录的作者
 """
 
 import concurrent.futures
@@ -95,6 +96,8 @@ def issue_articles(issue_url, year, issue):
 
 def article_body(article):
     soup = fetch(article['u'])
+    if not article['a']:
+        article['a'] = article_author(soup)
     content = soup.select_one('.flag-text-con')
     if content is None:
         raise RuntimeError('找不到正文容器: ' + article['u'])
@@ -114,6 +117,27 @@ def article_body(article):
     if len(body) < 40 or '\ufffd' in body or any(0x80 <= ord(ch) <= 0x9f for ch in body):
         raise RuntimeError('正文过短或包含乱码: ' + article['u'])
     return body
+
+
+def article_author(soup):
+    """旧期目录不带作者；文章页标题下的 pauthor 是官方作者字段。"""
+    element = soup.select_one('.flag-text-tit .pauthor')
+    author = re.sub(r'\s+', ' ', element.get_text(' ', strip=True)).strip() if element else ''
+    author = re.sub(r'^作者\s*[：:]\s*', '', author)
+    if not author:
+        # 个别旧页把极短的个人署名放在副标题位；常见的“——……”仍是副标题。
+        subtitle = soup.select_one('.flag-text-tit .sub')
+        candidate = subtitle.get_text(' ', strip=True) if subtitle else ''
+        if re.fullmatch(r'[\u4e00-\u9fff]{2,3}', candidate):
+            author = candidate
+    return author if len(author) <= 120 else ''
+
+
+def try_article_author(article):
+    try:
+        return article_author(fetch(article['u'])), None
+    except Exception as error:
+        return '', str(error)
 
 
 def try_article_body(article):
@@ -166,6 +190,32 @@ def reconcile_index():
         print(f'恢复中断前已保存的 {repaired} 篇文章索引', flush=True)
 
 
+def backfill_authors(workers=4):
+    meta_path = os.path.join(BASE_DIR, 'data/qz/meta.json')
+    meta = json.load(open(meta_path, encoding='utf-8'))
+    by_issue = {}
+    for article in meta:
+        if article.get('h') and not article.get('a'):
+            by_issue.setdefault((article['y'], article['i']), []).append(article)
+    filled = 0
+    failed = 0
+    for year, issue in sorted(by_issue, reverse=True):
+        articles = by_issue[(year, issue)]
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+            results = list(pool.map(try_article_author, articles))
+        count = 0
+        for article, (author, error) in zip(articles, results):
+            if author:
+                article['a'] = author
+                count += 1
+            elif error:
+                failed += 1
+        filled += count
+        write_json('data/qz/meta.json', meta)
+        print(f'《旗帜》{year}年第{issue}期：补齐作者 {count}/{len(articles)}', flush=True)
+    print(f'作者回填完成：新增 {filled}，抓取失败 {failed}，仍无作者 {sum(not a.get("a") for a in meta)}', flush=True)
+
+
 def sync_issue(year, issue, issue_url, workers=4):
     articles = issue_articles(issue_url, year, issue)
     print(f'《旗帜》{year}年第{issue}期：目录 {len(articles)} 篇，抓取正文...', flush=True)
@@ -207,6 +257,9 @@ def sync_issue(year, issue, issue_url, workers=4):
 
 
 def main():
+    if '--authors' in sys.argv:
+        backfill_authors()
+        return
     issues = archive_issues()
     if '--check' in sys.argv:
         latest = issues[0]
