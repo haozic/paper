@@ -39,9 +39,9 @@
 var VERSION = (function () {
     try {
         var m = /[?&]v=([^&]+)/.exec(self.location.search);
-        return m ? decodeURIComponent(m[1]) : '20261102j';
+        return m ? decodeURIComponent(m[1]) : '20261102k';
     } catch (e) {
-        return '20261102j';
+        return '20261102k';
     }
 })();
 
@@ -64,7 +64,7 @@ var SHELL_ASSETS = [
     './assets/img/cover_qs.jpg',
     './assets/img/cover_hqwg.jpg',
     './assets/img/cover_djyj.jpg',
-    './assets/img/cover_qz.svg',
+    './assets/img/cover_qz_2026_06.jpg',
     './data/counts.json?v=' + VERSION
 ];
 

@@ -186,8 +186,9 @@ python scripts/check_data.py
 | `assets/img/cover_qs.jpg` | `?v=20260920a` |
 | `assets/img/cover_hqwg.jpg` | `?v=20261030a` |
 | `assets/img/cover_djyj.jpg` | `?v=20261030a` |
+| `assets/img/cover_qz_2026_06.jpg` | 文件名带期号；新期出版后需核验并更换 |
 
-封面图在 `assets/css/style.css` 里引用，**只有换封面图时才改**，且三本各自独立。
+封面图由 `index.html` 和 `assets/js/app.js` 引用。更新《旗帜》新期时，须同步核验新封面；在新封面确定前，使用 `assets/img/cover_qz.svg` 文字封面，避免把 2026 年第 6 期封面误用于新期。
 
 **版本号命名规则**：`YYYYMMDDx`，x 是当天的 a/b/c（如果同一天多次更新）。
 

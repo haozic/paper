@@ -68,7 +68,7 @@ MAGAZINES = {
         'meta_path': 'data/qz/meta.json',
         'issues_path': 'data/qz/issues',
         'articles_dir': 'articles/qz',
-        'cover_path': 'assets/img/cover_qz.svg',
+        'cover_path': 'assets/img/cover_qz_2026_06.jpg',
     },
 }
 
@@ -559,7 +559,7 @@ def fetch_article_content(url, mag_type):
 def download_cover(mag_key, year, issue):
     """下载杂志最新一期封面图"""
     if mag_key == 'qz':
-        return True  # 官网无封面文件，站内使用文字封面
+        return True  # 《旗帜》封面按期手工核验和更新
     conf = MAGAZINES[mag_key]
 
     if mag_key in ('qs', 'hqwg'):
