@@ -112,7 +112,7 @@ e:\cursor\xgkt\djyj
     └── UX_MODERNIZATION.md         # 阅读体验现代化与舒适度优化建议
 ```
 
-> **重要**：`data/` 是网站运行的**唯一依赖**。`articles/` 仅作原始备份，网站运行时只通过 `article_index.json` 指向它。如果你只需要把站点跑起来，不关心备份，可以 `git rm -r articles/` 后提交，仓库瞬间瘦身到 8 MB。
+> **重要**：阅读正文优先加载 `data/<刊物>/issues/<年>-<期>.json`，同一期只请求一次。`articles/` 和 `data/article_index.json` 仅在期次正文请求失败时作为备份；若移除 `articles/`，需同步删除备份索引或接受备份读取不可用。访问权限的实际限制见 [访问控制迁移](docs/ACCESS_CONTROL.md)。
 
 ---
 
@@ -259,7 +259,7 @@ python scripts/check_compat.py
 - **总数据量**：约 190 MB（data 目录 104 MB + 文章 md 备份 85 MB）
 - **样式加载**：五份源码按原有顺序合成一个发布文件，减少四次样式请求；原始样式约 172 KB，按 gzip 估算传输约 32 KB
 - **搜索体验**：先搜标题（立即响应），正文搜索按需加载当年份数据
-- **阅读文章**：通过 `article_index.json` 直接定位 md 文件，单文件加载 < 50 KB
+- **阅读文章**：按需加载当前期次正文分片，同期切换文章复用已加载数据；全站 Markdown 路径索引仅在期次正文失败时请求
 
 ### SEO & 性能
 

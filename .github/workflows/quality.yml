@@ -1,0 +1,27 @@
+name: Site quality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check magazine data and article quality
+        run: python scripts/check_data.py
+      - name: Check generated search index
+        run: python scripts/build_search_index.py --check
+      - name: Check generated stylesheet
+        run: python scripts/build_styles.py --check
+      - name: Check JavaScript syntax
+        run: node --check assets/js/app.js && node --check sw.js
+      - name: Check reading progress behavior
+        run: node --test scripts/test_reading_progress.js

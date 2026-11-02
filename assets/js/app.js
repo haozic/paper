@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261102m';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261102n';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -122,7 +122,6 @@ function newMagState() {
         loadingIssues: new Set(),  // 正在加载的期次
         fullTextReady: false,      // 该刊全部期次是否都已加载完
         articleIndex: null,
-        indexLoaded: false,
     };
 }
 
@@ -229,6 +228,7 @@ function goHome() {
     document.documentElement.style.setProperty('--mag-color-dark-base', '#8b0000');
 
     history.pushState({ home: true }, '', '#');
+    renderHomeResume();
     window.scrollTo(0, 0);
 }
 
@@ -262,17 +262,6 @@ async function initMagazine(magKey) {
                 '<div class="loading"><div>数据加载失败，请刷新重试</div></div>';
             return;
         }
-    }
-
-    // 后台加载文章索引（不阻塞）
-    if (!ms.indexLoaded) {
-        ms.indexLoaded = true;
-        fetch(dataUrl('data/article_index.json'))
-            .then(r => r.ok ? r.json() : null)
-            .then(idx => {
-                if (idx) ms.articleIndex = idx[magKey] || {};
-            })
-            .catch(() => {});
     }
 
     document.getElementById('totalCount').textContent = ms.meta.length;
@@ -823,14 +812,14 @@ function crossMagCardsHtml(groups, query, showFav) {
             if (showFav) {
                 const isFav = isFavorite(a.u);
                 favBtn = '<button class="rc-fav-btn ' + (isFav ? 'active' : '')
-                    + '" onclick="event.stopPropagation(); toggleFavFromCard(this, \'' + encUrl + '\')">'
+                    + '" aria-label="' + (isFav ? '取消收藏' : '收藏文章') + '：' + escHtml(a.t) + '" onclick="toggleFavFromCard(this, \'' + encUrl + '\')">'
                     + svgStar(isFav) + '</button>';
             }
-            html += '<div class="result-card" onclick="openCrossMagArticle(\'' + a.m + '\', \'' + encUrl + '\')">'
-                + favBtn
-                + '<div class="rc-title">' + titleHtml + '</div>'
-                + '<div class="rc-meta"><span class="rc-tag">' + a.y + '年第' + ci + '期</span></div>'
-                + '</div>';
+            html += '<div class="result-card">' + favBtn
+                + '<button type="button" class="result-card-main" onclick="openCrossMagArticle(\'' + a.m + '\', \'' + encUrl + '\')">'
+                + '<span class="rc-title">' + titleHtml + '</span>'
+                + '<span class="rc-meta"><span class="rc-tag">' + a.y + '年第' + ci + '期</span></span>'
+                + '</button></div>';
         });
         html += '</div>';
     });
@@ -1016,18 +1005,20 @@ function renderSearchPage() {
         const favIcon = svgStar(isFav);
         const noBodyTag = a.h ? '' : '<span class="rc-tag no-body">无全文</span>';
         const encUrl = encodeURIComponent(a.u);
-        const snippetHtml = snippet ? `<div class="rc-snippet">${snippet}</div>` : '';
+        const snippetHtml = snippet ? `<span class="rc-snippet">${snippet}</span>` : '';
 
-        html += `<div class="result-card" onclick="showArticle('${encUrl}')">
-            <button class="rc-fav-btn ${favClass}" onclick="event.stopPropagation(); toggleFavFromCard(this, '${encUrl}')">${favIcon}</button>
-            <div class="rc-title">${titleHtml}</div>
-            <div class="rc-meta">
+        html += `<div class="result-card">
+            <button class="rc-fav-btn ${favClass}" onclick="toggleFavFromCard(this, '${encUrl}')" aria-label="${isFav ? '取消收藏' : '收藏文章'}：${escHtml(a.t)}">${favIcon}</button>
+            <button type="button" class="result-card-main" onclick="showArticle('${encUrl}')">
+            <span class="rc-title">${titleHtml}</span>
+            <span class="rc-meta">
                 <span class="rc-tag">${a.y}年第${ci}期</span>
                 ${sectionLabel(a.s) ? `<span class="rc-tag">${escHtml(sectionLabel(a.s))}</span>` : ''}
                 ${authorHtml}
                 ${noBodyTag}
-            </div>
+            </span>
             ${snippetHtml}
+            </button>
         </div>`;
     });
 
@@ -1079,6 +1070,7 @@ function toggleFavFromCard(btn, encUrl) {
     const active = isFavorite(url);
     btn.classList.toggle('active', active);
     btn.innerHTML = svgStar(active);
+    btn.setAttribute('aria-label', (active ? '取消收藏' : '收藏文章') + '：' + (btn.parentElement.querySelector('.rc-title')?.textContent || '文章'));
 }
 
 /* ===== 文章详情 ===== */
@@ -1132,9 +1124,15 @@ async function showArticle(encUrl, replaceHist) {
     state.currentArticleUrl = url;
     state.currentArticleIdx = idx;
     state.lastCatalogArticle = { mag: state.currentMag, url: url };
-    document.querySelectorAll('#catalogContent .art-item.is-current').forEach(item => item.classList.remove('is-current'));
+    document.querySelectorAll('#catalogContent .art-item.is-current').forEach(item => {
+        item.classList.remove('is-current');
+        item.removeAttribute('aria-current');
+    });
     document.querySelectorAll('#catalogContent .art-item[data-url]').forEach(item => {
-        if (decodeURIComponent(item.dataset.url) === url) item.classList.add('is-current');
+        if (decodeURIComponent(item.dataset.url) === url) {
+            item.classList.add('is-current');
+            item.setAttribute('aria-current', 'page');
+        }
     });
 
     document.getElementById('articleTitle').textContent = a.t;
@@ -1154,6 +1152,7 @@ async function showArticle(encUrl, replaceHist) {
     const bodyEl = document.getElementById('articleBody');
     document.body.classList.add('article-active');
     document.getElementById('backToTopBtn').classList.remove('show');
+    document.getElementById('progressRingFg').style.strokeDashoffset = RING_CIRCUMFERENCE;
     window.scrollTo(0, 0);
 
     const magKey = state.currentMag;
@@ -1173,41 +1172,48 @@ async function showArticle(encUrl, replaceHist) {
 
     bodyEl.innerHTML = '<div class="article-loading"><div class="spinner"></div><div>加载正文...</div></div>';
 
-    // 优先从 markdown 文件加载（轻量，单文件按需加载）
-    const mdPath = ms.articleIndex ? ms.articleIndex[url] : undefined;
-    if (mdPath) {
-        try {
-            const resp = await fetch(mdPath);
-            if (resp.ok) {
-                let md = await resp.text();
-                // 统一换行符：CRLF -> LF，避免 Windows 行尾导致分隔符检测失败
-                md = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-                // 去掉 markdown 头部的元信息（# 标题到 --- 分隔线之间的内容）
-                let bodyMd = md;
-                const sepIdx = md.indexOf('\n---\n');
-                if (sepIdx >= 0) bodyMd = md.substring(sepIdx + 5).trim();
-                bodyEl.innerHTML = renderMarkdown(bodyMd, a.t);
-                const wordCount = countWords(bodyEl.textContent);
-                updateArticleMeta(a, wordCount);
-                return;
-            }
-        } catch (e) {
-            console.error('加载 markdown 文件失败:', e);
-        }
-    }
-
-    // 回退到该期的正文分片（文章没有 markdown 备份时）
+    // 一期只请求一次正文分片；同一期继续阅读直接复用已加载的正文。
     if (!ms.loadedIssues.has(a.y + '-' + a.i)) {
         const ok = await loadIssueData(a.y, a.i);
         if (!ok && !ms.bodyText[url]) {
+            if (await loadArticleBackup(state.currentMag, a, bodyEl)) return;
             bodyEl.innerHTML = `<div class="no-body">正文数据加载失败<br>
                 <small>可能是网络不稳定，请重试</small><br>
                 <button class="retry-btn" onclick="retryShowArticle('${encUrl}')">重新加载</button></div>`;
             return;
         }
     }
-
+    if (!ms.bodyText[url] && await loadArticleBackup(state.currentMag, a, bodyEl)) return;
     renderArticleBody(url, bodyEl);
+}
+
+let articleIndexPromise = null;
+async function loadArticleBackup(magKey, article, bodyEl, refresh) {
+    const ms = state.magCache[magKey];
+    if (!ms) return false;
+    if (!ms.articleIndex) {
+        if (!articleIndexPromise) {
+            articleIndexPromise = fetch(dataUrl('data/article_index.json'))
+                .then(r => { if (!r.ok) throw new Error('文章索引不可用'); return r.json(); })
+                .catch(() => { articleIndexPromise = null; return null; });
+        }
+        const all = await articleIndexPromise;
+        if (!all) return false;
+        ms.articleIndex = all[magKey] || {};
+    }
+    const path = ms.articleIndex[article.u];
+    if (!path) return false;
+    try {
+        const resp = await fetch(path + (refresh ? '?t=' + Date.now() : ''));
+        if (!resp.ok) return false;
+        const md = (await resp.text()).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        const sepIdx = md.indexOf('\n---\n');
+        const bodyMd = sepIdx >= 0 ? md.substring(sepIdx + 5).trim() : md;
+        bodyEl.innerHTML = renderMarkdown(bodyMd, article.t);
+        updateArticleMeta(article, countWords(bodyEl.textContent));
+        requestAnimationFrame(updateReadingProgress);
+        return true;
+    } catch (e) { return false; }
 }
 
 function updateArticleMeta(a, wordCount) {
@@ -1242,6 +1248,7 @@ function renderArticleBody(url, bodyEl) {
             const wordCount = countWords(bodyEl.textContent);
             updateArticleMeta(a, wordCount);
         }
+        requestAnimationFrame(updateReadingProgress);
     } else {
         bodyEl.innerHTML = `<div class="no-body">未找到该文章的正文数据<br>
             <small>URL: ${escHtml(url.substring(0, 60))}...</small></div>`;
@@ -1257,36 +1264,18 @@ async function retryShowArticle(encUrl) {
     const bodyEl = document.getElementById('articleBody');
     bodyEl.innerHTML = '<div class="article-loading"><div class="spinner"></div><div>重新加载中...</div></div>';
 
-    // 优先重试 markdown 文件
-    const mdPath = ms.articleIndex ? ms.articleIndex[url] : undefined;
-    if (mdPath) {
-        try {
-            const resp = await fetch(mdPath + '?t=' + Date.now());
-            if (resp.ok) {
-                let md = await resp.text();
-                md = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-                let bodyMd = md;
-                const sepIdx = md.indexOf('\n---\n');
-                if (sepIdx >= 0) bodyMd = md.substring(sepIdx + 5).trim();
-                bodyEl.innerHTML = renderMarkdown(bodyMd, a.t);
-                const wordCount = countWords(bodyEl.textContent);
-                updateArticleMeta(a, wordCount);
-                return;
-            }
-        } catch (e) {}
-    }
-
-    // 回退到该期的正文分片
+    // 先重试期次正文，再尝试按需加载 Markdown 备份。
     ms.loadedIssues.delete(a.y + '-' + a.i);
     const ok = await loadIssueData(a.y, a.i);
-    if (!ok) {
+    if (ok && ms.bodyText[url]) { renderArticleBody(url, bodyEl); return; }
+    if (await loadArticleBackup(state.currentMag, a, bodyEl, true)) return;
+    if (!ok || !ms.bodyText[url]) {
         bodyEl.innerHTML = `<div class="no-body">加载仍然失败<br>
             <small>请检查网络后重试，或访问原文链接</small><br>
             <button class="retry-btn" onclick="retryShowArticle('${encUrl}')">再次重试</button>
             <a href="${a.u}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;color:var(--primary);">直接查看原文</a></div>`;
         return;
     }
-    renderArticleBody(url, bodyEl);
 }
 
 function toggleArticleFav() {
@@ -1328,9 +1317,8 @@ function closeArticlePage() {
     if (document.body.classList.contains('article-active')) {
         const url = state.currentArticleUrl;
         if (url) {
-            const max = document.documentElement.scrollHeight - window.innerHeight;
-            const ratio = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-            saveReadPosition(url, ratio);
+            const endScroll = getArticleEndScroll();
+            if (endScroll !== null) saveReadPosition(url, getArticleProgressRatio());
         }
     }
     document.body.classList.remove('article-active');
@@ -1404,6 +1392,7 @@ function saveReadingSettings() {
     if (state.readingW !== null && state.readingW !== undefined) localStorage.setItem(READING_W_KEY, String(state.readingW));
     if (state.readingIndent !== null && state.readingIndent !== undefined) localStorage.setItem(READING_INDENT_KEY, String(state.readingIndent));
     if (state.readingPaper) localStorage.setItem(READING_PAPER_KEY, state.readingPaper);
+    requestAnimationFrame(updateReadingProgress);
 }
 
 function applyFontSize(size) {
@@ -1603,7 +1592,10 @@ function saveReadPosition(url, ratio) {
     if (!url) return;
     try {
         const all = getReadPositions();
-        all[url] = { r: Math.round(ratio * 1000) / 1000, t: Date.now() };
+        const ms = getMagState();
+        const current = ms && ms.meta[state.currentArticleIdx];
+        const article = current && current.u === url ? current : null;
+        all[url] = { r: Math.round(ratio * 1000) / 1000, t: Date.now(), m: state.currentMag, title: article ? article.t : '' };
         const keys = Object.keys(all);
         if (keys.length > READ_POS_MAX) {
             keys.sort(function (a, b) { return (all[b].t || 0) - (all[a].t || 0); });
@@ -1620,6 +1612,34 @@ function getReadPosition(url) {
     return typeof v === 'number' ? v : (v.r || 0);
 }
 
+function renderHomeResume() {
+    const button = document.getElementById('homeResume');
+    if (!button) return;
+    const entries = Object.entries(getReadPositions())
+        .filter(([url, v]) => v && typeof v === 'object' && MAGAZINES[v.m] && v.title && v.r > 0.05 && v.r < 0.95)
+        .sort((a, b) => (b[1].t || 0) - (a[1].t || 0));
+    const latest = entries[0];
+    button.hidden = !latest;
+    if (!latest) return;
+    button.dataset.url = latest[0];
+    button.dataset.mag = latest[1].m;
+    document.getElementById('homeResumeTitle').textContent = latest[1].title;
+    document.getElementById('homeResumeProgress').textContent = Math.round(latest[1].r * 100) + '%';
+}
+
+async function openHomeResume() {
+    const button = document.getElementById('homeResume');
+    if (!button || !MAGAZINES[button.dataset.mag] || !button.dataset.url) return;
+    const mag = button.dataset.mag;
+    const url = button.dataset.url;
+    const savedRatio = getReadPosition(url);
+    enterMagazine(mag);
+    const meta = await loadMagMeta(mag);
+    if (state.currentMag !== mag || !meta.some(a => a.u === url)) return;
+    await showArticle(encodeURIComponent(url));
+    continueReading(savedRatio);
+}
+
 /* 滚动时按 1.5 秒节流记录进度 */
 function maybeSaveReadPosition() {
     if (!document.body.classList.contains('article-active')) return;
@@ -1628,9 +1648,7 @@ function maybeSaveReadPosition() {
     _lastPosSaveAt = now;
     const url = state.currentArticleUrl;
     if (!url) return;
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    const ratio = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-    saveReadPosition(url, ratio);
+    if (getArticleEndScroll() !== null) saveReadPosition(url, getArticleProgressRatio());
 }
 
 function showContinueBanner(url) {
@@ -1646,15 +1664,15 @@ function showContinueBanner(url) {
     }
 }
 
-function continueReading() {
+function continueReading(savedRatio) {
     const url = state.currentArticleUrl;
     if (!url) return;
-    const ratio = getReadPosition(url);
+    const ratio = typeof savedRatio === 'number' ? savedRatio : getReadPosition(url);
     const banner = document.getElementById('articleContinue');
     if (banner) banner.hidden = true;
     const go = function () {
-        const max = document.documentElement.scrollHeight - window.innerHeight;
-        if (max > 0) window.scrollTo({ top: Math.round(max * ratio), behavior: 'smooth' });
+        const endScroll = getArticleEndScroll();
+        if (endScroll !== null) window.scrollTo({ top: Math.round(endScroll * ratio), behavior: 'smooth' });
     };
     go();
     // 正文可能还在异步加载，稍后按最终高度再校正一次
@@ -1714,6 +1732,9 @@ function renderArticleFooter(url, cur) {
     const ordered = nb.ordered;
     const pos = nb.pos;
     const next = nb.next;
+    const crossesIssue = next && (next.y !== cur.y || next.i !== cur.i);
+    const nextLabel = crossesIssue ? (next.y < cur.y || (next.y === cur.y && next.i < cur.i) ? '上期' : '下期') : '下一篇';
+    const nextAria = crossesIssue ? '继续阅读' + issueLabel(next) : '下一篇文章';
     const issueArticles = ordered.filter(item => item.a.y === cur.y && item.a.i === cur.i);
     const issueMenu = document.getElementById('readingIssueMenu');
     issueMenu.innerHTML = '<div class="reading-issue-heading"><strong>' + escHtml(MAGAZINES[state.currentMag].name) + ' · ' + issueLabel(cur) + '</strong><span>' + issueArticles.length + ' 篇</span></div>' +
@@ -1729,7 +1750,7 @@ function renderArticleFooter(url, cur) {
         '<button class="ap-bottom-magazine" type="button" onclick="navigateFromReader(\'magazine\')" aria-label="杂志首页" title="杂志首页">' + svgIcon('i-book') + '<span>杂志首页</span></button>' +
         '<button class="ap-bottom-directory" id="articleIssueBtn" type="button" onclick="toggleIssueContents()" aria-label="本期目录" title="本期目录" aria-expanded="false" aria-controls="readingIssueMenu">' + svgIcon('i-list') + '<span>目录</span></button>' +
         '<button class="ap-bottom-settings" id="articleSettingsBtn" type="button" onclick="toggleArticleSettings(event)" aria-label="阅读设置" title="阅读设置" aria-expanded="false" aria-controls="readingOperationMenu">' + svgIcon('i-sliders') + '<span>设置</span></button>' +
-        '<button class="ap-bottom-next" type="button" aria-label="下一篇文章" title="下一篇文章"' + (next ? ' data-url="' + encodeURIComponent(next.u) + '"' : ' disabled') + '>' + svgIcon('i-arrow-right') + '<span>下一篇</span></button>';
+        '<button class="ap-bottom-next" type="button" aria-label="' + nextAria + '" title="' + nextAria + '"' + (next ? ' data-url="' + encodeURIComponent(next.u) + '"' : ' disabled') + '>' + svgIcon('i-arrow-right') + '<span>' + nextLabel + '</span></button>';
     navEl.innerHTML = html;
     closeReadingTrays();
 
@@ -1991,11 +2012,27 @@ function closeAboutPage() {
 
 /* ===== 阅读进度环 ===== */
 const RING_CIRCUMFERENCE = 2 * Math.PI * 21; // r=21
+function getArticleEndScroll() {
+    const body = document.getElementById('articleBody');
+    if (!body || !body.lastElementChild) return null;
+    if (body.querySelector && body.querySelector('.article-loading, .no-body')) return null;
+    const end = body.lastElementChild.getBoundingClientRect().bottom + window.scrollY;
+    const dock = document.getElementById('readingDock');
+    const dockSpace = dock && !dock.hidden ? Math.max(0, window.innerHeight - dock.getBoundingClientRect().top) : 0;
+    return Math.max(0, end - window.innerHeight + dockSpace);
+}
+
+function getArticleProgressRatio() {
+    const endScroll = getArticleEndScroll();
+    if (endScroll === null) return 0;
+    if (endScroll === 0) return 1;
+    return Math.min(1, Math.max(0, window.scrollY / endScroll));
+}
+
 function updateReadingProgress() {
     if (!document.body.classList.contains('article-active')) return;
     const scrollTop = window.scrollY;
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const pct = docHeight > 0 ? Math.min(1, Math.max(0, scrollTop / docHeight)) : 0;
+    const pct = getArticleProgressRatio();
     // 更新进度环
     const ring = document.getElementById('progressRingFg');
     if (ring) ring.style.strokeDashoffset = RING_CIRCUMFERENCE * (1 - pct);
@@ -2181,10 +2218,10 @@ function renderSections() {
         const tip = name === OTHER_SECTION
             ? ' title="来源站未提供这部分文章的栏目信息（2019—2025 年的目录页已下线栏目结构），按期浏览请用「目录」"'
             : '';
-        html += `<div class="section-card"${tip} onclick="showSectionPage('${encodeURIComponent(name)}')">
-            <div class="sc-name">${escHtml(name)}</div>
-            <div class="sc-count">${count}<span class="sc-unit">篇</span></div>
-        </div>`;
+        html += `<button type="button" class="section-card"${tip} onclick="showSectionPage('${encodeURIComponent(name)}')">
+            <span class="sc-name">${escHtml(name)}</span>
+            <span class="sc-count">${count}<span class="sc-unit">篇</span></span>
+        </button>`;
     });
     container.innerHTML = html;
 }
@@ -2244,7 +2281,7 @@ function renderSectionPageBody(articles, query) {
                 const author = a.a ? `<span class="author">｜${escHtml(a.a)}</span>` : '';
                 const encUrl = encodeURIComponent(a.u);
                 if (a.h) {
-                    html += `<div class="sp-article" onclick="showArticle('${encUrl}')">${escHtml(a.t)}${author}</div>`;
+                    html += `<button type="button" class="sp-article" onclick="showArticle('${encUrl}')">${escHtml(a.t)}${author}</button>`;
                 } else {
                     html += `<div class="sp-article no-body">${escHtml(a.t)}<span class="sp-no-body-tag">无全文</span>${author}</div>`;
                 }
@@ -2295,7 +2332,7 @@ function renderCatalog() {
         let total = 0;
         issues.forEach(ik => total += Object.values(catalog[year][ik]).reduce((s, arr) => s + arr.length, 0));
         html += `<div class="year-block collapsed" id="yb-${year}">
-            <div class="yb-header" data-year="${year}">
+            <div class="yb-header" role="button" tabindex="0" aria-expanded="false" aria-controls="yb-body-${year}" data-year="${year}">
                 <h3>${year}年</h3>
                 <div class="yb-right">
                     <span class="yb-info">${issues.length}期 ｜ ${total}篇</span>
@@ -2326,6 +2363,13 @@ function renderCatalog() {
             return;
         }
     };
+    container.onkeydown = function(e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const header = e.target.closest('.yb-header, .ir-header');
+        if (!header || !container.contains(header)) return;
+        e.preventDefault();
+        header.click();
+    };
 
     // 自动展开第一年
     if (years.length > 0) {
@@ -2343,6 +2387,8 @@ function toggleYear(year) {
     const body = document.getElementById(`yb-body-${year}`);
     const wasCollapsed = block.classList.contains('collapsed');
     block.classList.toggle('collapsed');
+    const header = block.querySelector('.yb-header');
+    if (header) header.setAttribute('aria-expanded', String(wasCollapsed));
     if (wasCollapsed && !state.catalogExpanded.has(`y-${year}`)) {
         state.catalogExpanded.add(`y-${year}`);
         const catalog = state.catalogData;
@@ -2355,7 +2401,7 @@ function toggleYear(year) {
             let issueTotal = secNames.reduce((s, sn) => s + secs[sn].length, 0);
             const cin = parseInt(ik) <= 24 ? CN[parseInt(ik) - 1] : ik;
             html += `<div class="issue-row collapsed" id="ir-${year}-${ik}">
-                <div class="ir-header" data-year="${year}" data-issue="${ik}">
+                <div class="ir-header" role="button" tabindex="0" aria-expanded="false" aria-controls="ir-body-${year}-${ik}" data-year="${year}" data-issue="${ik}">
                     <span class="ir-title">第${cin}期</span>
                     <div class="ir-right">
                         <span class="ir-count">${issueTotal}篇</span>
@@ -2375,6 +2421,8 @@ function toggleIssue(year, ik) {
     const body = document.getElementById(`ir-body-${year}-${ik}`);
     const wasCollapsed = row.classList.contains('collapsed');
     row.classList.toggle('collapsed');
+    const header = row.querySelector('.ir-header');
+    if (header) header.setAttribute('aria-expanded', String(wasCollapsed));
     if (wasCollapsed && !state.catalogExpanded.has(`i-${year}-${ik}`)) {
         state.catalogExpanded.add(`i-${year}-${ik}`);
         const catalog = state.catalogData;
@@ -2391,7 +2439,8 @@ function toggleIssue(year, ik) {
             arts.forEach(a => {
                 const au = a.a ? ` <span class="ai-author">｜${escHtml(a.a)}</span>` : '';
                 const encUrl = encodeURIComponent(a.u);
-                html += `<div class="art-item${state.lastCatalogArticle && state.lastCatalogArticle.mag === state.currentMag && state.lastCatalogArticle.url === a.u ? ' is-current' : ''}" data-url="${encUrl}">${escHtml(a.t)}${au}</div>`;
+                const isCurrent = state.lastCatalogArticle && state.lastCatalogArticle.mag === state.currentMag && state.lastCatalogArticle.url === a.u;
+                html += `<button type="button" class="art-item${isCurrent ? ' is-current' : ''}" data-url="${encUrl}"${isCurrent ? ' aria-current="page"' : ''}>${escHtml(a.t)}${au}</button>`;
             });
             html += `</div>`;
         });
@@ -2440,14 +2489,15 @@ async function renderFavorites() {
     favArticles.forEach(a => {
         const ci = a.i <= 24 ? CN[a.i - 1] : a.i;
         const encUrl = encodeURIComponent(a.u);
-        html += `<div class="result-card" onclick="showArticle('${encUrl}')">
-            <button class="rc-fav-btn active" onclick="event.stopPropagation(); toggleFavFromCard(this, '${encUrl}')">${svgStar(true)}</button>
-            <div class="rc-title">${escHtml(a.t)}</div>
-            <div class="rc-meta">
+        html += `<div class="result-card">
+            <button class="rc-fav-btn active" onclick="toggleFavFromCard(this, '${encUrl}')" aria-label="取消收藏：${escHtml(a.t)}">${svgStar(true)}</button>
+            <button type="button" class="result-card-main" onclick="showArticle('${encUrl}')">
+            <span class="rc-title">${escHtml(a.t)}</span>
+            <span class="rc-meta">
                 <span class="rc-tag">${a.y}年第${ci}期</span>
                 ${sectionLabel(a.s) ? `<span class="rc-tag">${escHtml(sectionLabel(a.s))}</span>` : ''}
                 ${a.a ? `<span class="rc-author">｜${escHtml(a.a)}</span>` : ''}
-            </div>
+            </span></button>
         </div>`;
     });
     container.innerHTML = html;
@@ -2584,6 +2634,9 @@ async function init() {
     updateFavBadges();
     loadReadingSettings();
     initReadingSettingsListeners();
+    renderHomeResume();
+    const homeResume = document.getElementById('homeResume');
+    if (homeResume) homeResume.addEventListener('click', openHomeResume);
 
     // 导航按钮
     document.querySelectorAll('.nav-tab, .bn-item[data-mode]').forEach(btn => {
@@ -2729,17 +2782,21 @@ async function init() {
             document.documentElement.style.setProperty('--mag-color-base', '#8b0000');
             document.documentElement.style.setProperty('--mag-color-dark-base', '#8b0000');
             document.body.classList.remove('mag-active');
+            renderHomeResume();
             window.scrollTo(0, 0);
         }
     });
 
     // 阅读进度
     window.addEventListener('scroll', updateReadingProgress, { passive: true });
+    if (window.ResizeObserver) {
+        new ResizeObserver(updateReadingProgress).observe(document.getElementById('articleBody'));
+    }
 
     // 窗口尺寸变化时更新 sticky 偏移量
     window.addEventListener('resize', () => {
         clearTimeout(window._resizeTimer);
-        window._resizeTimer = setTimeout(updateStickyOffsets, 150);
+        window._resizeTimer = setTimeout(() => { updateStickyOffsets(); updateReadingProgress(); }, 150);
     });
 
     // 加载首页计数
