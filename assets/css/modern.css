@@ -56,16 +56,16 @@ html[data-theme="dark"] .article-page { --bg: #191c22; --bg-2: #252a33; --card: 
 .home-eyebrow { display: none; }
 .home-title { margin: 0; font: 650 22px/1.4 var(--font-sans); letter-spacing: .045em; }
 .home-header-actions { display: flex; align-items: center; gap: 7px; }
-.home-search-icon, .home-about-btn { position: static; display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; padding: 0; border: 1px solid transparent; border-radius: 14px; background: transparent; color: var(--text-2); box-shadow: none; cursor: pointer; }
-.home-search-icon:hover, .home-about-btn:hover { background: var(--glass-surface); border-color: var(--glass-border); color: var(--text); backdrop-filter: saturate(180%) blur(18px); }
+.home-search-icon, .home-about-btn { position: static; display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; padding: 0; border: 1px solid var(--glass-border); border-radius: 14px; background: color-mix(in srgb, var(--card) 58%, transparent); color: var(--text-2); backdrop-filter: saturate(160%) blur(14px); box-shadow: inset 0 1px rgba(255,255,255,.55); cursor: pointer; }
+.home-search-icon:hover, .home-about-btn:hover { background: var(--glass-surface); color: var(--text); }
 .home-search-icon .icon, .home-about-btn .icon { width: 20px; height: 20px; }
 .home-search-icon span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
 .home-body { padding: clamp(46px, 7vh, 92px) 28px 40px; }
 .magazine-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 290px)); justify-content: center; align-items: start; gap: clamp(26px, 4.5vw, 66px); width: 100%; max-width: 1110px; margin: auto; padding: 0; overflow: visible; }
 .magazine-card { display: block; min-width: 0; width: 100%; margin: 0; text-decoration: none; color: var(--text); }
-.mag-cover { box-sizing: border-box; width: 100%; height: auto; aspect-ratio: 3 / 4; max-width: none; overflow: hidden; border: 1px solid rgba(20,30,50,.08); border-radius: 7px; background: #fff !important; box-shadow: 0 18px 38px rgba(35,40,55,.16), 0 2px 5px rgba(35,40,55,.08); filter: none !important; transition: transform .25s ease, box-shadow .25s ease; }
+.mag-cover { box-sizing: border-box; width: 100%; height: auto; aspect-ratio: 3 / 4; max-width: none; overflow: hidden; border: 1px solid rgba(20,30,50,.08); border-radius: 7px; background: #fff !important; box-shadow: 0 11px 28px rgba(35,40,55,.11), 0 2px 5px rgba(35,40,55,.05); filter: none !important; transition: transform .25s ease, box-shadow .25s ease; }
 .mag-cover img { display: block; width: 100%; height: 100%; object-fit: contain; }
-.magazine-card:hover .mag-cover, .magazine-card:focus-visible .mag-cover { transform: translateY(-5px); box-shadow: 0 25px 45px rgba(35,40,55,.19); }
+.magazine-card:hover .mag-cover, .magazine-card:focus-visible .mag-cover { transform: translateY(-4px); box-shadow: 0 17px 34px rgba(35,40,55,.15); }
 .mag-info { padding: 19px 0 0; text-align: center; align-items: center; }
 .mag-info h2 { margin: 0 0 4px; font: 650 20px/1.4 var(--font-sans); color: var(--text); }
 .mag-desc { display: none; }
@@ -79,8 +79,8 @@ body.mag-active #app { min-height: 100vh; }
 .app-sidebar { border: 0; }
 .sidebar-header { box-sizing: border-box; position: relative; display: flex; align-items: center; justify-content: flex-end; gap: 6px; max-width: 1190px; margin: auto; }
 .sidebar-brand { display: none; }
-.header-home-btn, .header-search-btn, .header-about-btn { position: static; z-index: 2; flex: 0 0 42px; width: 42px; height: 42px; transform: none; border-radius: 13px; }
-.header-home-btn:hover, .header-search-btn:hover, .header-about-btn:hover { background: var(--glass-surface); color: var(--text); backdrop-filter: saturate(180%) blur(18px); }
+.header-home-btn, .header-search-btn, .header-about-btn { position: static; z-index: 2; flex: 0 0 42px; width: 42px; height: 42px; transform: none; border: 1px solid var(--glass-border); border-radius: 14px; background: color-mix(in srgb, var(--card) 58%, transparent); color: var(--text-2); backdrop-filter: saturate(160%) blur(14px); box-shadow: inset 0 1px rgba(255,255,255,.55); }
+.header-home-btn:hover, .header-search-btn:hover, .header-about-btn:hover { background: var(--glass-surface); color: var(--text); }
 .app-sidebar .search-bar { display: none; box-sizing: border-box; max-width: 1138px; margin: 0 auto 12px; padding: 22px 26px; border: 1px solid var(--glass-border); border-radius: 20px; background: var(--glass-surface); backdrop-filter: saturate(170%) blur(20px); box-shadow: var(--glass-shadow); }
 body.mag-search-open .app-sidebar .search-bar { display: block; }
 .app-sidebar .search-box { gap: 8px; }
@@ -91,17 +91,17 @@ body.mag-search-open .app-sidebar .search-bar { display: block; }
 .app-sidebar .scope-option.checked, .app-sidebar .scope-option:has(input:checked) { background: var(--card); color: var(--text); box-shadow: 0 1px 4px rgba(25,30,45,.06); }
 .app-sidebar .scope-option.checked input[type="radio"]:checked, .app-sidebar .scope-option:has(input:checked) input[type="radio"]:checked { border-color: var(--primary); background-color: var(--primary); background-image: radial-gradient(circle at center, #fff 0, #fff 4px, transparent 4.5px); }
 .journal-cover { min-width: 0; }
-.journal-cover img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: contain; border: 1px solid rgba(20,30,50,.08); border-radius: 7px; background: #fff; box-shadow: 0 22px 50px rgba(35,40,55,.15); }
+.journal-cover img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: contain; border: 1px solid rgba(20,30,50,.08); border-radius: 7px; background: #fff; box-shadow: 0 14px 34px rgba(35,40,55,.11); }
 .nav-tabs { border: 1px solid var(--glass-border); border-radius: 16px; background: var(--glass-surface); backdrop-filter: saturate(180%) blur(24px); box-shadow: none; }
 .nav-tab { border: 0; border-radius: 12px; }
 .nav-tab.active { border: 0; border-radius: 12px; background: color-mix(in srgb, var(--card) 80%, transparent); box-shadow: none; color: var(--text); }
-.year-block { margin-bottom: 14px; padding: 0 22px; border: 1px solid var(--glass-border); border-radius: 20px; background: color-mix(in srgb, var(--card) 91%, transparent); box-shadow: inset 0 1px rgba(255,255,255,.48); }
+.year-block { margin-bottom: 14px; padding: 0 22px; border: 1px solid color-mix(in srgb, var(--border) 55%, transparent); border-radius: 20px; background: color-mix(in srgb, var(--card) 91%, transparent); box-shadow: none; }
 .year-block:hover { background: var(--card); border-color: var(--border-2); }
 .yb-header { padding: 20px 0 11px; margin: 0; border: 0; }
 .yb-header h3 { font-family: var(--font-sans); font-size: 21px; font-weight: 650; }
 .issue-row { border: 0; }
 .ir-header { padding-inline: 12px; border-radius: 12px; transition: background .18s ease, color .18s ease; }
-.issue-row:not(.collapsed) > .ir-header { background: var(--bg-2); color: var(--text); }
+.issue-row:not(.collapsed) > .ir-header { background: color-mix(in srgb, var(--card) 48%, var(--bg-2)); color: var(--text); }
 .ir-header:hover { background: var(--bg-2); border-radius: 12px; }
 .ir-title { font-family: var(--font-sans); font-size: 16px; font-weight: 600; }
 .ir-body { padding-top: 2px; }
@@ -109,7 +109,7 @@ body.mag-search-open .app-sidebar .search-bar { display: block; }
 .sec-group:hover { border: 0; }
 .art-item { position: relative; border-radius: 12px; }
 .art-item:hover, .art-item:focus-visible { border-radius: 12px; background: var(--bg-2); color: var(--text); }
-.art-item.is-current { border-radius: 12px; background: color-mix(in srgb, var(--primary) 9%, var(--card)); color: var(--text); font-weight: 600; }
+.art-item.is-current { border-radius: 12px; background: color-mix(in srgb, var(--primary) 6%, var(--card)); color: var(--text); font-weight: 600; }
 .art-item.is-current::before { display: none; }
 .section-card, .result-card, .fav-card { border-color: var(--border); }
 .section-card:hover, .result-card:hover, .fav-card:hover { border-radius: 12px; }
@@ -236,9 +236,15 @@ body.article-active { --reading-dock-height: 86px; --reader-shortcut-size: 44px;
 .reading-operation-menu .ap-actions { gap: 6px; margin-top: 11px; padding-top: 0; border: 0; }
 .reading-operation-menu .ap-actions > * { min-height: 43px; height: 43px; border: 0; border-radius: 11px; background: color-mix(in srgb, var(--bg) 82%, transparent); color: var(--text-2); }
 .reading-operation-menu .ap-actions > *:hover, .reading-operation-menu .ap-actions > *.active { border-radius: 11px; background: var(--bg-2); color: var(--text); }
-.article-page .back-to-top { right: max(18px, calc((100vw - 1020px) / 2)); bottom: calc(var(--dock-bottom) + 78px + 12px); width: 50px; height: 50px; border: 1px solid var(--glass-border); background: var(--glass-surface); backdrop-filter: saturate(180%) blur(22px); box-shadow: var(--glass-shadow); }
-.article-page .back-to-top .icon { width: 22px; height: 22px; }
-.article-page .back-to-top:hover { background: var(--card); }
+.article-page .back-to-top { right: max(18px, calc((100vw - 1020px) / 2)); bottom: calc(var(--dock-bottom) + 78px + 12px); width: 46px; height: 46px; border: 1px solid var(--glass-border); border-radius: 16px; background: color-mix(in srgb, var(--card) 68%, transparent); color: var(--text-2); backdrop-filter: saturate(165%) blur(16px); box-shadow: 0 4px 16px rgba(26,35,55,.08), inset 0 1px rgba(255,255,255,.6); }
+.article-page .back-to-top .icon { width: 19px; height: 19px; }
+.article-page .back-to-top .progress-ring { inset: 4px; width: calc(100% - 8px); height: calc(100% - 8px); }
+.article-page .back-to-top .progress-ring-bg { stroke: color-mix(in srgb, var(--text-3) 18%, transparent); stroke-width: 2; }
+.article-page .back-to-top .progress-ring-fg { stroke: color-mix(in srgb, var(--primary) 65%, var(--text-3)); stroke-width: 2; }
+.article-page .back-to-top:hover { background: color-mix(in srgb, var(--card) 82%, transparent); color: var(--text); }
+.article-page .back-to-top:hover .progress-ring-bg { stroke: color-mix(in srgb, var(--text-3) 24%, transparent); }
+.article-page .back-to-top:hover .progress-ring-fg { stroke: color-mix(in srgb, var(--primary) 65%, var(--text-3)); }
+.article-page .back-to-top:active { transform: scale(.96); }
 .article-page:has(.reading-operation-menu:not([hidden])) .back-to-top.show,
 .article-page:has(.reading-issue-menu:not([hidden])) .back-to-top.show { opacity: 0; visibility: hidden; pointer-events: none; }
 .article-toc.is-open { border: 1px solid var(--glass-border); border-radius: 18px; background: color-mix(in srgb, var(--card) 94%, transparent); backdrop-filter: saturate(170%) blur(22px); box-shadow: var(--glass-shadow); }
@@ -306,7 +312,7 @@ body.article-active { --reading-dock-height: 86px; --reader-shortcut-size: 44px;
   .reading-dock { width: calc(100% - 16px); border-radius: 21px; }
   .reading-dock .ap-nav > button { min-height: 60px; font-size: 10px; }
   .reading-dock .ap-nav .icon { width: 20px; height: 20px; }
-  .article-page .back-to-top { right: 12px; bottom: calc(var(--dock-bottom) + 78px + 10px); width: 50px; height: 50px; }
+  .article-page .back-to-top { right: 12px; bottom: calc(var(--dock-bottom) + 78px + 10px); }
   .reading-dock .reading-operation-menu, .reading-dock .reading-issue-menu { right: 0; width: min(380px, calc(100vw - 28px)); }
   .article-page-body { padding-bottom: 134px; }
 }
