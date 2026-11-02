@@ -64,6 +64,16 @@ MAGAZINES = {
     },
 }
 
+OFFICIAL_ARTICLE_HOSTS = {
+    'qs': {'qstheory.cn', 'www.qstheory.cn'},
+    'hqwg': {'qstheory.cn', 'www.qstheory.cn'},
+    'djyj': {'djyj.12371.cn'},
+}
+
+def is_official_article_url(url, mag_type):
+    parsed = urlparse(url)
+    return parsed.scheme in ('http', 'https') and parsed.hostname in OFFICIAL_ARTICLE_HOSTS.get(mag_type, set())
+
 # ===== 工具函数 =====
 # 板块名归一化：求是/红旗文稿的目录页里，同一个板块有多种等价写法
 #   '目 录'（半角空格）/ '目　录'（全角 U+3000）/ '目\xa0录'（nbsp）
@@ -499,8 +509,12 @@ def parse_djyj_catalog(catalog_url, year, issue):
 # ===== 文章内容抓取 =====
 def fetch_article_content(url, mag_type):
     """抓取文章正文内容"""
+    if not is_official_article_url(url, mag_type):
+        raise ValueError(f'非该刊官方网站的文章链接: {url}')
     try:
         resp = requests.get(url, headers=HEADERS, timeout=20, verify=False)
+        if not is_official_article_url(resp.url, mag_type):
+            raise ValueError(f'文章跳转到了非该刊官方网站: {resp.url}')
         resp.encoding = resp.apparent_encoding
         soup = BeautifulSoup(resp.text, 'html.parser')
 
@@ -517,8 +531,13 @@ def fetch_article_content(url, mag_type):
 
         if content_el:
             md = element_to_md(content_el, url)
-            return clean_text(md)
+            content = clean_text(md)
+            if any(c == '\ufffd' or 0x80 <= ord(c) <= 0x9f for c in content):
+                raise ValueError(f'文章包含乱码或控制字符: {url}')
+            return content
         return ''
+    except ValueError:
+        raise
     except Exception as e:
         print(f"    抓取失败: {e}")
         return ''

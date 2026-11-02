@@ -39,15 +39,15 @@
 var VERSION = (function () {
     try {
         var m = /[?&]v=([^&]+)/.exec(self.location.search);
-        return m ? decodeURIComponent(m[1]) : '20261102e';
+        return m ? decodeURIComponent(m[1]) : '20261102f';
     } catch (e) {
-        return '20261102e';
+        return '20261102f';
     }
 })();
 
 var SHELL_CACHE = 'djyj-shell-' + VERSION;
 var RT_CACHE = 'djyj-rt-' + VERSION;
-var MD_CACHE = 'djyj-md';           /* 正文不可变，跨版本保留 */
+var MD_CACHE = 'djyj-md-v2';        /* 正文数据修复时递增，清除旧的损坏缓存 */
 var KEEP_CACHES = [SHELL_CACHE, RT_CACHE, MD_CACHE];
 
 /* 应用外壳：安装时预缓存（必须能离线打开并显示完整样式） */

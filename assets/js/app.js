@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261102e';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261102f';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -814,7 +814,7 @@ function crossMagCardsHtml(groups, query, showFav) {
                     + '" onclick="event.stopPropagation(); toggleFavFromCard(this, \'' + encUrl + '\')">'
                     + svgStar(isFav) + '</button>';
             }
-            html += '<div class="result-card" onclick="showArticle(\'' + encUrl + '\')">'
+            html += '<div class="result-card" onclick="openCrossMagArticle(\'' + a.m + '\', \'' + encUrl + '\')">'
                 + favBtn
                 + '<div class="rc-title">' + titleHtml + '</div>'
                 + '<div class="rc-meta"><span class="rc-tag">' + a.y + '年第' + ci + '期</span></div>'
@@ -1070,6 +1070,15 @@ function toggleFavFromCard(btn, encUrl) {
 }
 
 /* ===== 文章详情 ===== */
+async function openCrossMagArticle(magKey, encUrl) {
+    if (!MAGAZINES[magKey]) return;
+    if (state.currentMag !== magKey) enterMagazine(magKey);
+    const meta = await loadMagMeta(magKey);
+    if (state.currentMag !== magKey || !meta.some(a => a.u === decodeURIComponent(encUrl))) return;
+    closeGlobalSearch();
+    await showArticle(encUrl);
+}
+
 /* replaceHist=true 时用 replaceState 改写当前历史条目（上一/下一篇切换用，避免后退键逐篇回溯） */
 async function showArticle(encUrl, replaceHist) {
     const url = decodeURIComponent(encUrl);
@@ -1170,7 +1179,7 @@ async function showArticle(encUrl, replaceHist) {
                 let bodyMd = md;
                 const sepIdx = md.indexOf('\n---\n');
                 if (sepIdx >= 0) bodyMd = md.substring(sepIdx + 5).trim();
-                bodyEl.innerHTML = renderMarkdown(bodyMd);
+                bodyEl.innerHTML = renderMarkdown(bodyMd, a.t);
                 buildArticleToc(bodyEl);
                 const wordCount = countWords(bodyEl.textContent);
                 updateArticleMeta(a, wordCount);
@@ -1221,9 +1230,9 @@ function renderArticleBody(url, bodyEl) {
     const text = ms.bodyText[url];
     if (text) {
         const body = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-        bodyEl.innerHTML = renderMarkdown(body);
-        buildArticleToc(bodyEl);
         const a = ms.meta.find(x => x.u === url);
+        bodyEl.innerHTML = renderMarkdown(body, a && a.t);
+        buildArticleToc(bodyEl);
         if (a) {
             const wordCount = countWords(bodyEl.textContent);
             updateArticleMeta(a, wordCount);
@@ -1280,7 +1289,8 @@ async function retryShowArticle(encUrl) {
                 let bodyMd = md;
                 const sepIdx = md.indexOf('\n---\n');
                 if (sepIdx >= 0) bodyMd = md.substring(sepIdx + 5).trim();
-                bodyEl.innerHTML = renderMarkdown(bodyMd);
+                bodyEl.innerHTML = renderMarkdown(bodyMd, a.t);
+                buildArticleToc(bodyEl);
                 const wordCount = countWords(bodyEl.textContent);
                 updateArticleMeta(a, wordCount);
                 return;
@@ -2089,10 +2099,11 @@ function isChineseHeading(text) {
     // 或：第一章/第一节/第一部分 等
     // 或：（一）（二）（三） 开头
     return /^[一二三四五六七八九十]{1,3}、/.test(text) ||
+           /^[（(][一二三四五六七八九十]{1,3}[）)]/.test(text) ||
            /^第[一二三四五六七八九十百]{1,4}[章节部分条]/.test(text);
 }
 
-function renderMarkdown(md) {
+function renderMarkdown(md, articleTitle) {
     if (!md) return '';
     // 统一换行符：CRLF/CR -> LF
     md = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -2100,9 +2111,14 @@ function renderMarkdown(md) {
     md = md.replace(/\n{3,}/g, '\n\n');
     const paras = md.split('\n\n');
     let html = '';
-    paras.forEach(p => {
+    paras.forEach((p, index) => {
         p = p.trim();
         if (!p) return;
+        // 新版来源页会把文章标题再放进正文，阅读页已有独立标题。
+        if (index === 0 && articleTitle) {
+            const plain = p.replace(/<[^>]*>/g, '').replace(/\*\*/g, '').replace(/[#※\s　]/g, '');
+            if (plain === articleTitle.replace(/[#※\s　]/g, '')) return;
+        }
         // Markdown 图片段落（可能被 ** 包裹）—— 作为块级元素，不包裹 <p>
         if (p.startsWith('![') || p.startsWith('**![')) {
             html += processInlineMarkdown(p);
@@ -2121,7 +2137,9 @@ function renderMarkdown(md) {
             let processed = processInlineMarkdown(p);
             if (processed.startsWith('<strong>') && processed.endsWith('</strong>') &&
                 processed.indexOf('<strong>') === processed.lastIndexOf('<strong>')) {
-                html += '<p class="md-bold">' + processed + '</p>';
+                const label = p.slice(2, -2).trim();
+                const heading = label.length <= 90 && !/[。！？]$/.test(label);
+                html += '<p class="' + (heading ? 'md-heading' : 'md-bold') + '">' + processed + '</p>';
             } else if (isChineseHeading(p)) {
                 // 中文数字标题（一、二、三、等）显示为小标题
                 html += '<p class="md-subheading">' + processed + '</p>';

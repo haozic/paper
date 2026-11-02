@@ -22,6 +22,43 @@ import json
 import os
 import sys
 import collections
+from urllib.parse import urlparse
+
+OFFICIAL_HOSTS = {
+    'qs': {'qstheory.cn', 'www.qstheory.cn'},
+    'hqwg': {'qstheory.cn', 'www.qstheory.cn'},
+    'djyj': {'djyj.12371.cn'},
+}
+
+
+def has_bad_chars(text):
+    return any(ch == '\ufffd' or 0x80 <= ord(ch) <= 0x9f for ch in text)
+
+
+def check_article_quality():
+    """拦截非官方来源及正文中的替换字符、C1 控制符。"""
+    problems = []
+    checked = 0
+    for key, _, meta_path, issues_path in MAGAZINES:
+        for article in load(meta_path) or []:
+            host = urlparse(article.get('u', '')).hostname
+            if host not in OFFICIAL_HOSTS[key]:
+                problems.append(f'{key} 非官方网站: {article.get("u")}')
+        for folder in (os.path.join(BASE_DIR, issues_path), os.path.join(BASE_DIR, 'articles', key)):
+            for root, _, files in os.walk(folder):
+                for name in files:
+                    if not name.endswith(('.json', '.md')):
+                        continue
+                    path = os.path.join(root, name)
+                    with open(path, encoding='utf-8') as f:
+                        content = f.read()
+                    checked += 1
+                    if has_bad_chars(content):
+                        problems.append(f'正文乱码或控制字符: {os.path.relpath(path, BASE_DIR)}')
+    print(f'\n[article_quality] 检查 {checked} 个正文文件，异常 {len(problems)} 处')
+    for problem in problems[:10]:
+        print('    !! ' + problem)
+    return len(problems)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(SCRIPT_DIR)
@@ -400,7 +437,7 @@ def main():
     # 索引体检放在去重之后：去重一旦改了 meta，索引随即变陈旧，
     # 退出码要如实报 1（提示「meta 变了，要重建索引」）
     index_bad = check_search_index()
-    return index_bad
+    return index_bad + check_article_quality()
 
 
 if __name__ == '__main__':
