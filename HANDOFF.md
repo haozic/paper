@@ -12,7 +12,7 @@
 
 - `python scripts/check_data.py`：四刊 9638 篇、无数据异常；`python scripts/build_search_index.py --check`、`node scripts/check_search_upgrade.js`、`node scripts/check_related.js`、`python scripts/build_styles.py --check`、`node --check assets/js/app.js` 通过。
 - Chrome 本地文件映射模拟 390px 和 1280px：首页封面和计数、旗帜目录及正文、相关阅读、跨刊搜索点击跳转通过，无 JS 错误或横向溢出。另在 390px 正文检查到大标题为红色、普通段落字重 400。临时浏览器夹具与截图应在提交前清理。
-- 待办：最终清理临时文件，检查 git diff，提交并推送 GitHub `main`，核实 Cloudflare Pages 发布结果。当前无代码卡点。若上线后用户给出具体标题仍误判，应针对该来源结构优化渲染规则，不要盲目把整段加粗。
+- 临时浏览器夹具和截图已清理；提交 `70b3415` 已推送 GitHub `main`，远端一致。Cloudflare Pages 首页已引用 `20261102i`，线上《旗帜》meta 为 2223 篇、文章索引 2218 项，抽查正文 HTTP 200，四刊搜索索引 9638 行、新样式可访问。当前无卡点。若用户给出具体标题仍误判，应针对该来源结构优化渲染规则，不要盲目把整段加粗。
 
 ### 踩过的坑
 
