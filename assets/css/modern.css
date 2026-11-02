@@ -195,6 +195,7 @@ html[data-theme="dark"] .year-block, html[data-theme="dark"] .nav-tab.active { b
 
 /* Reading: paper stays opaque while the five-action dock floats above it. */
 .ap-title { font-family: var(--font-sans); font-weight: 680; letter-spacing: -.018em; }
+.ap-header-inner { grid-template-columns: minmax(0, 1fr); grid-template-areas: "title" "meta"; }
 .article-page-header { border-color: var(--border); }
 .ap-related { box-sizing: border-box; max-width: 760px; margin: 12px auto 0; padding: 26px 0 40px; border-top: 1px solid var(--border); }
 .ap-related-heading { margin-bottom: 19px; }
@@ -223,6 +224,10 @@ body.article-active { --reading-dock-height: 86px; --reader-shortcut-size: 44px;
 .reading-issue-heading strong { min-width: 0; font: 650 15px/1.4 var(--font-sans); }
 .reading-issue-heading span { font-size: 11px; }
 .reading-issue-list { gap: 3px; }
+.reading-article-sections { display: grid; gap: 3px; margin: 0 4px 12px; padding: 0 4px 8px; }
+.reading-article-sections strong { margin-bottom: 4px; color: var(--text-3); font: 600 12px/1.4 var(--font-sans); }
+.reading-article-sections button { width: 100%; padding: 8px 9px; border: 0; border-radius: 10px; background: transparent; color: var(--text-2); font: 500 13px/1.5 var(--font-sans); text-align: left; cursor: pointer; }
+.reading-article-sections button:hover, .reading-article-sections button:focus-visible { background: var(--bg-2); color: var(--text); }
 .reading-issue-item { gap: 10px; min-height: 47px; padding: 10px 9px; border: 0; border-radius: 12px; }
 .reading-issue-item:hover { border-radius: 12px; background: color-mix(in srgb, var(--card) 55%, var(--bg-2)); }
 .reading-issue-item.active { border-radius: 12px; background: color-mix(in srgb, var(--primary) 10%, var(--card)); color: var(--text); }
