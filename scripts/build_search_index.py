@@ -47,7 +47,7 @@ except (AttributeError, ValueError):      # Python < 3.7 / 非标准流
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(SCRIPT_DIR)
 
-INDEX_VERSION = '20261101a'
+INDEX_VERSION = '20261104a'
 INDEX_PATH = 'data/search_index.json'
 
 # 刊物**展示顺序**：与 app.js 的 MAGAZINES、check_data.py 的 MAGAZINES 一致。

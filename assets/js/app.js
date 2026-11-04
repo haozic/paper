@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261102n';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261104a';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -15,7 +15,7 @@ const MAGAZINES = {
         issuesPath: 'data/qs/issues',
         source: 'https://www.qstheory.cn/qs/mulu.htm',
         desc: '中共中央委员会机关刊',
-        cover: 'assets/img/cover_qs.jpg',
+        cover: 'assets/img/cover_qs.jpg?v=20261104a',
     },
     hqwg: {
         name: '红旗文稿',
