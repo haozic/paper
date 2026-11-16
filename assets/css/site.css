@@ -327,11 +327,11 @@ body.about-active { padding-bottom: 0; }
     }
 }
 .mag-cover-qs {
-    background-image: url('../img/cover_qs.jpg?v=20260920a');
+    background-image: url('../img/cover_qs.jpg?v=20261116a');
     background-color: #8b0000;
 }
 .mag-cover-hqwg {
-    background-image: url('../img/cover_hqwg.jpg?v=20261030a');
+    background-image: url('../img/cover_hqwg.jpg?v=20261116a');
     background-color: #8b0000;
 }
 .mag-cover-djyj {
@@ -3057,7 +3057,7 @@ html[data-theme="dark"] .home-title, html[data-theme="dark"] .home-section-headi
 .home-subtitle { font-size: 11px; letter-spacing: .16em; color: #8a8a8a; }
 .home-about-btn { top: 4px; border: 0; box-shadow: none; background: none; }
 .home-feature { max-width: 1000px; margin: 40px auto 32px; padding: 0 22px; display: grid; grid-template-columns: minmax(220px, 380px) minmax(0,1fr); gap: 62px; align-items: center; }
-.home-feature-cover { display: block; width: 100%; aspect-ratio: 3 / 4; background: #f2f2f2 url('../img/cover_qs.jpg?v=20260920a') center / contain no-repeat; box-shadow: 0 4px 16px rgba(0,0,0,.1); }
+.home-feature-cover { display: block; width: 100%; aspect-ratio: 3 / 4; background: #f2f2f2 url('../img/cover_qs.jpg?v=20261116a') center / contain no-repeat; box-shadow: 0 4px 16px rgba(0,0,0,.1); }
 .home-feature-text { padding: 18px 0; }
 .home-feature-kicker, .home-feature-issue { display: block; color: #888; font-size: 11px; letter-spacing: .12em; }
 .home-feature-issue { margin-top: 18px; }
