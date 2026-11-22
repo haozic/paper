@@ -686,7 +686,7 @@ Windows Python `write_text` 会把换行变成 CRLF，Git 将每行 CR 判为尾
 
 - 静态对照确认两个页面都具备杂志侧栏、封面栏、内容区；六组阅读设置名称与选项逐组一致。`check_speeches.py`、`check_data.py`、生成 CSS/索引检查、SW 导航测试、JS 语法与阅读进度测试均通过，`git diff --check` 通过。
 - CUA in-app browser 可以建站点标签页，但随后两次读取均超时；无法作视觉验收。此前 Playwright 本机访问也被网络策略拒绝。下一步在可用浏览器环境复查手机导航、设置面板与收藏交互。
-- 下一步：提交推送 GitHub，核对 Cloudflare Pages 线上资源。
+- 更新提交 `f40637c` 已推送 GitHub `main`；Cloudflare Pages 首页、讲话库 HTML/JS、生成 CSS 与 SW 均 HTTP 200，且与本地逐字节一致。下一步仍是在可用浏览器中视觉复查目录、手机底栏、设置面板与收藏交互。
 
 ### 踩过的坑
 
