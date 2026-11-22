@@ -644,9 +644,10 @@ Windows Python `write_text` 会把换行变成 CRLF，Git 将每行 CR 判为尾
 ### 验收、卡点与下一步
 
 - 静态检查：首页共 5 张封面卡片，讲话库 1 张，无独立入口；阅读底栏 5 个操作。SVG 可被 XML 解析。讲话库数据校验仍为 1540 条目录、1535 篇正文、5 篇官网失效；样式、搜索索引、JS/SW 语法、阅读进度测试和 SW 导航测试通过，Git diff 无空白错误。
-- 本节编写时尚需提交、推送 GitHub，并核对 Cloudflare Pages 新版。上一轮本地 Playwright 访问本机 HTTP 服务被网络策略拦截，不可把静态检查称作浏览器视觉验收；可尝试在部署后核对线上可见页面。
+- 更新提交 `d56eff53998b4ee82b54124dc790a7935d3de848` 已推送 GitHub `main`，只读 `ls-remote` 确认远端一致。Cloudflare Pages 的首页、生成 CSS、SVG 封面、讲话库 HTML/CSS/JS 和 SW 均 HTTP 200 且与本地逐字节一致。Playwright 访问线上站点出现 `ERR_PROXY_CONNECTION_FAILED`，没有完成真实浏览器视觉验收；不能把 HTTP 资源核对称作 UI 验收。
 
 ### 踩过的坑
 
 - 首页五张封面若仍沿用四列，会使第五张单独落在左侧；需要桌面五列、平板居中及手机单列。
 - 讲话库原手机 CSS 给阅读纸张加了内边距，重做正文内边距后须把旧纸张 padding 覆盖为 0，避免手机双重留白。
+- GitHub CLI 当前默认账号令牌显示无效，但 Git 通过 Git Credential Manager 仍能推送；无需因 CLI 状态改变仓库凭据。Git 配置远端为 `https://github.com/haozic/paper.git`，无显式代理，TLS 后端 Schannel。连接一度被重置，恢复后 HTTP/1.1 推送成功。
