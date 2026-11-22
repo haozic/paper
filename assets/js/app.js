@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261122d';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261122e';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -15,7 +15,7 @@ const MAGAZINES = {
         issuesPath: 'data/qs/issues',
         source: 'https://www.qstheory.cn/qs/mulu.htm',
         desc: '中共中央委员会机关刊',
-        cover: 'assets/img/cover_qs.jpg?v=20261122d',
+        cover: 'assets/img/cover_qs.jpg?v=20261122e',
     },
     hqwg: {
         name: '红旗文稿',
@@ -26,7 +26,7 @@ const MAGAZINES = {
         issuesPath: 'data/hqwg/issues',
         source: 'https://www.qstheory.cn/hqwglist/mulu.htm',
         desc: '政治理论半月刊',
-        cover: 'assets/img/cover_hqwg.jpg?v=20261122d',
+        cover: 'assets/img/cover_hqwg.jpg?v=20261122e',
     },
     djyj: {
         name: '党建研究',
@@ -1924,28 +1924,32 @@ function renderRelatedArticles(cur, pos, ordered) {
     });
 }
 
-/* ===== 复制链接 ===== */
-function copyArticleLink() {
+/* ===== 分享文章；无系统分享时复制当前文章链接 ===== */
+async function shareArticleLink() {
     const btn = document.getElementById('articleCopyBtn');
     const url = window.location.href;
-    const done = function () {
-        if (!btn) return;
-        btn.classList.add('copied');
-        btn.innerHTML = '<svg class="icon"><use href="#i-check"/></svg>';
-        setTimeout(function () {
-            btn.classList.remove('copied');
-            btn.innerHTML = '<svg class="icon"><use href="#i-link"/></svg>';
-        }, 1500);
-    };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url).then(done).catch(function () { fallbackCopyText(url, done); });
-    } else {
-        fallbackCopyText(url, done);
+    const title = document.getElementById('articleTitle')?.textContent || document.title;
+    if (navigator.share) {
+        try { await navigator.share({ title: title, url: url }); return; }
+        catch (error) { if (error.name === 'AbortError') return; }
     }
+    let copied = false;
+    try {
+        if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(url); copied = true; }
+    } catch (_) { /* Try the selection fallback below. */ }
+    if (!copied) copied = fallbackCopyText(url);
+    if (!btn) return;
+    const label = btn.querySelector('span');
+    btn.classList.toggle('copied', copied);
+    if (label) label.textContent = copied ? '已复制' : '复制失败';
+    setTimeout(function () {
+        btn.classList.remove('copied');
+        if (label) label.textContent = '分享';
+    }, 1800);
 }
 
 /* 非安全上下文（http）或老浏览器下的复制兜底 */
-function fallbackCopyText(text, cb) {
+function fallbackCopyText(text) {
     try {
         const ta = document.createElement('textarea');
         ta.value = text;
@@ -1956,10 +1960,10 @@ function fallbackCopyText(text, cb) {
         document.body.appendChild(ta);
         ta.select();
         ta.setSelectionRange(0, text.length);
-        document.execCommand('copy');
+        const copied = document.execCommand('copy');
         document.body.removeChild(ta);
-        if (cb) cb();
-    } catch (e) { /* 复制失败则静默 */ }
+        return copied;
+    } catch (e) { return false; }
 }
 
 /* ===== 快捷键：/ 与 Ctrl/⌘+K 聚焦搜索 ===== */

@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '20261122d';
+const VERSION = '20261122e';
 const savedSettings = JSON.parse(localStorage.getItem('speech-reading') || '{}');
 const settingKeys = {font:'reading_fontsize',theme:'reading_theme',line:'reading_lineheight',width:'reading_width',indent:'reading_indent',paper:'reading_paper'};
 const stored = (key, fallback) => localStorage.getItem(settingKeys[key]) ?? savedSettings[key] ?? fallback;
@@ -54,7 +54,7 @@ function renderBody(md) {
   return md.split(/\n\s*\n/).map(block => {
     const s = block.trim(); if (!s) return '';
     const center = /^<div style="text-align:center">([\s\S]*?)<\/div>$/.exec(s);
-    if (center) return '<p class="' + (/^\*\*/.test(center[1]) ? 'md-heading' : 'center') + '">' + inline(center[1]) + '</p>';
+    if (center) return '<p class="' + (/^\*\*/.test(center[1]) ? 'speech-centered-heading' : 'center') + '">' + inline(center[1]) + '</p>';
     if (s.startsWith('![')) return '<p class="center">' + inline(s) + '</p>';
     const heading = /^#{1,3} /.test(s);
     return '<p' + (heading ? ' class="md-heading"' : '') + '>' + inline(s.replace(/^#{1,3} /,'')) + '</p>';
@@ -67,7 +67,6 @@ async function openArticle(item, replace = false) {
   document.body.classList.add('reading','article-active');
   closePanels();
   $('articleTitle').textContent = item.t; $('articleSubtitle').textContent = item.d; $('readerDate').textContent = dateOf(item);
-  $('original').href = item.u;
   $('speechOriginal').href = item.u;
   $('articleBody').innerHTML = '<p>正在加载正文…</p>';
   updateProgress();
