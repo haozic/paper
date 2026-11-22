@@ -1,6 +1,8 @@
 'use strict';
-const VERSION = '20261122a';
-const state = { items: [], year: '2026', query: '', visible: 40, current: -1, font: +(localStorage.getItem('speech-font') || 19) };
+const VERSION = '20261122b';
+const savedSettings = JSON.parse(localStorage.getItem('speech-reading') || '{}');
+const state = { items: [], year: '2026', query: '', visible: 40, current: -1,
+  reading: { font: savedSettings.font || '20', theme: savedSettings.theme || 'auto', line: savedSettings.line || '2.05', indent: savedSettings.indent || '2', paper: savedSettings.paper || 'default' } };
 const $ = id => document.getElementById(id);
 const articleId = item => item.p?.match(/ARTI\d+/)?.[0] || item.u.match(/ARTI\d+/)?.[0];
 const safe = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -49,11 +51,14 @@ function renderBody(md) {
 async function openArticle(item, replace = false) {
   state.current = state.items.indexOf(item);
   $('library').hidden = true; $('reader').hidden = false;
+  document.body.classList.add('reading');
+  closePanels();
   $('articleTitle').textContent = item.t; $('articleSubtitle').textContent = item.d; $('readerDate').textContent = dateOf(item);
   $('original').href = item.u;
   $('articleBody').innerHTML = '<p>正在加载正文…</p>';
-  $('previous').disabled = state.current >= state.items.length - 1;
   $('next').disabled = state.current <= 0;
+  renderDirectory(item);
+  renderRelated();
   if (replace) history.replaceState(null,'','#id='+articleId(item)); else history.pushState(null,'','#id='+articleId(item));
   window.scrollTo(0,0);
   if (!item.p) { $('articleBody').innerHTML = '<p>官网原文目前无法读取，请使用下方官网链接查看。</p>'; return; }
@@ -62,9 +67,58 @@ async function openArticle(item, replace = false) {
     $('articleBody').innerHTML = renderBody(await response.text());
   } catch (_) { $('articleBody').innerHTML = '<p>正文加载失败，请刷新或访问官网原文。</p>'; }
 }
-function showLibrary() { $('reader').hidden = true; $('library').hidden = false; history.pushState(null,'','#'); window.scrollTo(0,0); }
+function renderDirectory(item) {
+  $('directoryTitle').textContent = item.y + '年 · 讲话目录';
+  const list = document.createDocumentFragment();
+  for (const entry of state.items.filter(a => a.y === item.y)) {
+    const button = document.createElement('button');
+    button.type = 'button'; button.textContent = entry.t;
+    if (entry === item) button.className = 'active';
+    button.onclick = () => openArticle(entry, true);
+    list.append(button);
+  }
+  $('directoryList').replaceChildren(list);
+}
+function renderRelated() {
+  const section = $('related');
+  const title = document.createElement('h2'); title.textContent = '相关阅读';
+  section.replaceChildren(title);
+  for (const entry of state.items.slice(state.current + 1, state.current + 4)) {
+    const button = document.createElement('button');
+    button.type = 'button'; button.textContent = entry.t;
+    const small = document.createElement('small'); small.textContent = entry.d;
+    button.append(small); button.onclick = () => openArticle(entry, true);
+    section.append(button);
+  }
+}
+function closePanels() {
+  $('directoryPanel').hidden = true; $('settingsPanel').hidden = true;
+  $('directory').setAttribute('aria-expanded','false'); $('settings').setAttribute('aria-expanded','false');
+}
+function showLibrary() {
+  $('reader').hidden = true; $('library').hidden = false;
+  document.body.classList.remove('reading'); closePanels();
+  history.pushState(null,'','#'); window.scrollTo(0,0);
+}
+function applySettings() {
+  const r = state.reading;
+  document.documentElement.style.setProperty('--reading-size',r.font+'px');
+  document.documentElement.style.setProperty('--reading-line',r.line);
+  document.documentElement.style.setProperty('--reading-indent',r.indent+'em');
+  document.documentElement.dataset.readingPaper = r.paper;
+  document.documentElement.dataset.readingTheme = r.theme === 'auto' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : r.theme;
+  document.querySelectorAll('[data-setting]').forEach(group => {
+    group.querySelectorAll('button').forEach(b => b.classList.toggle('active',b.dataset.value === r[group.dataset.setting]));
+  });
+  localStorage.setItem('speech-reading',JSON.stringify(r));
+}
+function togglePanel(id) {
+  const opening = $(id).hidden; closePanels();
+  $(id).hidden = !opening;
+  $(id === 'directoryPanel' ? 'directory' : 'settings').setAttribute('aria-expanded',String(opening));
+}
 async function init() {
-  document.documentElement.style.setProperty('--reading-size',state.font+'px');
+  applySettings();
   try {
     const response = await fetch('../data/speeches/index.json?v='+VERSION); if (!response.ok) throw Error(response.status);
     state.items = (await response.json()).items;
@@ -76,8 +130,17 @@ async function init() {
 $('query').oninput = e => { state.query = e.target.value.trim(); state.year = 'all'; state.visible = 40; renderYears(); renderList(); };
 $('more').onclick = () => { state.visible += 40; renderList(); };
 $('back').onclick = showLibrary;
-$('previous').onclick = () => { if (state.current < state.items.length-1) openArticle(state.items[state.current+1],true); };
 $('next').onclick = () => { if (state.current > 0) openArticle(state.items[state.current-1],true); };
-$('settings').onclick = () => { state.font = state.font >= 23 ? 17 : state.font+2; localStorage.setItem('speech-font',state.font); document.documentElement.style.setProperty('--reading-size',state.font+'px'); };
-window.onpopstate = () => { const id=location.hash.match(/id=(ARTI\d+)/)?.[1]; const item=state.items.find(a=>articleId(a)===id); if(item) openArticle(item,true); else { $('reader').hidden=true; $('library').hidden=false; } };
+$('directory').onclick = () => togglePanel('directoryPanel');
+$('settings').onclick = () => togglePanel('settingsPanel');
+$('toTop').onclick = () => window.scrollTo({top:0,behavior:'smooth'});
+window.addEventListener('scroll',() => { $('toTop').hidden = !document.body.classList.contains('reading') || scrollY < 320; },{passive:true});
+document.querySelectorAll('[data-setting]').forEach(group => group.onclick = event => {
+  const button = event.target.closest('button[data-value]');
+  if (!button) return;
+  state.reading[group.dataset.setting] = button.dataset.value;
+  applySettings();
+});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applySettings);
+window.onpopstate = () => { const id=location.hash.match(/id=(ARTI\d+)/)?.[1]; const item=state.items.find(a=>articleId(a)===id); if(item) openArticle(item,true); else { $('reader').hidden=true; $('library').hidden=false; document.body.classList.remove('reading'); closePanels(); } };
 init();

@@ -5,9 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f7f6f3">
 <title>习近平讲话库 · 党内刊物</title>
-<link rel="stylesheet" href="speeches.css?v=20261122a">
+<link rel="stylesheet" href="speeches.css?v=20261122b">
 </head>
 <body>
+<svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+ <symbol id="home-icon" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></symbol>
+ <symbol id="book-icon" viewBox="0 0 24 24"><path d="M4 4h7a3 3 0 0 1 3 3v14a3 3 0 0 0-3-3H4zM20 4h-3a3 3 0 0 0-3 3v14a3 3 0 0 1 3-3h3z"/></symbol>
+ <symbol id="list-icon" viewBox="0 0 24 24"><path d="M8 5h13M8 12h13M8 19h13M3 5h.01M3 12h.01M3 19h.01"/></symbol>
+ <symbol id="settings-icon" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16M9 3v6M15 9v6M9 15v6"/></symbol>
+ <symbol id="next-icon" viewBox="0 0 24 24"><path d="m5 4 11 8L5 20zM19 4v16"/></symbol>
+ <symbol id="up-icon" viewBox="0 0 24 24"><path d="m5 14 7-7 7 7M12 7v13"/></symbol>
+</svg>
 <header class="topbar">
   <a class="home-link" href="../" aria-label="返回网站首页">‹ <span>党内刊物</span></a>
   <strong>习近平讲话库</strong>
@@ -22,11 +30,30 @@
     <button class="more" id="more" type="button" hidden>显示更多</button>
   </section>
   <article class="reader" id="reader" hidden>
-    <div class="reader-head"><button id="back" type="button">‹ 返回目录</button><span id="readerDate"></span></div>
-    <div class="reader-paper"><span class="eyebrow">重要讲话 · 共产党员网</span><h1 id="articleTitle"></h1><p class="subtitle" id="articleSubtitle"></p><div class="article-body" id="articleBody"></div><p class="original"><a id="original" target="_blank" rel="noopener">查看官网原文 ↗</a></p></div>
-    <div class="reader-bottom"><button id="previous" type="button">上一篇</button><button id="settings" type="button" aria-label="调整字号">Aa</button><button id="next" type="button">下一篇</button></div>
+    <header class="article-heading"><h1 id="articleTitle"></h1><p id="articleSubtitle"></p><span id="readerDate"></span></header>
+    <div class="reader-paper"><div class="article-body" id="articleBody"></div></div>
+    <footer class="reader-footer"><a id="original" target="_blank" rel="noopener">查看官网原文 ↗</a><section class="related" id="related" aria-label="相关阅读"></section></footer>
+    <button class="to-top" id="toTop" type="button" aria-label="返回顶部" hidden><svg><use href="#up-icon"/></svg></button>
+    <div class="reading-dock">
+      <div class="dock-panel" id="directoryPanel" hidden><h2 id="directoryTitle">本年目录</h2><div id="directoryList"></div></div>
+      <div class="dock-panel settings-panel" id="settingsPanel" hidden>
+        <h2>阅读设置</h2>
+        <div class="setting-row"><span>字号</span><div data-setting="font"><button data-value="16">小</button><button data-value="20">标准</button><button data-value="24">大</button><button data-value="28">特大</button></div></div>
+        <div class="setting-row"><span>背景</span><div data-setting="theme"><button data-value="auto">跟随系统</button><button data-value="light">白天</button><button data-value="dark">夜晚</button></div></div>
+        <div class="setting-row"><span>行距</span><div data-setting="line"><button data-value="1.75">紧凑</button><button data-value="2.05">标准</button><button data-value="2.35">宽松</button></div></div>
+        <div class="setting-row"><span>首行缩进</span><div data-setting="indent"><button data-value="2">缩进</button><button data-value="0">不缩进</button></div></div>
+        <div class="setting-row"><span>纸张</span><div data-setting="paper"><button data-value="default">默认</button><button data-value="warm">米黄</button><button data-value="white">纯白</button></div></div>
+      </div>
+      <nav class="dock-actions" aria-label="阅读导航与操作">
+        <a href="../"><svg><use href="#home-icon"/></svg><span>首页</span></a>
+        <button id="back" type="button"><svg><use href="#book-icon"/></svg><span>讲话库</span></button>
+        <button id="directory" type="button" aria-expanded="false"><svg><use href="#list-icon"/></svg><span>目录</span></button>
+        <button id="settings" type="button" aria-expanded="false"><svg><use href="#settings-icon"/></svg><span>设置</span></button>
+        <button id="next" type="button"><svg><use href="#next-icon"/></svg><span>下一篇</span></button>
+      </nav>
+    </div>
   </article>
 </main>
-<script src="speeches.js?v=20261122a" defer></script>
+<script src="speeches.js?v=20261122b" defer></script>
 </body>
 </html>

@@ -61,9 +61,10 @@ html[data-theme="dark"] .article-page { --bg: #191c22; --bg-2: #252a33; --card: 
 .home-search-icon .icon, .home-about-btn .icon { width: 20px; height: 20px; }
 .home-search-icon span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
 .home-body { padding: clamp(46px, 7vh, 92px) 28px 40px; }
-.magazine-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 260px)); justify-content: center; align-items: start; gap: clamp(22px, 3vw, 42px); width: 100%; max-width: 1180px; margin: auto; padding: 0; overflow: visible; }
+.magazine-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); justify-content: center; align-items: start; gap: clamp(18px, 2.1vw, 30px); width: 100%; max-width: 1180px; margin: auto; padding: 0; overflow: visible; }
 @media (min-width: 768px) and (max-width: 1100px) {
   .magazine-grid { grid-template-columns: repeat(2, minmax(0, 280px)); }
+  .magazine-card:last-child { grid-column: 1 / -1; justify-self: center; max-width: 280px; }
 }
 .nav-tab[hidden], .bn-item[hidden] { display: none !important; }
 .article-page-body p.md-heading { color: var(--mag-color-dark, var(--primary-dark)); border-bottom: 0; }
@@ -84,14 +85,6 @@ html[data-theme="dark"] .article-page { --bg: #191c22; --bg-2: #252a33; --card: 
 .home-search { display: none; }
 .home-guides { margin-top: 22px; }
 .home-footer { padding: 28px 20px 32px; color: var(--text-3); }
-.speech-entry { max-width: 1100px; margin: 8px auto 0; padding: 22px 27px; display: flex; align-items: center; gap: 18px; border: 1px solid var(--glass-border); border-radius: 22px; background: var(--glass-surface); backdrop-filter: blur(20px); color: var(--text); text-decoration: none; transition: background .2s, transform .2s; }
-.speech-entry:hover { background: var(--card); transform: translateY(-2px); }
-.speech-entry-symbol { width: 49px; height: 49px; border-radius: 15px; display: grid; place-items: center; background: #a03431; color: #fff; font-size: 23px; font-weight: 650; flex: none; }
-.speech-entry-copy { display: grid; gap: 5px; flex: 1; }
-.speech-entry-copy strong { font-size: 18px; font-weight: 650; }
-.speech-entry-copy small { font-size: 12px; color: var(--text-3); }
-.speech-entry > .icon { width: 19px; height: 19px; color: var(--text-3); }
-@media (max-width: 700px) { .speech-entry { margin: 8px 16px 0; padding: 16px; border-radius: 18px; } .speech-entry-symbol { width: 43px; height: 43px; font-size: 20px; } }
 
 /* Magazine: the cover and index provide identity; utilities share one quiet row. */
 body.mag-active #app { min-height: 100vh; }
