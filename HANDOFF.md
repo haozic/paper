@@ -664,7 +664,7 @@ Windows Python `write_text` 会把换行变成 CRLF，Git 将每行 CR 判为尾
 
 - `check_speeches.py`、`check_data.py`、生成 CSS/搜索索引 `--check`、SW 导航测试、JS 语法和阅读进度测试通过；HTML 结构检查确认共享样式、手机导航、五按钮底栏、相关阅读和进度环。讲话库目录仍为 1540 条，正文 1535 篇，官网失效 5 篇。
 - Playwright 访问本机 `http://127.0.0.1:8765/speeches/` 仍被 `ERR_NETWORK_ACCESS_DENIED` 拒绝，真实浏览器视觉和交互验收未完成。没有绕过访问策略。临时 HTTP 服务已停止。
-- 下一步：确认 GitHub 推送及 Cloudflare Pages 资源部署；在可用的浏览器中复查手机底栏安全区、搜索展开、正文设置和进度环。
+- 更新提交 `a7d6ec490aebb6bb37fae633c006bba0267d38ad` 已推送 GitHub `main`，`origin/main` 与本地一致。Cloudflare Pages 的首页、讲话库 HTML/JS、生成 CSS 与 SW 均 HTTP 200，且与本地逐字节相同。仍需在可用的浏览器中复查手机底栏安全区、搜索展开、正文设置和进度环。
 
 ### 踩过的坑
 
