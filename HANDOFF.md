@@ -704,7 +704,7 @@ Windows Python `write_text` 会把换行变成 CRLF，Git 将每行 CR 判为尾
 ### 验收、卡点与下一步
 
 - Node VM 模拟验证四刊原生分享、Clipboard 复制和选区复制三条路径通过；讲话库 HTML/CSS/JS 结构检查确认标题居中规则、文末无原文链接、设置原文入口仍在。`check_speeches.py`、生成 CSS/索引 `--check`、阅读进度测试、JS 语法和 `git diff --check` 通过。
-- 下一步：提交推送 GitHub，核对 Cloudflare Pages 线上资源。浏览器视觉验收仍受此前浏览器环境超时与本机访问拒绝所限。
+- 修复提交 `2359df5` 已推送 GitHub `main`。Cloudflare Pages 首页、讲话库 HTML/JS、四刊 `app.js`、生成 CSS 与 SW 均 HTTP 200，且与本地逐字节一致。浏览器视觉验收仍受此前浏览器环境超时与本机访问拒绝所限。
 
 ### 踩过的坑
 
