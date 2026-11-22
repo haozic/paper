@@ -3642,7 +3642,7 @@ body.article-active { --reading-dock-height: 58px; }
 }
 
 /* Source: modern.css */
-/* Modern reading layer. Keep the three topical guides in their own visual system. */
+/* Modern reading layer. */
 :root {
   --bg: #f3f4f7;
   --bg-2: #e9ebf0;
@@ -3728,6 +3728,14 @@ html[data-theme="dark"] .article-page { --bg: #191c22; --bg-2: #252a33; --card: 
 .home-search { display: none; }
 .home-guides { margin-top: 22px; }
 .home-footer { padding: 28px 20px 32px; color: var(--text-3); }
+.speech-entry { max-width: 1100px; margin: 8px auto 0; padding: 22px 27px; display: flex; align-items: center; gap: 18px; border: 1px solid var(--glass-border); border-radius: 22px; background: var(--glass-surface); backdrop-filter: blur(20px); color: var(--text); text-decoration: none; transition: background .2s, transform .2s; }
+.speech-entry:hover { background: var(--card); transform: translateY(-2px); }
+.speech-entry-symbol { width: 49px; height: 49px; border-radius: 15px; display: grid; place-items: center; background: #a03431; color: #fff; font-size: 23px; font-weight: 650; flex: none; }
+.speech-entry-copy { display: grid; gap: 5px; flex: 1; }
+.speech-entry-copy strong { font-size: 18px; font-weight: 650; }
+.speech-entry-copy small { font-size: 12px; color: var(--text-3); }
+.speech-entry > .icon { width: 19px; height: 19px; color: var(--text-3); }
+@media (max-width: 700px) { .speech-entry { margin: 8px 16px 0; padding: 16px; border-radius: 18px; } .speech-entry-symbol { width: 43px; height: 43px; font-size: 20px; } }
 
 /* Magazine: the cover and index provide identity; utilities share one quiet row. */
 body.mag-active #app { min-height: 100vh; }
