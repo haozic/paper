@@ -1,13 +1,15 @@
 'use strict';
-const VERSION = '20261122c';
+const VERSION = '20261122d';
 const savedSettings = JSON.parse(localStorage.getItem('speech-reading') || '{}');
-const state = { items: [], year: 'all', query: '', visible: 40, current: -1,
-  reading: { font: savedSettings.font || '20', theme: savedSettings.theme || 'auto', line: savedSettings.line || '2.05', indent: savedSettings.indent || '2', paper: savedSettings.paper || 'default' } };
+const settingKeys = {font:'reading_fontsize',theme:'reading_theme',line:'reading_lineheight',width:'reading_width',indent:'reading_indent',paper:'reading_paper'};
+const stored = (key, fallback) => localStorage.getItem(settingKeys[key]) ?? savedSettings[key] ?? fallback;
+const state = { items: [], query: '', visible: 40, current: -1, loadToken: 0, view: 'catalog', favorites: JSON.parse(localStorage.getItem('speech-favorites') || '[]'),
+  reading: { font: stored('font','20'), theme: stored('theme','auto'), line: stored('line','2.05'), width: stored('width','0'), indent: stored('indent','2'), paper: stored('paper','default') } };
 const $ = id => document.getElementById(id);
 const articleId = item => item.p?.match(/ARTI\d+/)?.[0] || item.u.match(/ARTI\d+/)?.[0];
 const safe = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function dateOf(item) { const m = item.u.match(/\/(20\d\d)\/(\d\d)\/(\d\d)\//); return m ? `${m[1]}.${m[2]}.${m[3]}` : String(item.y); }
-function filtered() { const q = state.query.toLocaleLowerCase('zh-CN'); return state.items.filter(a => (state.year === 'all' || String(a.y) === state.year) && (!q || (a.t + ' ' + a.d).toLocaleLowerCase('zh-CN').includes(q))); }
+function filtered() { const q = state.query.toLocaleLowerCase('zh-CN'); return state.items.filter(a => (a.t + ' ' + a.d).toLocaleLowerCase('zh-CN').includes(q)); }
 function articleRow(item) {
   const b = document.createElement('button'); b.className = 'art-item'; b.type = 'button';
   const title = document.createElement('span'); title.className = 'speech-row-title'; title.textContent = item.t;
@@ -17,21 +19,25 @@ function articleRow(item) {
 }
 function renderList() {
   const rows = state.query ? filtered() : state.items;
-  $('listTitle').textContent = state.query ? '搜索结果' : '目录';
   $('resultCount').textContent = rows.length + ' 篇';
+  $('resultCount').hidden = !state.query;
   const frag = document.createDocumentFragment();
   if (state.query) {
     for (const item of rows.slice(0,state.visible)) frag.append(articleRow(item));
   } else {
     const years = [...new Set(rows.map(a=>a.y))].sort((a,b)=>b-a);
     for (const year of years) {
-      const group = document.createElement('div'); group.className = 'year-block';
-      const header = document.createElement('button'); header.className = 'yb-header'; header.type = 'button';
-      header.innerHTML = '<h3>'+year+'年</h3><span class="yb-info">'+rows.filter(a=>a.y===year).length+' 篇　⌄</span>';
-      const body = document.createElement('div'); body.className = 'yb-body'; body.hidden = year !== years[0];
-      header.setAttribute('aria-expanded',String(!body.hidden));
-      header.onclick = () => { body.hidden = !body.hidden; header.setAttribute('aria-expanded',String(!body.hidden)); if (!body.hidden && !body.childElementCount) rows.filter(a=>a.y===year).forEach(a=>body.append(articleRow(a))); };
-      if (!body.hidden) rows.filter(a=>a.y===year).forEach(a=>body.append(articleRow(a)));
+      const entries = rows.filter(a=>a.y===year);
+      const group = document.createElement('div'); group.className = 'year-block' + (year === years[0] ? '' : ' collapsed');
+      const header = document.createElement('div'); header.className = 'yb-header'; header.role = 'button'; header.tabIndex = 0;
+      header.setAttribute('aria-expanded',String(year === years[0]));
+      header.innerHTML = '<h3>'+year+'年</h3><div class="yb-right"><span class="yb-info">'+entries.length+'篇</span><span class="yb-toggle"><svg class="icon"><use href="#chevron-icon"/></svg></span></div>';
+      const body = document.createElement('div'); body.className = 'yb-body';
+      const articles = document.createElement('div'); articles.className = 'speech-year-articles'; body.append(articles);
+      const expand = () => { const opening = group.classList.toggle('collapsed') === false; header.setAttribute('aria-expanded',String(opening)); if (opening && !articles.childElementCount) entries.forEach(a=>articles.append(articleRow(a))); };
+      header.onclick = expand;
+      header.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); expand(); } };
+      if (year === years[0]) entries.forEach(a=>articles.append(articleRow(a)));
       group.append(header,body); frag.append(group);
     }
   }
@@ -55,35 +61,45 @@ function renderBody(md) {
   }).join('');
 }
 async function openArticle(item, replace = false) {
+  const token = ++state.loadToken;
   state.current = state.items.indexOf(item);
   $('library').hidden = true; $('reader').hidden = false;
   document.body.classList.add('reading','article-active');
   closePanels();
   $('articleTitle').textContent = item.t; $('articleSubtitle').textContent = item.d; $('readerDate').textContent = dateOf(item);
   $('original').href = item.u;
+  $('speechOriginal').href = item.u;
   $('articleBody').innerHTML = '<p>正在加载正文…</p>';
   updateProgress();
   $('next').disabled = state.current <= 0;
   renderDirectory(item);
   renderRelated();
+  updateFavoriteButton();
   if (replace) history.replaceState(null,'','#id='+articleId(item)); else history.pushState(null,'','#id='+articleId(item));
   window.scrollTo(0,0);
   if (!item.p) { $('articleBody').innerHTML = '<p>官网原文目前无法读取，请使用下方官网链接查看。</p>'; updateProgress(); return; }
   try {
     const response = await fetch('../' + item.p); if (!response.ok) throw Error(response.status);
-    $('articleBody').innerHTML = renderBody(await response.text()); updateProgress();
-  } catch (_) { $('articleBody').innerHTML = '<p>正文加载失败，请刷新或访问官网原文。</p>'; updateProgress(); }
+    const markdown = await response.text();
+    if (token === state.loadToken) { $('articleBody').innerHTML = renderBody(markdown); updateProgress(); }
+  } catch (_) { if (token === state.loadToken) { $('articleBody').innerHTML = '<p>正文加载失败，请刷新或访问官网原文。</p>'; updateProgress(); } }
 }
 function renderDirectory(item) {
-  $('directoryTitle').textContent = item.y + '年 · 讲话目录';
+  $('directoryTitle').textContent = '习近平讲话库 · ' + item.y + '年';
+  const entries = state.items.filter(a => a.y === item.y);
+  $('directoryCount').textContent = entries.length + ' 篇';
   const list = document.createDocumentFragment();
-  for (const entry of state.items.filter(a => a.y === item.y)) {
+  entries.forEach((entry, index) => {
     const button = document.createElement('button');
-    button.type = 'button'; button.textContent = entry.t;
-    if (entry === item) button.className = 'active';
+    button.type = 'button'; button.className = 'reading-issue-item' + (entry === item ? ' active' : '');
+    if (entry === item) button.setAttribute('aria-current','page');
+    const number = document.createElement('span'); number.className = 'reading-issue-number'; number.textContent = String(index+1).padStart(2,'0');
+    const title = document.createElement('span'); title.className = 'reading-issue-title'; title.textContent = entry.t;
+    button.append(number,title);
     button.onclick = () => openArticle(entry, true);
     list.append(button);
-  }
+  });
+  $('directoryList').className = 'reading-issue-list';
   $('directoryList').replaceChildren(list);
 }
 function renderRelated() {
@@ -106,6 +122,7 @@ function closePanels() {
   $('directory').setAttribute('aria-expanded','false'); $('settings').setAttribute('aria-expanded','false');
 }
 function showLibrary() {
+  state.loadToken++;
   $('reader').hidden = true; $('library').hidden = false;
   document.body.classList.remove('reading','article-active'); closePanels();
   updateProgress();
@@ -115,18 +132,21 @@ function applySettings() {
   const r = state.reading;
   document.documentElement.style.setProperty('--article-fs',r.font+'px');
   document.documentElement.style.setProperty('--article-lh',r.line);
+  document.documentElement.style.setProperty('--article-w-delta',r.width+'px');
   document.documentElement.style.setProperty('--article-indent',r.indent+'em');
+  document.documentElement.dataset.articleWidth = Number(r.width) < 0 ? 'narrow' : Number(r.width) > 0 ? 'wide' : 'standard';
   document.documentElement.dataset.readingPaper = r.paper;
   document.documentElement.dataset.theme = r.theme;
   document.querySelectorAll('[data-setting]').forEach(group => {
     group.querySelectorAll('button').forEach(b => b.classList.toggle('active',b.dataset.value === r[group.dataset.setting]));
   });
-  localStorage.setItem('speech-reading',JSON.stringify(r));
+  for (const [key, value] of Object.entries(r)) localStorage.setItem(settingKeys[key], value);
 }
 function togglePanel(id) {
   const opening = $(id).hidden; closePanels();
   $(id).hidden = !opening;
   $(id === 'directoryPanel' ? 'directory' : 'settings').setAttribute('aria-expanded',String(opening));
+  if (opening && id === 'directoryPanel') $('directoryList').querySelector('[aria-current="page"]')?.scrollIntoView({block:'nearest'});
 }
 async function init() {
   applySettings();
@@ -135,26 +155,74 @@ async function init() {
     state.items = (await response.json()).items;
     $('count').textContent = state.items.length + ' 篇 · 2012—2026';
     renderList();
+    if (state.view === 'favorites') renderFavorites();
     const id = location.hash.match(/id=(ARTI\d+)/)?.[1]; if (id) { const item = state.items.find(a => articleId(a) === id); if (item) openArticle(item,true); }
   } catch (_) { $('list').innerHTML = '<p class="empty">目录暂时无法加载，请稍后重试。</p>'; }
 }
-$('query').oninput = e => { state.query = e.target.value.trim(); state.visible = 40; renderList(); };
+function showView(view) {
+  state.view = view;
+  $('catalogView').classList.toggle('active',view === 'catalog');
+  $('favoritesView').classList.toggle('active',view === 'favorites');
+  $('favoritesToggle').classList.toggle('active',view === 'favorites');
+  $('catalogNav').classList.toggle('active',view === 'catalog' && $('speechSearch').hidden);
+  $('favoritesNav').classList.toggle('active',view === 'favorites');
+  $('searchNav').classList.toggle('active',view === 'catalog' && !$('speechSearch').hidden);
+  if (view === 'favorites') renderFavorites();
+  window.scrollTo(0,0);
+}
+function renderFavorites() {
+  const list = $('favoritesList');
+  const favorites = state.favorites.map(id => state.items.find(a => articleId(a) === id)).filter(Boolean);
+  if (!favorites.length) { list.innerHTML = '<div class="fav-empty"><div class="fav-empty-text">还没有收藏文章</div><div class="fav-empty-hint">阅读时可在设置面板收藏</div></div>'; return; }
+  list.replaceChildren(...favorites.map(articleRow));
+}
+function updateFavoriteButton() {
+  const item = state.items[state.current];
+  const active = !!item && state.favorites.includes(articleId(item));
+  $('speechFav').classList.toggle('active',active);
+  $('speechFav').setAttribute('aria-pressed',String(active));
+  $('speechFav').querySelector('span').textContent = active ? '已收藏' : '收藏';
+}
+function toggleFavorite() {
+  const item = state.items[state.current]; if (!item) return;
+  const id = articleId(item);
+  state.favorites = state.favorites.includes(id) ? state.favorites.filter(x=>x!==id) : [...state.favorites,id];
+  localStorage.setItem('speech-favorites',JSON.stringify(state.favorites));
+  updateFavoriteButton();
+}
+async function shareArticle() {
+  const item = state.items[state.current]; if (!item) return;
+  const data = {title:item.t,url:location.href};
+  try {
+    if (navigator.share) await navigator.share(data);
+    else {
+      if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(data.url);
+      else { const input = document.createElement('textarea'); input.value = data.url; document.body.append(input); input.select(); document.execCommand('copy'); input.remove(); }
+      $('speechShare').classList.add('copied'); setTimeout(()=>$('speechShare').classList.remove('copied'),1800);
+    }
+  } catch (_) { /* Cancelled share leaves the reader unchanged. */ }
+}
+$('query').oninput = e => { state.query = e.target.value.trim(); state.visible = 40; renderList(); showView('catalog'); };
 function toggleSearch(open) {
   $('speechSearch').hidden = !open;
   $('searchToggle').setAttribute('aria-expanded', String(open));
-  $('searchNav').classList.toggle('active', open);
-  $('catalogNav').classList.toggle('active', !open);
+  showView('catalog');
   if (open) $('query').focus();
   else if (state.query) { $('query').value = ''; state.query = ''; renderList(); }
 }
 $('searchToggle').onclick = () => toggleSearch($('speechSearch').hidden);
 $('searchNav').onclick = () => toggleSearch(true);
 $('catalogNav').onclick = () => { toggleSearch(false); window.scrollTo({top:0,behavior:'smooth'}); };
+$('favoritesToggle').onclick = () => { if (state.view === 'favorites') showView('catalog'); else { toggleSearch(false); showView('favorites'); } };
+$('favoritesNav').onclick = () => { toggleSearch(false); showView('favorites'); };
 $('more').onclick = () => { state.visible += 40; renderList(); };
 $('back').onclick = showLibrary;
 $('next').onclick = () => { if (state.current > 0) openArticle(state.items[state.current-1],true); };
 $('directory').onclick = () => togglePanel('directoryPanel');
 $('settings').onclick = () => togglePanel('settingsPanel');
+$('settingsClose').onclick = closePanels;
+$('speechFav').onclick = toggleFavorite;
+$('speechShare').onclick = shareArticle;
 $('toTop').onclick = () => window.scrollTo({top:0,behavior:'smooth'});
 function updateProgress() {
   const reading = document.body.classList.contains('reading');
@@ -173,6 +241,8 @@ document.querySelectorAll('[data-setting]').forEach(group => group.onclick = eve
   state.reading[group.dataset.setting] = button.dataset.value;
   applySettings();
 });
+document.addEventListener('click', event => { if (document.body.classList.contains('reading') && !event.target.closest('.reading-dock')) closePanels(); });
+document.addEventListener('keydown', event => { if (event.key === 'Escape') { closePanels(); if (!$('speechSearch').hidden) toggleSearch(false); } });
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applySettings);
-window.onpopstate = () => { const id=location.hash.match(/id=(ARTI\d+)/)?.[1]; const item=state.items.find(a=>articleId(a)===id); if(item) openArticle(item,true); else { $('reader').hidden=true; $('library').hidden=false; document.body.classList.remove('reading','article-active'); closePanels(); } };
+window.onpopstate = () => { const id=location.hash.match(/id=(ARTI\d+)/)?.[1]; const item=state.items.find(a=>articleId(a)===id); if(item) openArticle(item,true); else { state.loadToken++; $('reader').hidden=true; $('library').hidden=false; document.body.classList.remove('reading','article-active'); closePanels(); } };
 init();

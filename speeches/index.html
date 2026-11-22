@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f7f6f3">
 <title>习近平讲话库 · 党内刊物</title>
-<link rel="stylesheet" href="../assets/css/site.css?v=20261122c">
+<link rel="stylesheet" href="../assets/css/site.css?v=20261122d">
 </head>
 <body class="speech-page">
 <svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -13,39 +13,53 @@
  <symbol id="book-icon" viewBox="0 0 24 24"><path d="M4 4h7a3 3 0 0 1 3 3v14a3 3 0 0 0-3-3H4zM20 4h-3a3 3 0 0 0-3 3v14a3 3 0 0 1 3-3h3z"/></symbol>
  <symbol id="list-icon" viewBox="0 0 24 24"><path d="M8 5h13M8 12h13M8 19h13M3 5h.01M3 12h.01M3 19h.01"/></symbol>
  <symbol id="search-icon" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></symbol>
+ <symbol id="chevron-icon" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+ <symbol id="info-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></symbol>
+ <symbol id="star-icon" viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 7 1-5 4.9 1.2 6.9-6.3-3.3-6.3 3.3 1.2-6.9-5-4.9 7-1z"/></symbol>
+ <symbol id="share-icon" viewBox="0 0 24 24"><path d="M12 16V3m0 0-4 4m4-4 4 4M5 13v7h14v-7"/></symbol>
+ <symbol id="external-icon" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6-9 9M19 14v5H5V5h5"/></symbol>
+ <symbol id="close-icon" viewBox="0 0 24 24"><path d="M5 5 19 19M19 5 5 19"/></symbol>
  <symbol id="settings-icon" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16M9 3v6M15 9v6M9 15v6"/></symbol>
  <symbol id="next-icon" viewBox="0 0 24 24"><path d="m5 4 11 8L5 20zM19 4v16"/></symbol>
  <symbol id="up-icon" viewBox="0 0 24 24"><path d="m5 14 7-7 7 7M12 7v13"/></symbol>
 </svg>
-<header class="topbar sidebar-header">
-  <a class="home-link header-home-btn" href="../" aria-label="返回网站首页"><svg class="icon"><use href="#home-icon"/></svg></a>
-  <strong>习近平讲话库</strong>
-  <button class="speech-search-toggle header-search-btn" id="searchToggle" type="button" aria-label="搜索讲话" aria-expanded="false"><svg class="icon"><use href="#search-icon"/></svg></button>
-</header>
 <main>
   <section class="library" id="library">
-    <header class="speech-header"><div><h1>习近平讲话库</h1><p>共产党员网重要讲话 · <span id="count"></span></p></div><img src="../assets/img/cover_speeches.svg" alt="" width="600" height="800"></header>
-    <nav class="nav-tabs"><span class="nav-tab active"><svg class="icon"><use href="#list-icon"/></svg>目录</span></nav>
-    <label class="speech-search" id="speechSearch" hidden><svg class="icon"><use href="#search-icon"/></svg><input id="query" type="search" placeholder="搜索标题与副标题" aria-label="搜索讲话标题与副标题"></label>
-    <div class="speech-results"><h2 id="listTitle">目录</h2><span id="resultCount"></span></div>
-    <div class="catalog-list" id="list" aria-live="polite"></div>
-    <button class="more" id="more" type="button" hidden>显示更多</button>
+    <div class="app-sidebar">
+      <header class="sidebar-header">
+        <div class="sidebar-brand"><h1>习近平讲话库</h1><div class="sidebar-meta"><span id="count"></span></div></div>
+        <a class="header-home-btn" href="../" aria-label="返回网站首页"><svg class="icon"><use href="#home-icon"/></svg></a>
+        <button class="header-search-btn" id="searchToggle" type="button" aria-label="搜索讲话" aria-expanded="false"><svg class="icon"><use href="#search-icon"/></svg></button>
+        <button class="header-about-btn speech-favorites-toggle" id="favoritesToggle" type="button" aria-label="查看收藏"><svg class="icon"><use href="#star-icon"/></svg></button>
+        <a class="header-about-btn" href="https://www.12371.cn/special/xxzd/jh/" target="_blank" rel="noopener" aria-label="查看官网目录"><svg class="icon"><use href="#info-icon"/></svg></a>
+      </header>
+      <section class="search-bar" id="speechSearch" hidden><div class="search-intro"><strong>检索讲话</strong><span>搜索标题与目录副标题</span></div><label class="search-box"><svg class="icon search-icon"><use href="#search-icon"/></svg><input id="query" type="search" placeholder="输入关键词搜索…" aria-label="搜索讲话标题与副标题"></label></section>
+    </div>
+    <div class="app-main">
+      <div class="journal-cover" aria-hidden="true"><img src="../assets/img/cover_speeches.svg" alt="" width="600" height="800"></div>
+      <div class="content"><div class="view active" id="catalogView"><div class="result-info" id="resultCount" hidden></div><div class="catalog-list" id="list" aria-live="polite"></div><button class="more" id="more" type="button" hidden>显示更多</button></div><div class="view" id="favoritesView"><div class="catalog-list" id="favoritesList"></div></div></div>
+    </div>
+    <nav class="bottom-nav mobile-only speech-bottom-nav" aria-label="讲话库导航"><a class="bn-item bn-home" href="../"><svg class="icon"><use href="#home-icon"/></svg><span class="bn-label">首页</span></a><button class="bn-item active" id="catalogNav" type="button"><svg class="icon"><use href="#list-icon"/></svg><span class="bn-label">目录</span></button><button class="bn-item" id="favoritesNav" type="button"><svg class="icon"><use href="#star-icon"/></svg><span class="bn-label">收藏</span></button><button class="bn-item" id="searchNav" type="button"><svg class="icon"><use href="#search-icon"/></svg><span class="bn-label">搜索</span></button></nav>
   </section>
-  <nav class="bottom-nav speech-bottom-nav" aria-label="讲话库导航"><a class="bn-item" href="../"><svg class="icon"><use href="#home-icon"/></svg><span>首页</span></a><button class="bn-item active" id="catalogNav" type="button"><svg class="icon"><use href="#book-icon"/></svg><span>目录</span></button><button class="bn-item" id="searchNav" type="button"><svg class="icon"><use href="#search-icon"/></svg><span>搜索</span></button></nav>
   <article class="reader article-page" id="reader" hidden>
     <header class="article-page-header article-heading"><div class="ap-header-inner"><h1 class="ap-title" id="articleTitle"></h1><p class="ap-meta" id="articleSubtitle"></p><span class="ap-meta" id="readerDate"></span></div></header>
     <div class="reader-paper"><div class="article-page-body" id="articleBody"></div></div>
     <footer class="reader-footer"><a id="original" target="_blank" rel="noopener">查看官网原文 ↗</a><section class="ap-related" id="related" aria-label="相关阅读"></section></footer>
     <button class="back-to-top" id="toTop" type="button" aria-label="返回顶部，外圈显示阅读进度"><svg class="progress-ring" viewBox="0 0 48 48"><circle class="progress-ring-bg" cx="24" cy="24" r="21"/><circle class="progress-ring-fg" id="progressRingFg" cx="24" cy="24" r="21"/></svg><svg class="icon"><use href="#up-icon"/></svg></button>
     <div class="reading-dock">
-      <div class="dock-panel reading-issue-menu" id="directoryPanel" hidden><h2 id="directoryTitle">本年目录</h2><div id="directoryList"></div></div>
-      <div class="dock-panel settings-panel reading-operation-menu" id="settingsPanel" hidden>
-        <h2>阅读设置</h2>
-        <div class="setting-row"><span>字号</span><div data-setting="font"><button data-value="16">小</button><button data-value="20">标准</button><button data-value="24">大</button><button data-value="28">特大</button></div></div>
-        <div class="setting-row"><span>背景</span><div data-setting="theme"><button data-value="auto">跟随系统</button><button data-value="light">白天</button><button data-value="dark">夜晚</button></div></div>
-        <div class="setting-row"><span>行距</span><div data-setting="line"><button data-value="1.75">紧凑</button><button data-value="2.05">标准</button><button data-value="2.35">宽松</button></div></div>
-        <div class="setting-row"><span>首行缩进</span><div data-setting="indent"><button data-value="2">缩进</button><button data-value="0">不缩进</button></div></div>
-        <div class="setting-row"><span>纸张</span><div data-setting="paper"><button data-value="default">默认</button><button data-value="warm">米黄</button><button data-value="white">纯白</button></div></div>
+      <div class="reading-issue-menu" id="directoryPanel" hidden><div class="reading-issue-heading"><strong id="directoryTitle">本年目录</strong><span id="directoryCount"></span></div><div class="reading-issue-list" id="directoryList"></div></div>
+      <div class="reading-operation-menu" id="settingsPanel" hidden>
+        <div class="ap-settings-panel show" id="speechSettingsPanel">
+          <button class="asp-close-btn" id="settingsClose" type="button" aria-label="关闭阅读设置"><svg class="icon"><use href="#close-icon"/></svg></button>
+          <h2 class="asp-title">阅读设置</h2>
+          <div class="asp-section"><div class="asp-label">字号</div><div class="asp-btn-group" id="fontSizeGroup" data-setting="font"><button class="asp-btn" data-value="16">小</button><button class="asp-btn" data-value="20">标准</button><button class="asp-btn" data-value="24">大</button><button class="asp-btn" data-value="28">特大</button></div></div>
+          <div class="asp-section"><div class="asp-label">背景</div><div class="asp-btn-group" id="themeGroup" data-setting="theme"><button class="asp-btn" data-value="light">白天</button><button class="asp-btn" data-value="dark">夜晚</button><button class="asp-btn" data-value="auto">跟随系统</button></div></div>
+          <div class="asp-section"><div class="asp-label">行距</div><div class="asp-btn-group" id="lineHeightGroup" data-setting="line"><button class="asp-btn" data-value="1.75">紧凑</button><button class="asp-btn" data-value="2.05">标准</button><button class="asp-btn" data-value="2.35">宽松</button></div></div>
+          <div class="asp-section"><div class="asp-label">页宽</div><div class="asp-btn-group" id="widthGroup" data-setting="width"><button class="asp-btn" data-value="-80">窄</button><button class="asp-btn" data-value="0">标准</button><button class="asp-btn" data-value="120">宽</button></div></div>
+          <div class="asp-section"><div class="asp-label">首行缩进</div><div class="asp-btn-group" id="indentGroup" data-setting="indent"><button class="asp-btn" data-value="2">缩进</button><button class="asp-btn" data-value="0">不缩进</button></div></div>
+          <div class="asp-section asp-section--light-only" id="paperSection"><div class="asp-label">纸张</div><div class="asp-btn-group" id="paperGroup" data-setting="paper"><button class="asp-btn" data-value="default">默认</button><button class="asp-btn" data-value="warm">米黄</button><button class="asp-btn" data-value="white">纯白</button></div></div>
+        </div>
+        <div class="ap-actions" aria-label="文章操作"><button class="ap-fav-btn" id="speechFav" type="button" aria-label="收藏文章"><svg class="icon"><use href="#star-icon"/></svg><span>收藏</span></button><button class="ap-copy-btn" id="speechShare" type="button" aria-label="分享文章"><svg class="icon"><use href="#share-icon"/></svg><span>分享</span></button><a class="ap-original-link" id="speechOriginal" target="_blank" rel="noopener" aria-label="查看原文"><svg class="icon"><use href="#external-icon"/></svg><span>原文</span></a></div>
       </div>
       <nav class="dock-actions ap-nav" aria-label="阅读导航与操作">
         <a href="../"><svg class="icon"><use href="#home-icon"/></svg><span>首页</span></a>
@@ -57,6 +71,6 @@
     </div>
   </article>
 </main>
-<script src="speeches.js?v=20261122c" defer></script>
+<script src="speeches.js?v=20261122d" defer></script>
 </body>
 </html>

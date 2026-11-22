@@ -346,51 +346,32 @@ body.article-active { --reading-dock-height: 86px; --reader-shortcut-size: 44px;
   .reading-dock { display: none !important; }
 }
 
-/* The speech collection uses the magazine catalog and reader surfaces. */
-.speech-page { font-family: var(--font-sans); }
+/* Speech collection reuses the magazine shell, catalog and reader components. */
 .speech-page [hidden] { display: none !important; }
 .speech-page .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
-.speech-page .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 58px; padding: 0 max(20px, calc((100vw - 1138px)/2)); border-bottom: 1px solid var(--border); background: var(--glass-surface); backdrop-filter: blur(20px); }
-.speech-page .topbar a { color: var(--text-2); font-size: 13px; text-decoration: none; }
-.speech-page .topbar strong { color: var(--text); font-size: 15px; }
-.speech-page .topbar a:hover { color: var(--primary); }
-.speech-page.reading .topbar { display: none; }
-.speech-page main { padding: 0; }
-.speech-page .library { max-width: 1138px; margin: 0 auto; padding: 28px 24px 100px; }
-.speech-page .speech-header { display: flex; align-items: center; justify-content: space-between; gap: 25px; min-height: 178px; padding: 20px 30px; margin-bottom: 24px; border: 1px solid var(--glass-border); border-radius: 22px; background: var(--glass-surface); }
-.speech-page .speech-header h1 { margin: 0; color: var(--text); font: 680 clamp(28px, 3vw, 38px)/1.35 var(--font-sans); }
-.speech-page .speech-header p { margin: 10px 0 0; color: var(--text-3); font-size: 13px; }
-.speech-page .speech-header img { width: 82px; height: 110px; object-fit: contain; border-radius: 5px; box-shadow: 0 8px 20px rgba(30,39,60,.12); }
-.speech-page .nav-tabs { display: flex; width: fit-content; margin: 0 0 18px; padding: 4px; }
-.speech-page .nav-tab { display: inline-flex; align-items: center; gap: 7px; padding: 8px 17px; font-size: 13px; }
-.speech-page .icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.speech-page .speech-search { display: flex; align-items: center; gap: 9px; width: min(420px, 100%); min-height: 43px; padding: 0 13px; margin: 0 0 25px; border: 1px solid var(--border); border-radius: 13px; background: var(--card); color: var(--text-3); }
-.speech-page .speech-search:focus-within { border-color: var(--primary); }
-.speech-page .speech-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); font: 14px var(--font-sans); }
-.speech-page .speech-bottom-nav { display: none; }
-.speech-page .topbar { justify-content: flex-end; max-width: 1190px; min-height: 70px; margin: 0 auto; padding: 12px 26px; border: 0; background: transparent; backdrop-filter: none; }
-.speech-page .topbar strong { display: none; }
-.speech-page .topbar :is(.header-home-btn,.header-search-btn) { display: grid; place-items: center; flex: 0 0 42px; width: 42px; height: 42px; border: 1px solid var(--glass-border); border-radius: 14px; background: var(--glass-surface); color: var(--text-2); cursor: pointer; }
-.speech-page .library { display: grid; grid-template-columns: minmax(230px,315px) minmax(0,1fr); column-gap: clamp(40px,6vw,86px); align-items: start; padding: 0 26px 100px; }
-.speech-page .speech-header { grid-column: 1; grid-row: 1 / span 4; display: block; position: sticky; top: 24px; min-height: 0; padding: 0; margin: 0; border: 0; background: transparent; }
-.speech-page .speech-header > div { display: none; }
-.speech-page .speech-header img { width: 100%; height: auto; aspect-ratio: 3/4; border: 1px solid var(--border); border-radius: 7px; box-shadow: 0 14px 34px rgba(35,40,55,.11); }
-.speech-page .library > :not(.speech-header) { grid-column: 2; min-width: 0; }
-.speech-page .speech-search { box-sizing: border-box; width: 100%; max-width: none; min-height: 56px; padding: 0 18px; border: 1px solid var(--glass-border); border-radius: 16px; background: var(--glass-surface); backdrop-filter: blur(20px); }
-.speech-page .speech-results { margin-top: 12px; }
-.speech-page .speech-results { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 13px; }
-.speech-page .speech-results h2 { margin: 0; font: 650 21px var(--font-sans); }
-.speech-page .speech-results span { color: var(--text-3); font-size: 12px; }
+.speech-page .icon { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.speech-page .library { min-height: 100vh; }
+.speech-page .sidebar-header { max-width: 1190px; }
+.speech-page .sidebar-brand h1 { margin: 0; }
+.speech-page .sidebar-header > a { display: grid; place-items: center; text-decoration: none; }
+.speech-page .speech-favorites-toggle.active { background: color-mix(in srgb, var(--primary) 10%, var(--card)); color: var(--primary); }
+.speech-page .app-sidebar .search-bar:not([hidden]) { display: block; }
+.speech-page .search-box { display: flex; align-items: center; gap: 10px; }
+.speech-page .search-box input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); font: 15px var(--font-sans); }
+.speech-page .nav-tab { flex: none; }
+.speech-page .result-info { margin-bottom: 14px; }
+.speech-page .year-block { padding-inline: 22px; }
 .speech-page .yb-header { width: 100%; color: var(--text); background: transparent; font: inherit; text-align: left; }
 .speech-page .yb-header h3 { margin: 0; }
-.speech-page .yb-header[aria-expanded="false"] { padding-bottom: 20px; }
 .speech-page .yb-body { padding: 0 0 12px; }
-.speech-page .art-item { padding: 12px 14px; color: var(--text); cursor: pointer; }
+.speech-page .speech-year-articles { padding: 2px 8px 4px; }
+.speech-page .art-item { padding: 11px 12px; color: var(--text); cursor: pointer; }
 .speech-page .speech-row-title { display: block; font-size: 15px; font-weight: 600; line-height: 1.55; }
-.speech-page .speech-row-subtitle { display: block; margin-top: 4px; color: var(--text-3); font-size: 12px; line-height: 1.6; }
+.speech-page .speech-row-subtitle { display: block; margin-top: 3px; color: var(--text-3); font-size: 12px; line-height: 1.6; }
 .speech-page .speech-empty { padding: 28px 0; color: var(--text-3); text-align: center; }
 .speech-page .more { display: block; margin: 22px auto; padding: 9px 22px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text); cursor: pointer; }
-.speech-page.reading .reader { min-height: 100vh; }
+.speech-page.reading .library { display: none; }
+.speech-page .reader { min-height: 100vh; }
 .speech-page .article-page-header { padding: 40px 0 30px; }
 .speech-page .ap-header-inner { display: block; }
 .speech-page .ap-title { margin: 0 0 14px; }
@@ -406,28 +387,30 @@ body.article-active { --reading-dock-height: 86px; --reader-shortcut-size: 44px;
 .speech-page .reading-dock .ap-nav > a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 0; min-height: 60px; padding: 7px 2px; border-radius: 17px; color: var(--text-2); font: 550 11px/1.3 var(--font-sans); text-decoration: none; }
 .speech-page .reading-dock .ap-nav > a:hover, .speech-page .reading-dock .ap-nav > button[aria-expanded="true"] { background: color-mix(in srgb, var(--card) 72%, transparent); color: var(--primary); }
 .speech-page .reading-dock .ap-nav svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.speech-page .dock-panel h2 { margin: 0 4px 10px; font: 650 17px var(--font-sans); }
-.speech-page #directoryList button { display: block; width: 100%; padding: 10px; border: 0; border-radius: 12px; background: transparent; color: var(--text); font: 13px/1.5 var(--font-sans); text-align: left; cursor: pointer; }
-.speech-page #directoryList button:hover, .speech-page #directoryList button.active { background: color-mix(in srgb, var(--primary) 10%, var(--card)); }
-.speech-page .settings-panel { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
-.speech-page .settings-panel > h2, .speech-page .setting-row:nth-of-type(-n+2) { grid-column: 1 / -1; }
-.speech-page .setting-row > span { display: block; margin-bottom: 5px; color: var(--text-2); font-size: 11px; }
-.speech-page .setting-row > div { display: flex; gap: 2px; padding: 2px; border: 1px solid var(--glass-border); border-radius: 12px; background: var(--bg-2); }
-.speech-page .setting-row button { flex: 1; min-width: 0; min-height: 31px; padding: 4px 2px; border: 0; border-radius: 9px; background: transparent; color: var(--text-2); font: 11px var(--font-sans); cursor: pointer; }
-.speech-page .setting-row button.active { background: var(--card); color: var(--text); box-shadow: 0 1px 4px rgba(25,30,45,.08); }
-html[data-reading-paper="warm"] .speech-page .reader-paper { background: #efe4d2; }
-html[data-reading-paper="white"] .speech-page .reader-paper { background: #fff; }
-html[data-theme="dark"] .speech-page .reader-paper { background: var(--bg); }
-@media (prefers-color-scheme: dark) { html[data-theme="auto"] .speech-page .reader-paper { background: var(--bg); } }
+.speech-page .reading-issue-heading { display: flex; justify-content: space-between; }
+.speech-page .reading-issue-list { display: grid; }
+.speech-page .reading-issue-item { display: flex; width: 100%; border: 0; background: transparent; color: var(--text); font: 13px/1.5 var(--font-sans); text-align: left; cursor: pointer; }
+.speech-page .reading-issue-number { flex: none; width: 26px; color: var(--text-3); }
+.speech-page .reading-operation-menu .ap-settings-panel.show { position: relative; min-width: 0; max-height: none; overflow: visible; }
+.speech-page .reading-operation-menu .asp-section:has(#fontSizeGroup), .speech-page .reading-operation-menu .asp-section:has(#themeGroup) { grid-column: 1 / -1; }
+.speech-page .reading-operation-menu .ap-actions { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
+.speech-page .reading-operation-menu .ap-actions > * { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: auto; font: 11px var(--font-sans); text-decoration: none; }
+.speech-page .reading-operation-menu .ap-actions svg { width: 18px; height: 18px; }
+.speech-page .reading-operation-menu .ap-fav-btn.active { color: var(--primary); }
+.speech-page .reading-operation-menu .ap-copy-btn.copied { color: #2e7d32; }
+.speech-page .reading-dock .reading-issue-menu h2 { margin: 0 4px 10px; font: 650 17px var(--font-sans); }
+html[data-reading-paper="warm"] .speech-page .article-page { --bg: #f3ecd7; --bg-2: #ece2c6; --card: #f7f2e0; --text: #3b3429; --text-2: #756b58; --text-3: #9a8f78; --border: #ded3b6; --border-2: #d0c3a0; }
+html[data-reading-paper="white"] .speech-page .article-page { --bg: #fff; --bg-2: #f7f7f7; --card: #fff; --text: #2b2726; --text-2: #66605e; --text-3: #918a88; --border: #e9e9e9; --border-2: #dcdcdc; }
+html[data-theme="dark"] .speech-page .article-page { --bg: #191c22; --bg-2: #252a33; --card: #2b3039; --text: #f2f3f5; --text-2: #c6cad3; --text-3: #a4aab5; --border: #404650; --border-2: #565c67; }
+@media (prefers-color-scheme: dark) { html[data-theme="auto"] .speech-page .article-page { --bg: #191c22; --bg-2: #252a33; --card: #2b3039; --text: #f2f3f5; --text-2: #c6cad3; --text-3: #a4aab5; --border: #404650; --border-2: #565c67; } }
 @media (max-width: 767px) {
-  .speech-page .topbar { justify-content: flex-end; min-height: 60px; padding: 10px 16px 8px; }
-  .speech-page .topbar strong { display: block; flex: 1; overflow: hidden; font-size: 19px; text-overflow: ellipsis; white-space: nowrap; }
-  .speech-page .topbar .home-link { display: none; }
-  .speech-page .library { display: block; padding: 16px 16px 92px; }
-  .speech-page .speech-header { display: none; }
-  .speech-page .speech-bottom-nav { display: flex; z-index: 100; }
-  .speech-page.reading .speech-bottom-nav { display: none; }
-  .speech-page .speech-bottom-nav .bn-item { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 2px; text-decoration: none; cursor: pointer; }
+  .speech-page .sidebar-header .header-home-btn { display: none; }
+  .speech-page .sidebar-header .speech-favorites-toggle { display: none; }
+  .speech-page .app-main { padding: 0; }
+  .speech-page .content { padding: 18px 16px 96px; }
+  .speech-page .year-block { padding-inline: 15px; }
+  .speech-page .speech-bottom-nav { display: flex; }
+  .speech-page .speech-bottom-nav .bn-item { text-decoration: none; }
   .speech-page .speech-bottom-nav .bn-item .icon { width: 20px; height: 20px; }
   .speech-page .article-page-header { padding: 34px 0 25px; }
   .speech-page .article-page-body { padding-top: 32px; padding-bottom: 56px; }
