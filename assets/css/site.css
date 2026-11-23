@@ -3806,6 +3806,8 @@ html[data-theme="dark"] .year-block, html[data-theme="dark"] .nav-tab.active { b
 .gs-body-search { display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; width: 100%; min-height: 46px; margin: -2px 0 18px; padding: 0 15px; border: 0; border-radius: 13px; background: var(--bg); color: var(--text-2); font: 570 13px/1.4 var(--font-sans); cursor: pointer; }
 .gs-body-search:hover { background: var(--bg-2); color: var(--text); }
 .gs-body-search .icon { width: 17px; height: 17px; }
+.gs-more[hidden] { display: none; }
+.gs-more { display: block; margin: 22px auto 4px; padding: 10px 22px; border: 1px solid var(--border); border-radius: 13px; background: var(--card); color: var(--text); font: 550 13px var(--font-sans); cursor: pointer; }
 .gs-count { margin: 12px 2px 10px; color: var(--text-3); font-size: 13px; }
 .global-search .results-list { padding-bottom: 4px; }
 
@@ -3992,8 +3994,9 @@ body.article-active { --reading-dock-height: 86px; --reader-shortcut-size: 44px;
 
 /* Speech collection reuses the magazine shell, catalog and reader components. */
 #speechApp { display: none; }
-body.speech-active #homePage, body.speech-active #app, body.speech-active #aboutPage, body.speech-active #sectionPage, body.speech-active #articlePage { display: none !important; }
+body.speech-active #homePage, body.speech-active #app, body.speech-active #sectionPage, body.speech-active #articlePage { display: none !important; }
 body.speech-active #speechApp { display: block !important; }
+body.speech-active.about-active #speechApp { display: none !important; }
 .speech-page [hidden] { display: none !important; }
 .speech-page .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 .speech-page .icon { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -4001,12 +4004,7 @@ body.speech-active #speechApp { display: block !important; }
 .speech-page .sidebar-header { max-width: 1190px; }
 .speech-page .sidebar-brand h1 { margin: 0; }
 .speech-page .sidebar-header > a { display: grid; place-items: center; text-decoration: none; }
-.speech-page .gs-box #query { min-width: 0; height: 100%; padding: 0 18px 0 52px; outline: none; font: 450 16px/1.4 var(--font-sans); -webkit-appearance: none; appearance: none; }
-.speech-page .gs-box #query:focus-visible { outline: none; }
-.speech-page .search-box { display: flex; align-items: center; gap: 10px; }
-.speech-page .search-box input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); font: 15px var(--font-sans); }
 .speech-page .nav-tab { flex: none; }
-.speech-page .result-info { margin-bottom: 14px; }
 .speech-page .year-block { padding-inline: 22px; }
 .speech-page .yb-header { width: 100%; color: var(--text); background: transparent; font: inherit; text-align: left; }
 .speech-page .yb-header h3 { margin: 0; }
@@ -4016,12 +4014,6 @@ body.speech-active #speechApp { display: block !important; }
 .speech-page .speech-row-title { display: block; font-size: 15px; font-weight: 600; line-height: 1.55; }
 .speech-page .speech-row-subtitle { display: block; margin-top: 3px; color: var(--text-3); font-size: 12px; line-height: 1.6; }
 .speech-page .speech-empty { padding: 28px 0; color: var(--text-3); text-align: center; }
-.speech-page .header-about-btn.active { color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, var(--card)); }
-.speech-page .speech-about { max-width: 720px; margin: 24px auto; padding: 32px; border: 1px solid var(--border); border-radius: 20px; background: var(--card); color: var(--text-2); line-height: 1.85; }
-.speech-page .speech-about h2 { margin: 0 0 16px; color: var(--text); font-size: 22px; }
-.speech-page .speech-about p { margin: 0 0 14px; }
-.speech-page .speech-about a { color: var(--primary); }
-.speech-page .more { display: block; margin: 22px auto; padding: 9px 22px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text); cursor: pointer; }
 .speech-page.reading .library { display: none; }
 .speech-page .reader { min-height: 100vh; }
 .speech-page .article-page-header { padding: 40px 0 30px; }

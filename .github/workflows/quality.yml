@@ -19,9 +19,11 @@ jobs:
         run: python scripts/check_data.py
       - name: Check generated search index
         run: python scripts/build_search_index.py --check
+      - name: Check speech library and body search files
+        run: python scripts/check_speeches.py && python scripts/build_speech_body_search.py --check
       - name: Check generated stylesheet
         run: python scripts/build_styles.py --check
       - name: Check JavaScript syntax
-        run: node --check assets/js/app.js && node --check sw.js
+        run: node --check assets/js/app.js && node --check speeches/speeches.js && node --check sw.js
       - name: Check reading progress behavior
         run: node --test scripts/test_reading_progress.js

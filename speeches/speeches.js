@@ -1,9 +1,9 @@
 'use strict';
-const VERSION = '20261123d';
+const VERSION = '20261123g';
 const savedSettings = JSON.parse(localStorage.getItem('speech-reading') || '{}');
 const settingKeys = {font:'reading_fontsize',theme:'reading_theme',line:'reading_lineheight',width:'reading_width',indent:'reading_indent',paper:'reading_paper'};
 const stored = (key, fallback) => localStorage.getItem(settingKeys[key]) ?? savedSettings[key] ?? fallback;
-const state = { items: [], query: '', scope: 'all', visible: 40, current: -1, loadToken: 0, view: 'catalog', favorites: JSON.parse(localStorage.getItem('speech-favorites') || '[]'),
+const state = { items: [], current: -1, loadToken: 0, view: 'catalog', favorites: JSON.parse(localStorage.getItem('speech-favorites') || '[]'),
   reading: { font: stored('font','20'), theme: stored('theme','auto'), line: stored('line','2.05'), width: stored('width','0'), indent: stored('indent','2'), paper: stored('paper','default') } };
 const speechRoot = document.getElementById('speechApp');
 const $ = id => speechRoot.querySelector('#' + id);
@@ -11,7 +11,6 @@ const speechHash = id => '#m=speeches' + (id ? '&a=' + id : '');
 const articleId = item => item.p?.match(/ARTI\d+/)?.[0] || item.u.match(/ARTI\d+/)?.[0];
 const safe = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function dateOf(item) { const m = item.u.match(/\/(20\d\d)\/(\d\d)\/(\d\d)\//); return m ? `${m[1]}.${m[2]}.${m[3]}` : String(item.y); }
-function filtered() { const q = state.query.toLocaleLowerCase('zh-CN'); return state.items.filter(a => (state.scope === 'title' ? a.t : state.scope === 'subtitle' ? a.d : a.t + ' ' + a.d).toLocaleLowerCase('zh-CN').includes(q)); }
 function articleRow(item) {
   const b = document.createElement('button'); b.className = 'art-item'; b.type = 'button';
   const title = document.createElement('span'); title.className = 'speech-row-title'; title.textContent = item.t;
@@ -39,24 +38,6 @@ function renderList() {
   }
   $('list').replaceChildren(frag);
   if (!rows.length) $('list').innerHTML = '<p class="speech-empty">目录暂时无法加载</p>';
-}
-function searchRow(item) {
-  const card = document.createElement('div'); card.className = 'result-card';
-  const button = document.createElement('button'); button.className = 'result-card-main'; button.type = 'button';
-  const title = document.createElement('span'); title.className = 'rc-title'; title.textContent = item.t;
-  const meta = document.createElement('span'); meta.className = 'rc-meta';
-  const tag = document.createElement('span'); tag.className = 'rc-tag'; tag.textContent = item.y + '年'; meta.append(tag);
-  const subtitle = document.createElement('span'); subtitle.className = 'rc-snippet'; subtitle.textContent = item.d.length > 110 ? item.d.slice(0,110) + '…' : item.d;
-  button.append(title,meta,subtitle); button.onclick = () => { toggleSearch(false); openArticle(item); };
-  card.append(button); return card;
-}
-function renderSearch() {
-  const list = $('speechSearchResults'); list.replaceChildren();
-  if (!state.query) { $('resultCount').textContent = ''; $('more').hidden = true; return; }
-  const rows = filtered();
-  $('resultCount').textContent = rows.length ? '找到 ' + rows.length + ' 篇讲话' : '未找到匹配的讲话';
-  list.replaceChildren(...rows.slice(0,state.visible).map(searchRow));
-  $('more').hidden = rows.length <= state.visible;
 }
 function inline(text) {
   return safe(text).replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g, (_,alt,url) => `<img loading="lazy" src="${url}" alt="${alt}">`)
@@ -195,12 +176,10 @@ function showView(view) {
   state.view = view;
   $('catalogView').classList.toggle('active',view === 'catalog');
   $('favoritesView').classList.toggle('active',view === 'favorites');
-  $('aboutView').classList.toggle('active',view === 'about');
   $('catalogTab').classList.toggle('active',view === 'catalog');
   $('favoritesTab').classList.toggle('active',view === 'favorites');
-  $('catalogNav').classList.toggle('active',view === 'catalog' && $('speechSearch').hidden);
+  $('catalogNav').classList.toggle('active',view === 'catalog');
   $('favoritesNav').classList.toggle('active',view === 'favorites');
-  $('aboutToggle').classList.toggle('active',view === 'about');
   if (view === 'favorites') renderFavorites();
   window.scrollTo(0,0);
 }
@@ -236,39 +215,12 @@ async function shareArticle() {
     }
   } catch (_) { /* Cancelled share leaves the reader unchanged. */ }
 }
-function syncSearchViewport() {
-  if ($('speechSearch').hidden) return;
-  const viewport = window.visualViewport;
-  $('speechSearch').style.setProperty('--gs-viewport-top',(viewport ? viewport.offsetTop : 0)+'px');
-  $('speechSearch').style.setProperty('--gs-viewport-height',(viewport ? viewport.height : innerHeight)+'px');
-}
-$('query').oninput = e => { state.query = e.target.value.trim(); state.visible = 40; renderSearch(); };
-function toggleSearch(open) {
-  $('speechSearch').hidden = !open;
-  $('searchToggle').setAttribute('aria-expanded', String(open));
-  document.body.classList.toggle('global-search-active',open);
-  $('catalogNav').classList.toggle('active',!open && state.view === 'catalog');
-  $('favoritesNav').classList.toggle('active',!open && state.view === 'favorites');
-  if (open) { syncSearchViewport(); $('query').focus(); $('query').select(); renderSearch(); }
-}
-$('searchToggle').onclick = () => toggleSearch($('speechSearch').hidden);
-$('searchClose').onclick = () => toggleSearch(false);
-$('speechSearch').onclick = e => { if (e.target === $('speechSearch')) toggleSearch(false); };
-$('catalogNav').onclick = () => { toggleSearch(false); showView('catalog'); };
-$('favoritesNav').onclick = () => { toggleSearch(false); showView('favorites'); };
-$('catalogTab').onclick = () => { toggleSearch(false); showView('catalog'); };
-$('favoritesTab').onclick = () => { toggleSearch(false); showView('favorites'); };
-$('aboutToggle').onclick = () => { toggleSearch(false); if (state.view === 'about') { showView('catalog'); history.pushState({speech:true},'',speechHash()); } else { showView('about'); history.pushState({speech:true},'','#m=speeches&about'); } };
-$('more').onclick = () => { state.visible += 40; renderSearch(); };
-speechRoot.querySelectorAll('[data-scope]').forEach(button => button.onclick = () => {
-  state.scope = button.dataset.scope; state.visible = 40;
-  speechRoot.querySelectorAll('[data-scope]').forEach(other => { const active = other === button; other.classList.toggle('active',active); other.setAttribute('aria-pressed',String(active)); });
-  renderSearch();
-});
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize',syncSearchViewport);
-  window.visualViewport.addEventListener('scroll',syncSearchViewport);
-}
+$('searchToggle').onclick = () => openGlobalSearch();
+$('catalogNav').onclick = () => { closeGlobalSearch(); showView('catalog'); };
+$('favoritesNav').onclick = () => { closeGlobalSearch(); showView('favorites'); };
+$('catalogTab').onclick = () => { closeGlobalSearch(); showView('catalog'); };
+$('favoritesTab').onclick = () => { closeGlobalSearch(); showView('favorites'); };
+$('aboutToggle').onclick = () => { closeGlobalSearch(); showAboutPage(); };
 $('back').onclick = showLibrary;
 $('next').onclick = () => { if (state.current > 0) openArticle(state.items[state.current-1],true); };
 $('directory').onclick = () => togglePanel('directoryPanel');
@@ -295,7 +247,7 @@ speechRoot.querySelectorAll('[data-setting]').forEach(group => group.onclick = e
   applySettings();
 });
 document.addEventListener('click', event => { if (document.body.classList.contains('speech-reading') && !event.target.closest('.reading-dock')) closePanels(); });
-document.addEventListener('keydown', event => { if (document.body.classList.contains('speech-active') && event.key === 'Escape') { closePanels(); if (!$('speechSearch').hidden) toggleSearch(false); } });
+document.addEventListener('keydown', event => { if (document.body.classList.contains('speech-active') && event.key === 'Escape') closePanels(); });
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applySettings);
-window.__speechRoute = () => { if (!state.items.length) return; const params = new URLSearchParams(location.hash.slice(1)); const id = params.get('a'); const item = state.items.find(a => articleId(a) === id); if (item) { if (state.items[state.current] !== item || $('reader').hidden) openArticle(item,true); } else { state.loadToken++; $('reader').hidden=true; $('library').hidden=false; document.body.classList.remove('reading','speech-reading'); closePanels(); showView(params.has('about') ? 'about' : 'catalog'); } };
+window.__speechRoute = () => { if (!state.items.length) return; const params = new URLSearchParams(location.hash.slice(1)); const id = params.get('a'); const item = state.items.find(a => articleId(a) === id); if (item) { if (state.items[state.current] !== item || $('reader').hidden) openArticle(item,true); } else { state.loadToken++; $('reader').hidden=true; $('library').hidden=false; document.body.classList.remove('reading','speech-reading'); closePanels(); showView('catalog'); } };
 init();

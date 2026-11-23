@@ -66,7 +66,7 @@ BASE_DIR = os.path.dirname(SCRIPT_DIR)
 
 sys.path.insert(0, SCRIPT_DIR)
 from canonical_sections import ALIASES    # noqa: E402  板块名归一表（改名合并）
-from refresh_sections import url_key     # noqa: E402  URL 匹配键（忽略协议与年份段）
+from url_keys import url_key     # noqa: E402  URL 匹配键（忽略协议与年份段）
 
 MAGAZINES = [
     ('qs', '求是', 'data/qs/meta.json', 'data/qs/issues'),

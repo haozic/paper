@@ -1,6 +1,6 @@
 # 党内刊物检索系统
 
-收录《求是》《红旗文稿》《党建研究》《旗帜》四本党刊，文章与期次目录只取各刊官方网站，提供**全文搜索、目录浏览、文章收藏、自适应阅读**等功能。
+收录《求是》《红旗文稿》《党建研究》《旗帜》四本党刊和习近平讲话库，内容只取对应官方网站，提供**全文搜索、目录浏览、文章收藏、自适应阅读**等功能。
 
 > 配套的备考资料请见 [`linxuan-beikao-zhinan/`](./linxuan-beikao-zhinan/linxuan-beikao-zhinan.html) 子页。
 >
@@ -185,7 +185,7 @@ git push -u origin main
 
 > **关于 `articles/`**：四本杂志的正文也存于 `data/<mag>/issues/<年>-<期>.json` 分片；讲话库正文依赖 `articles/speeches/`，部署时不能排除整个 `articles/` 目录。
 
-讲话库使用首页路由 `#m=speeches`，文章为 `#m=speeches&a=ARTI...`。界面从 `speeches/shell.txt` 按需加载，脚本为 `speeches/speeches.js`；首页搜索在首次查询时按需加载讲话库目录。部署时需保留这两个文件和 `data/speeches/index.json`。
+讲话库使用首页路由 `#m=speeches`，文章为 `#m=speeches&a=ARTI...`。界面从 `speeches/shell.txt` 按需加载，脚本为 `speeches/speeches.js`；全站共用搜索弹层，讲话库标题与副标题检索在首次查询时按需加载目录，点击“进一步搜正文”后才逐年读取 `data/speeches/body_search/`。正文索引由 `python scripts/build_speech_body_search.py` 生成，更新讲话库文章后须重建并运行 `--check`。部署时需保留这两个文件、目录数据和正文索引。
 
 ### 第二步：Cloudflare Pages 部署
 

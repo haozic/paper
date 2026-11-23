@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#96382f">
 <meta name="description" content="党内刊物检索系统 — 求是、红旗文稿、党建研究">
 <title>党内刊物</title>
-<link rel="stylesheet" href="assets/css/site.css?v=20261123d">
-<link rel="manifest" href="manifest.webmanifest?v=20261123d">
-<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261123d">
+<link rel="stylesheet" href="assets/css/site.css?v=20261123g">
+<link rel="manifest" href="manifest.webmanifest?v=20261123g">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261123g">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2396382f' stroke-width='1.8'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
 <script>
 (function(){try{
@@ -121,7 +121,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
         </button>
         <div class="magazine-grid">
             <a class="magazine-card" href="#m=qs" onclick="event.preventDefault();enterMagazine('qs')" aria-label="打开求是杂志">
-                <div class="mag-cover mag-cover-qs"><img src="assets/img/cover_qs.jpg?v=20261123d" alt="求是刊物封面" width="600" height="800" fetchpriority="high"></div>
+                <div class="mag-cover mag-cover-qs"><img src="assets/img/cover_qs.jpg?v=20261123g" alt="求是刊物封面" width="600" height="800" fetchpriority="high"></div>
                 <div class="mag-info">
                     <h2>求是</h2>
                     <p class="mag-desc">中共中央委员会主办的理论刊物</p>
@@ -130,7 +130,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
             </a>
 
             <a class="magazine-card" href="#m=hqwg" onclick="event.preventDefault();enterMagazine('hqwg')" aria-label="打开红旗文稿杂志">
-                <div class="mag-cover mag-cover-hqwg"><img src="assets/img/cover_hqwg.jpg?v=20261123d" alt="红旗文稿刊物封面" width="600" height="800" loading="lazy"></div>
+                <div class="mag-cover mag-cover-hqwg"><img src="assets/img/cover_hqwg.jpg?v=20261123g" alt="红旗文稿刊物封面" width="600" height="800" loading="lazy"></div>
                 <div class="mag-info">
                     <h2>红旗文稿</h2>
                     <p class="mag-desc">政治理论半月刊</p>
@@ -155,7 +155,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
                 </div>
             </a>
             <a class="magazine-card" href="#m=speeches" onclick="event.preventDefault();enterSpeechLibrary()" aria-label="打开习近平讲话库">
-                <div class="mag-cover"><img src="assets/img/cover_speeches.svg?v=20261123d" alt="习近平讲话库封面" width="600" height="800" loading="lazy"></div>
+                <div class="mag-cover"><img src="assets/img/cover_speeches.svg?v=20261123g" alt="习近平讲话库封面" width="600" height="800" loading="lazy"></div>
                 <div class="mag-info">
                     <h2>习近平讲话库</h2>
                     <p class="mag-desc">共产党员网重要讲话</p>
@@ -211,7 +211,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 </div><!-- /.app-sidebar -->
 
 <div class="app-main">
-<div class="journal-cover" aria-hidden="true"><img id="journalCoverImage" src="assets/img/cover_qs.jpg?v=20261123d" alt="" width="600" height="800"></div>
+<div class="journal-cover" aria-hidden="true"><img id="journalCoverImage" src="assets/img/cover_qs.jpg?v=20261123g" alt="" width="600" height="800"></div>
 <nav class="nav-tabs desktop-only">
     <button class="nav-tab active" data-mode="catalog"><svg class="icon"><use href="#i-list"/></svg>目录</button>
     <button class="nav-tab" data-mode="section"><svg class="icon"><use href="#i-grid"/></svg>板块</button>
@@ -263,12 +263,13 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     <div class="about-page-body">
         <div class="about-section">
             <h2>项目简介</h2>
-            <p>本网站是党内刊物检索阅读系统，收录四种重要理论刊物：</p>
+            <p>本网站收录四种重要理论刊物及习近平讲话库：</p>
             <ul class="about-mag-list">
                 <li><strong>《求是》</strong> — 中共中央委员会机关刊</li>
                 <li><strong>《红旗文稿》</strong> — 求是杂志社主管主办的政治理论半月刊</li>
                 <li><strong>《党建研究》</strong> — 中共中央组织部主管的党建理论与实践研究月刊</li>
                 <li><strong>《旗帜》</strong> — 中央和国家机关工委机关刊</li>
+                <li><strong>习近平讲话库</strong> — 共产党员网重要讲话目录</li>
             </ul>
             <p>《旗帜》官网目录未提供栏目划分，本站按期次和原目录顺序呈现。</p>
             <p>提供按板块浏览、目录导航、全文搜索和文章收藏等功能，支持移动端与桌面端自适应访问。</p>
@@ -458,9 +459,10 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
         <button type="button" class="gs-body-search" id="globalBodySearch" onclick="openBodySearchFromGlobal()" hidden>搜索本刊正文 <svg class="icon"><use href="#i-arrow-right"/></svg></button>
         <div class="gs-count" id="globalSearchCount"></div>
         <div id="globalSearchResults" class="results-list"></div>
+        <button type="button" class="gs-more" id="globalSearchMore" hidden>显示更多</button>
     </div>
 </div>
 
-<script src="assets/js/app.js?v=20261123d"></script>
+<script src="assets/js/app.js?v=20261123g"></script>
 </body>
 </html>

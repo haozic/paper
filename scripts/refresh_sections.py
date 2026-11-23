@@ -97,11 +97,7 @@ def normalize_section(name):
     return scrape_normalize_section(name)
 
 
-def url_key(u):
-    """URL 匹配键：忽略协议、忽略 /dukan/<刊物>/<年份>/ 的年份段。"""
-    u = re.sub(r'(/dukan/(?:qs|hqwg)/)\d{4}/', r'\1', u or '')
-    u = re.sub(r'^https?://', '', u)
-    return u.lower()
+from url_keys import url_key
 
 
 def fetch(url, tries=3):

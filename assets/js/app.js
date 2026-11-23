@@ -242,13 +242,13 @@ async function enterSpeechLibrary(push = true) {
     host.hidden = false;
     if (push) history.pushState({ speech: true }, '', '#m=speeches');
     if (!speechLoading) speechLoading = (async () => {
-        const response = await fetch('speeches/shell.txt?v=20261123d');
+        const response = await fetch('speeches/shell.txt?v=20261123g');
         if (!response.ok) throw new Error('讲话库界面加载失败');
         host.innerHTML = await response.text();
         await new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.type = 'module';
-            script.src = 'speeches/speeches.js?v=20261123d';
+            script.src = 'speeches/speeches.js?v=20261123g';
             script.onload = resolve; script.onerror = reject;
             document.body.appendChild(script);
         });
@@ -845,6 +845,7 @@ function crossMagCardsHtml(groups, query, showFav) {
                 + '<button type="button" class="result-card-main" onclick="' + (a.m === 'speeches' ? 'openSpeechArticle' : 'openCrossMagArticle') + '(\'' + a.m + '\', \'' + encUrl + '\')">'
                 + '<span class="rc-title">' + titleHtml + '</span>'
                 + '<span class="rc-meta"><span class="rc-tag">' + (a.m === 'speeches' ? a.y + '年' : a.y + '年第' + ci + '期') + '</span></span>'
+                + (a.snippet ? '<span class="rc-snippet">' + escHtml(a.snippet) + '</span>' : '')
                 + '</button></div>';
         });
         html += '</div>';
@@ -891,7 +892,7 @@ function openGlobalSearch(initialQuery) {
     box.hidden = false;
     syncGlobalSearchViewport();
     document.body.classList.add('global-search-active');
-    state.globalSearchMag = state.currentMag || 'all';
+    state.globalSearchMag = state.currentMag || (document.body.classList.contains('speech-active') ? 'speeches' : 'all');
     updateGlobalSearchScope();
     const trigger = document.getElementById('magSearchToggle');
     if (trigger) trigger.setAttribute('aria-expanded', 'true');
@@ -911,6 +912,7 @@ if (window.visualViewport) {
 }
 
 function closeGlobalSearch() {
+    speechBodySearchToken++;
     const box = document.getElementById('globalSearch');
     if (!box) return;
     box.hidden = true;
@@ -926,7 +928,10 @@ function updateGlobalSearchScope() {
         btn.setAttribute('aria-pressed', String(active));
     });
     const bodyButton = document.getElementById('globalBodySearch');
-    if (bodyButton) bodyButton.hidden = !state.globalSearchMag || state.globalSearchMag === 'all' || state.globalSearchMag === 'speeches';
+    if (bodyButton) {
+        bodyButton.hidden = !state.globalSearchMag || state.globalSearchMag === 'all';
+        bodyButton.firstChild.textContent = state.globalSearchMag === 'speeches' ? '进一步搜正文 ' : '搜索本刊正文 ';
+    }
     const input = document.getElementById('globalSearchInput');
     if (input) input.placeholder = state.globalSearchMag === 'all' ? '搜索四刊与讲话库文章' : '搜索文章标题';
 }
@@ -944,13 +949,66 @@ function openBodySearchFromGlobal() {
     const mag = state.globalSearchMag;
     if (!mag || mag === 'all') return;
     const query = document.getElementById('globalSearchInput').value.trim();
+    if (mag === 'speeches') { searchSpeechBodies(query); return; }
     closeGlobalSearch();
     if (state.currentMag !== mag) enterMagazine(mag);
     document.getElementById('searchInput').value = query;
     toggleMagazineSearch(true);
 }
 
+let speechBodySearchToken = 0;
+async function searchSpeechBodies(query) {
+    const list = document.getElementById('globalSearchResults');
+    const count = document.getElementById('globalSearchCount');
+    const more = document.getElementById('globalSearchMore');
+    const token = ++speechBodySearchToken;
+    state.globalSearchVisible = 80;
+    if (query.length < 2) { count.textContent = '正文检索至少输入两个字'; return; }
+    more.hidden = true;
+    list.replaceChildren();
+    count.textContent = '正在准备讲话库正文检索…';
+    try {
+        const items = await loadSpeechSearchItems();
+        const byId = new Map(items.map(item => [item.p?.match(/ARTI\d+/)?.[0] || item.u.match(/ARTI\d+/)?.[0], item]));
+        const years = [...new Set(items.map(item => item.y))].sort((a,b) => b-a);
+        const found = [];
+        const q = query.toLocaleLowerCase('zh-CN');
+        for (let i = 0; i < years.length; i++) {
+            const response = await fetch(dataUrl('data/speeches/body_search/' + years[i] + '.json'));
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            const rows = await response.json();
+            if (token !== speechBodySearchToken) return;
+            for (const [id, body] of rows) {
+                const position = body.toLocaleLowerCase('zh-CN').indexOf(q);
+                if (position < 0) continue;
+                const item = byId.get(id);
+                if (item) found.push({m:'speeches',y:item.y,t:item.t,u:id,snippet:(position > 36 ? '…' : '') + body.slice(Math.max(0,position-36),position+q.length+56) + '…'});
+            }
+            count.textContent = `已检索 ${i+1}/${years.length} 年 · 找到 ${found.length} 篇`;
+        }
+        if (token !== speechBodySearchToken) return;
+        state.globalSearchResults = found;
+        renderGlobalSearchResults(query);
+    } catch (error) {
+        if (token === speechBodySearchToken) count.textContent = '正文检索暂不可用，请稍后重试';
+        console.warn('讲话库正文检索失败：', error);
+    }
+}
+
+function renderGlobalSearchResults(query) {
+    const results = state.globalSearchResults;
+    const visible = state.globalSearchVisible || 80;
+    const list = document.getElementById('globalSearchResults');
+    const count = document.getElementById('globalSearchCount');
+    list.innerHTML = results.length ? crossMagCardsHtml(groupCrossMagResults(results.slice(0,visible)), query, false) : '<div class="loading"><div>没有匹配的文章</div></div>';
+    count.textContent = '找到 ' + results.length + ' 篇文章';
+    document.getElementById('globalSearchMore').hidden = results.length <= visible;
+}
+
 async function runGlobalSearch() {
+    const token = ++speechBodySearchToken;
+    state.globalSearchVisible = 80;
+    document.getElementById('globalSearchMore').hidden = true;
     const input = document.getElementById('globalSearchInput');
     const list = document.getElementById('globalSearchResults');
     const count = document.getElementById('globalSearchCount');
@@ -962,24 +1020,33 @@ async function runGlobalSearch() {
         return;
     }
     count.textContent = '正在搜索…';
-    const ok = await loadSearchIndex();
-    if (!ok) {
+    const scope = state.globalSearchMag;
+    const wantSpeeches = scope === 'all' || scope === 'speeches';
+    let speechFailed = false;
+    const [magOk, speeches] = await Promise.all([
+        scope === 'speeches' ? Promise.resolve(true) : loadSearchIndex(),
+        wantSpeeches ? loadSpeechSearchItems().catch(error => { speechFailed = true; console.warn('讲话库搜索不可用：', error); return []; }) : Promise.resolve([])
+    ]);
+    if (token !== speechBodySearchToken) return;
+    if (!magOk && (!wantSpeeches || speechFailed)) {
         count.textContent = '索引不可用，请稍后再试或回到杂志内搜索';
         list.innerHTML = '';
         return;
     }
-    const allResults = searchAllTitles(state.searchIndex, query);
-    if (state.globalSearchMag === 'all' || state.globalSearchMag === 'speeches') {
-        try {
-            const speeches = await loadSpeechSearchItems();
-            const q = query.toLocaleLowerCase('zh-CN');
-            for (const item of speeches) {
-                if ((item.t + ' ' + item.d).toLocaleLowerCase('zh-CN').includes(q)) {
-                    const id = item.p?.match(/ARTI\d+/)?.[0] || item.u.match(/ARTI\d+/)?.[0];
-                    if (id) allResults.push({m:'speeches',y:item.y,t:item.t,u:id});
-                }
+    if (scope === 'speeches' && speechFailed) {
+        count.textContent = '讲话库目录暂不可用，请稍后重试';
+        list.innerHTML = '';
+        return;
+    }
+    const allResults = magOk && scope !== 'speeches' ? searchAllTitles(state.searchIndex, query) : [];
+    if (wantSpeeches) {
+        const q = query.toLocaleLowerCase('zh-CN');
+        for (const item of speeches) {
+            if ((item.t + ' ' + item.d).toLocaleLowerCase('zh-CN').includes(q)) {
+                const id = item.p?.match(/ARTI\d+/)?.[0] || item.u.match(/ARTI\d+/)?.[0];
+                if (id) allResults.push({m:'speeches',y:item.y,t:item.t,u:id});
             }
-        } catch (error) { console.warn('讲话库搜索不可用：', error); }
+        }
     }
     const results = state.globalSearchMag && state.globalSearchMag !== 'all'
         ? allResults.filter(item => item.m === state.globalSearchMag)
@@ -990,9 +1057,7 @@ async function runGlobalSearch() {
         list.innerHTML = '<div class="loading"><div>所选刊物中没有匹配的文章</div></div>';
         return;
     }
-    const groups = groupCrossMagResults(results);
-    list.innerHTML = crossMagCardsHtml(groups, query, false);
-    count.textContent = '找到 ' + results.length + ' 篇文章';
+    renderGlobalSearchResults(query);
 }
 
 function renderSearchPage() {
@@ -2058,8 +2123,8 @@ function focusSearch() {
 function showAboutPage() {
     document.body.classList.add('about-active');
     window.scrollTo(0, 0);
-    if (!history.state || !history.state.about) {
-        const magParam = state.currentMag;
+    if ((!history.state || !history.state.about) && !location.hash.includes('&about')) {
+        const magParam = state.currentMag || (document.body.classList.contains('speech-active') ? 'speeches' : null);
         if (magParam) {
             history.pushState({ about: true, mag: magParam }, '', `#m=${magParam}&about`);
         } else {
@@ -2641,7 +2706,7 @@ function parseHash() {
     const section = params.get('s');
     const about = params.has('about');
     
-    if (mag === 'speeches') return { page: 'speeches' };
+    if (mag === 'speeches') return { page: 'speeches', about };
     if (!mag) return { page: 'home' };
     return { page: 'magazine', mag, article, section, about };
 }
@@ -2762,6 +2827,10 @@ async function init() {
             closeGlobalSearch();
         });
     }
+    document.getElementById('globalSearchMore').addEventListener('click', function () {
+        state.globalSearchVisible = (state.globalSearchVisible || 80) + 80;
+        renderGlobalSearchResults(document.getElementById('globalSearchInput').value.trim());
+    });
 
     // "继续阅读"按钮
     const continueBtn = document.getElementById('articleContinueBtn');
@@ -2834,7 +2903,12 @@ async function init() {
     // History API
     window.addEventListener('popstate', e => {
         const route = parseHash();
-        if (route.page === 'speeches') { enterSpeechLibrary(false); return; }
+        if (route.page === 'speeches') {
+            enterSpeechLibrary(false).then(() => {
+                if (location.hash.includes('&about')) showAboutPage();
+            });
+            return;
+        }
         if (document.body.classList.contains('speech-active')) {
             document.body.classList.remove('speech-active', 'speech-page', 'reading', 'speech-reading');
             if (route.page === 'home') { renderHomeResume(); window.scrollTo(0, 0); }
@@ -2878,7 +2952,7 @@ async function init() {
     // URL 路由
     const route = parseHash();
     if (route.page === 'speeches') {
-        enterSpeechLibrary(false);
+        enterSpeechLibrary(false).then(() => { if (route.about) showAboutPage(); });
     } else if (route.page === 'magazine' && MAGAZINES[route.mag]) {
         enterMagazine(route.mag);
         if (route.about) {
