@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261123j';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261123m';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -64,6 +64,11 @@ const BODY_AVG_BYTES = { qs: 241619, hqwg: 176044, djyj: 198248, qz: 277117 };
 
 /* 正文搜索窗口：最新年份起几年（基准是该刊数据里的最新年份，不是浏览器时间） */
 const BODY_YEAR_SPAN = 3;
+
+const appRoot = document.getElementById('app');
+function appElement(id) { return appRoot.querySelector('#' + id); }
+const articleRoot = document.getElementById('articlePage');
+function articleElement(id) { return articleRoot.querySelector('#' + id); }
 
 /* ===== 状态管理 ===== */
 const state = {
@@ -207,8 +212,8 @@ function enterMagazine(magKey) {
     document.getElementById('searchStatus').className = 'search-status';
 
     // 重置视图
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('catalogView').classList.add('active');
+    appRoot.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    appElement('catalogView').classList.add('active');
     document.getElementById('catalogContent').innerHTML = '<div class="loading" role="status">目录加载中…</div>';
     document.getElementById('sectionContent').replaceChildren();
     document.querySelectorAll('.nav-tab, .bn-item[data-mode]').forEach(btn => {
@@ -250,7 +255,7 @@ async function enterSpeechLibrary(push = true) {
     if (push) history.pushState({ speech: true }, '', '#m=speeches');
     if (!speechLoading) speechLoading = (async () => {
         host.innerHTML = '<div class="loading" role="status">讲话库目录加载中…</div>';
-        const shellUrl = 'speeches/shell.txt?v=20261123j';
+        const shellUrl = 'speeches/shell.txt?v=20261123m';
         let shell;
         for (let attempt = 0; attempt < 2; attempt++) {
             try {
@@ -274,7 +279,7 @@ async function enterSpeechLibrary(push = true) {
         await new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.type = 'module';
-            script.src = 'speeches/speeches.js?v=20261123j&load=' + (++speechLoadAttempt);
+            script.src = 'speeches/speeches.js?v=20261123m&load=' + (++speechLoadAttempt);
             script.onload = resolve; script.onerror = reject;
             document.body.appendChild(script);
         });
@@ -604,14 +609,14 @@ function performSearch() {
 
     if (hasQuery && !state.isSearching) {
         state.isSearching = true;
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        appRoot.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById('searchView').classList.add('active');
     } else if (!hasQuery && state.isSearching) {
         state.isSearching = false;
         state.searchResults = [];
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        appRoot.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         const viewMap = { section: 'sectionView', catalog: 'catalogView', favorites: 'favoritesView' };
-        const view = document.getElementById(viewMap[state.currentMode]);
+        const view = appElement(viewMap[state.currentMode]);
         if (view) view.classList.add('active');
         document.getElementById('resultInfo').textContent = '';
         document.getElementById('searchResults').innerHTML = '';
@@ -1312,7 +1317,7 @@ async function showArticle(encUrl, replaceHist) {
         }
     });
 
-    document.getElementById('articleTitle').textContent = a.t;
+    articleElement('articleTitle').textContent = a.t;
     updateArticleMeta(a, 0);
     showContinueBanner(url);
     renderArticleFooter(url, a);
@@ -1326,10 +1331,10 @@ async function showArticle(encUrl, replaceHist) {
     favBtn.classList.toggle('active', isFav);
     favBtn.innerHTML = svgStar(isFav) + '<span>收藏</span>';
 
-    const bodyEl = document.getElementById('articleBody');
+    const bodyEl = articleElement('articleBody');
     document.body.classList.add('article-active');
     document.getElementById('backToTopBtn').classList.remove('show');
-    document.getElementById('progressRingFg').style.strokeDashoffset = RING_CIRCUMFERENCE;
+    articleElement('progressRingFg').style.strokeDashoffset = RING_CIRCUMFERENCE;
     window.scrollTo(0, 0);
 
     const magKey = state.currentMag;
@@ -1438,7 +1443,7 @@ async function retryShowArticle(encUrl) {
     if (!ms) return;
     const a = ms.meta.find(x => x.u === url);
     if (!a) return;
-    const bodyEl = document.getElementById('articleBody');
+    const bodyEl = articleElement('articleBody');
     bodyEl.innerHTML = '<div class="article-loading"><div class="spinner"></div><div>重新加载中...</div></div>';
 
     // 先重试期次正文，再尝试按需加载 Markdown 备份。
@@ -1500,7 +1505,7 @@ function closeArticlePage() {
     }
     document.body.classList.remove('article-active');
     state.currentArticleUrl = null;
-    const ring = document.getElementById('progressRingFg');
+    const ring = articleElement('progressRingFg');
     if (ring) ring.style.strokeDashoffset = RING_CIRCUMFERENCE;
     var btt = document.getElementById('backToTopBtn');
     if (btt) btt.classList.remove('show');
@@ -1576,7 +1581,7 @@ function applyFontSize(size) {
     state.readingFs = size;
     document.documentElement.style.setProperty('--article-fs', size + 'px');
     // 更新按钮高亮
-    document.querySelectorAll('#fontSizeGroup .asp-btn').forEach(btn => {
+    articleRoot.querySelectorAll('#fontSizeGroup .asp-btn').forEach(btn => {
         btn.classList.toggle('active', parseInt(btn.dataset.fs, 10) === size);
     });
 }
@@ -1584,7 +1589,7 @@ function applyFontSize(size) {
 function applyLineHeight(lh) {
     state.readingLh = String(lh);
     document.documentElement.style.setProperty('--article-lh', String(lh));
-    document.querySelectorAll('#lineHeightGroup .asp-btn').forEach(btn => {
+    articleRoot.querySelectorAll('#lineHeightGroup .asp-btn').forEach(btn => {
         btn.classList.toggle('active', parseFloat(btn.dataset.lh) === parseFloat(lh));
     });
 }
@@ -1597,7 +1602,7 @@ function applyWidth(delta) {
     /* 同时切换页边距档位：<html data-article-width> 驱动 --article-gutter。
        只改 max-width 的话，窄视口下元素宽被视口顶住，页宽档位看不出任何变化。 */
     document.documentElement.setAttribute('data-article-width', d < 0 ? 'narrow' : (d > 0 ? 'wide' : 'standard'));
-    document.querySelectorAll('#widthGroup .asp-btn').forEach(btn => {
+    articleRoot.querySelectorAll('#widthGroup .asp-btn').forEach(btn => {
         btn.classList.toggle('active', parseInt(btn.dataset.w, 10) === d);
     });
 }
@@ -1605,7 +1610,7 @@ function applyWidth(delta) {
 function applyIndent(em) {
     state.readingIndent = String(em);
     document.documentElement.style.setProperty('--article-indent', String(em) + 'em');
-    document.querySelectorAll('#indentGroup .asp-btn').forEach(btn => {
+    articleRoot.querySelectorAll('#indentGroup .asp-btn').forEach(btn => {
         btn.classList.toggle('active', parseInt(btn.dataset.indent, 10) === parseInt(em, 10));
     });
 }
@@ -1638,7 +1643,7 @@ function applyPaper(name) {
             page.style.setProperty('--border-2', preset.border2);
         }
     }
-    document.querySelectorAll('#paperGroup .asp-btn').forEach(btn => {
+    articleRoot.querySelectorAll('#paperGroup .asp-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.paper === name);
     });
 }
@@ -1647,7 +1652,7 @@ function applyTheme(theme) {
     state.readingTheme = theme;
     document.documentElement.setAttribute('data-theme', theme);
     // 更新按钮高亮
-    document.querySelectorAll('#themeGroup .asp-btn').forEach(btn => {
+    articleRoot.querySelectorAll('#themeGroup .asp-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.theme === theme);
     });
     // 主题变了，纸张配色要重算（深色下不生效）
@@ -1696,42 +1701,42 @@ function toggleIssueContents() {
 
 function initReadingSettingsListeners() {
     // 字号按钮
-    document.querySelectorAll('#fontSizeGroup .asp-btn').forEach(btn => {
+    articleRoot.querySelectorAll('#fontSizeGroup .asp-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             applyFontSize(parseInt(btn.dataset.fs, 10));
             saveReadingSettings();
         });
     });
     // 主题按钮
-    document.querySelectorAll('#themeGroup .asp-btn').forEach(btn => {
+    articleRoot.querySelectorAll('#themeGroup .asp-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             applyTheme(btn.dataset.theme);
             saveReadingSettings();
         });
     });
     // 行距按钮
-    document.querySelectorAll('#lineHeightGroup .asp-btn').forEach(btn => {
+    articleRoot.querySelectorAll('#lineHeightGroup .asp-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             applyLineHeight(btn.dataset.lh);
             saveReadingSettings();
         });
     });
     // 页宽按钮
-    document.querySelectorAll('#widthGroup .asp-btn').forEach(btn => {
+    articleRoot.querySelectorAll('#widthGroup .asp-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             applyWidth(btn.dataset.w);
             saveReadingSettings();
         });
     });
     // 首行缩进按钮
-    document.querySelectorAll('#indentGroup .asp-btn').forEach(btn => {
+    articleRoot.querySelectorAll('#indentGroup .asp-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             applyIndent(btn.dataset.indent);
             saveReadingSettings();
         });
     });
     // 纸张按钮
-    document.querySelectorAll('#paperGroup .asp-btn').forEach(btn => {
+    articleRoot.querySelectorAll('#paperGroup .asp-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             applyPaper(btn.dataset.paper);
             saveReadingSettings();
@@ -2105,7 +2110,7 @@ function renderRelatedArticles(cur, pos, ordered) {
 async function shareArticleLink() {
     const btn = document.getElementById('articleCopyBtn');
     if (!state.currentMag || !state.currentArticleUrl) return;
-    const title = document.getElementById('articleTitle')?.textContent || document.title;
+    const title = articleElement('articleTitle')?.textContent || document.title;
     const shareUrl = new URL('/share/', window.location.origin);
     shareUrl.searchParams.set('m', state.currentMag);
     shareUrl.searchParams.set('u', state.currentArticleUrl);
@@ -2198,7 +2203,7 @@ function closeAboutPage() {
 /* ===== 阅读进度环 ===== */
 const RING_CIRCUMFERENCE = 2 * Math.PI * 21; // r=21
 function getArticleEndScroll() {
-    const body = document.getElementById('articleBody');
+    const body = articleElement('articleBody');
     if (!body || !body.lastElementChild) return null;
     if (body.querySelector && body.querySelector('.article-loading, .no-body')) return null;
     const end = body.lastElementChild.getBoundingClientRect().bottom + window.scrollY;
@@ -2219,7 +2224,7 @@ function updateReadingProgress() {
     const scrollTop = window.scrollY;
     const pct = getArticleProgressRatio();
     // 更新进度环
-    const ring = document.getElementById('progressRingFg');
+    const ring = articleElement('progressRingFg');
     if (ring) ring.style.strokeDashoffset = RING_CIRCUMFERENCE * (1 - pct);
     // 返回顶部按钮：滚动超过 300px 时显示
     const btn = document.getElementById('backToTopBtn');
@@ -2715,9 +2720,9 @@ function switchMode(mode) {
     document.querySelectorAll('.nav-tab, .bn-item[data-mode]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.mode === mode);
     });
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    appRoot.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     const viewMap = { section: 'sectionView', catalog: 'catalogView', favorites: 'favoritesView' };
-    const view = document.getElementById(viewMap[mode]);
+    const view = appElement(viewMap[mode]);
     if (view) view.classList.add('active');
     if (mode === 'section') renderSections();
     else if (mode === 'catalog') renderCatalog();
@@ -2992,7 +2997,7 @@ async function init() {
     // 阅读进度
     window.addEventListener('scroll', updateReadingProgress, { passive: true });
     if (window.ResizeObserver) {
-        new ResizeObserver(updateReadingProgress).observe(document.getElementById('articleBody'));
+        new ResizeObserver(updateReadingProgress).observe(articleElement('articleBody'));
     }
 
     // 窗口尺寸变化时更新 sticky 偏移量

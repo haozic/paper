@@ -1,12 +1,13 @@
 'use strict';
-const VERSION = '20261123j';
+const VERSION = '20261123m';
 const savedSettings = JSON.parse(localStorage.getItem('speech-reading') || '{}');
 const settingKeys = {font:'reading_fontsize',theme:'reading_theme',line:'reading_lineheight',width:'reading_width',indent:'reading_indent',paper:'reading_paper'};
 const stored = (key, fallback) => localStorage.getItem(settingKeys[key]) ?? savedSettings[key] ?? fallback;
 const state = { items: [], current: -1, loadToken: 0, view: 'catalog', favorites: JSON.parse(localStorage.getItem('speech-favorites') || '[]'),
   reading: { font: stored('font','20'), theme: stored('theme','auto'), line: stored('line','2.05'), width: stored('width','0'), indent: stored('indent','2'), paper: stored('paper','default') } };
 const speechRoot = document.getElementById('speechApp');
-const $ = id => speechRoot.querySelector('#' + id);
+const sharedIds = new Set(['articleBody','articleTitle','catalogView','favoritesView','fontSizeGroup','indentGroup','lineHeightGroup','paperGroup','paperSection','progressRingFg','themeGroup','widthGroup']);
+const $ = id => speechRoot.querySelector('#' + (sharedIds.has(id) ? 'speech' + id[0].toUpperCase() + id.slice(1) : id));
 const speechHash = id => '#m=speeches' + (id ? '&a=' + id : '');
 const articleId = item => item.p?.match(/ARTI\d+/)?.[0] || item.u.match(/ARTI\d+/)?.[0];
 const safe = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

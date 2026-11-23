@@ -13,6 +13,7 @@ function makeReader(scrollY) {
         readingDock: { hidden: false, getBoundingClientRect: () => ({ top: 720 }) },
         articleContinue: { hidden: false },
     };
+    nodes.articlePage = { querySelector: selector => nodes[selector.slice(1)] || null };
     const document = { getElementById: id => nodes[id] || null };
     const context = vm.createContext({ window, document, console,
         localStorage: { getItem: key => key === 'reading_position' ? JSON.stringify({ u1: { r: 0.5 } }) : null },

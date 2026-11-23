@@ -24,29 +24,29 @@
       </header>
     </div>
     <div class="app-main">
-      <div class="journal-cover" aria-hidden="true"><img src="assets/img/cover_speeches.svg?v=20261123j" alt="" width="600" height="800"></div>
+      <div class="journal-cover" aria-hidden="true"><img src="assets/img/cover_speeches.svg?v=20261123m" alt="" width="600" height="800"></div>
       <nav class="nav-tabs desktop-only speech-tabs" aria-label="讲话库内容"><button class="nav-tab active" id="catalogTab" type="button"><svg class="icon"><use href="#list-icon"/></svg>目录</button><button class="nav-tab" id="favoritesTab" type="button"><svg class="icon"><use href="#star-icon"/></svg>收藏</button></nav>
-      <div class="content"><div class="view active" id="catalogView"><div class="catalog-list" id="list" aria-live="polite"></div></div><div class="view" id="favoritesView"><div class="catalog-list" id="favoritesList"></div></div></div>
+      <div class="content"><div class="view active" id="speechCatalogView"><div class="catalog-list" id="list" aria-live="polite"></div></div><div class="view" id="speechFavoritesView"><div class="catalog-list" id="favoritesList"></div></div></div>
     </div>
     <nav class="bottom-nav mobile-only speech-bottom-nav" aria-label="讲话库导航"><a class="bn-item bn-home" href="#" onclick="event.preventDefault();goHome()"><svg class="icon"><use href="#home-icon"/></svg><span class="bn-label">首页</span></a><button class="bn-item active" id="catalogNav" type="button"><svg class="icon"><use href="#list-icon"/></svg><span class="bn-label">目录</span></button><button class="bn-item" id="favoritesNav" type="button"><svg class="icon"><use href="#star-icon"/></svg><span class="bn-label">收藏</span></button></nav>
   </section>
   <article class="reader article-page" id="reader" hidden>
-    <header class="article-page-header article-heading"><div class="ap-header-inner"><h1 class="ap-title" id="articleTitle"></h1><p class="ap-meta" id="articleSubtitle"></p><span class="ap-meta" id="readerDate"></span></div></header>
-    <div class="reader-paper"><div class="article-page-body" id="articleBody"></div></div>
+    <header class="article-page-header article-heading"><div class="ap-header-inner"><h1 class="ap-title" id="speechArticleTitle"></h1><p class="ap-meta" id="articleSubtitle"></p><span class="ap-meta" id="readerDate"></span></div></header>
+    <div class="reader-paper"><div class="article-page-body" id="speechArticleBody"></div></div>
     <footer class="reader-footer"><section class="ap-related" id="related" aria-label="相关阅读"></section></footer>
-    <button class="back-to-top" id="toTop" type="button" aria-label="返回顶部，外圈显示阅读进度"><svg class="progress-ring" viewBox="0 0 48 48"><circle class="progress-ring-bg" cx="24" cy="24" r="21"/><circle class="progress-ring-fg" id="progressRingFg" cx="24" cy="24" r="21"/></svg><svg class="icon"><use href="#up-icon"/></svg></button>
+    <button class="back-to-top" id="toTop" type="button" aria-label="返回顶部，外圈显示阅读进度"><svg class="progress-ring" viewBox="0 0 48 48"><circle class="progress-ring-bg" cx="24" cy="24" r="21"/><circle class="progress-ring-fg" id="speechProgressRingFg" cx="24" cy="24" r="21"/></svg><svg class="icon"><use href="#up-icon"/></svg></button>
     <div class="reading-dock">
       <div class="reading-issue-menu" id="directoryPanel" hidden><div class="reading-issue-heading"><strong id="directoryTitle">本年目录</strong><span id="directoryCount"></span></div><div class="reading-issue-list" id="directoryList"></div></div>
       <div class="reading-operation-menu" id="settingsPanel" hidden>
         <div class="ap-settings-panel show" id="speechSettingsPanel">
           <button class="asp-close-btn" id="settingsClose" type="button" aria-label="关闭阅读设置"><svg class="icon"><use href="#close-icon"/></svg></button>
           <h2 class="asp-title">阅读设置</h2>
-          <div class="asp-section"><div class="asp-label">字号</div><div class="asp-btn-group" id="fontSizeGroup" data-setting="font"><button class="asp-btn" data-value="16">小</button><button class="asp-btn" data-value="20">标准</button><button class="asp-btn" data-value="24">大</button><button class="asp-btn" data-value="28">特大</button></div></div>
-          <div class="asp-section"><div class="asp-label">背景</div><div class="asp-btn-group" id="themeGroup" data-setting="theme"><button class="asp-btn" data-value="light">白天</button><button class="asp-btn" data-value="dark">夜晚</button><button class="asp-btn" data-value="auto">跟随系统</button></div></div>
-          <div class="asp-section"><div class="asp-label">行距</div><div class="asp-btn-group" id="lineHeightGroup" data-setting="line"><button class="asp-btn" data-value="1.75">紧凑</button><button class="asp-btn" data-value="2.05">标准</button><button class="asp-btn" data-value="2.35">宽松</button></div></div>
-          <div class="asp-section"><div class="asp-label">页宽</div><div class="asp-btn-group" id="widthGroup" data-setting="width"><button class="asp-btn" data-value="-80">窄</button><button class="asp-btn" data-value="0">标准</button><button class="asp-btn" data-value="120">宽</button></div></div>
-          <div class="asp-section"><div class="asp-label">首行缩进</div><div class="asp-btn-group" id="indentGroup" data-setting="indent"><button class="asp-btn" data-value="2">缩进</button><button class="asp-btn" data-value="0">不缩进</button></div></div>
-          <div class="asp-section asp-section--light-only" id="paperSection"><div class="asp-label">纸张</div><div class="asp-btn-group" id="paperGroup" data-setting="paper"><button class="asp-btn" data-value="default">默认</button><button class="asp-btn" data-value="warm">米黄</button><button class="asp-btn" data-value="white">纯白</button></div></div>
+          <div class="asp-section"><div class="asp-label">字号</div><div class="asp-btn-group" id="speechFontSizeGroup" data-setting="font"><button class="asp-btn" data-value="16">小</button><button class="asp-btn" data-value="20">标准</button><button class="asp-btn" data-value="24">大</button><button class="asp-btn" data-value="28">特大</button></div></div>
+          <div class="asp-section"><div class="asp-label">背景</div><div class="asp-btn-group" id="speechThemeGroup" data-setting="theme"><button class="asp-btn" data-value="light">白天</button><button class="asp-btn" data-value="dark">夜晚</button><button class="asp-btn" data-value="auto">跟随系统</button></div></div>
+          <div class="asp-section"><div class="asp-label">行距</div><div class="asp-btn-group" id="speechLineHeightGroup" data-setting="line"><button class="asp-btn" data-value="1.75">紧凑</button><button class="asp-btn" data-value="2.05">标准</button><button class="asp-btn" data-value="2.35">宽松</button></div></div>
+          <div class="asp-section"><div class="asp-label">页宽</div><div class="asp-btn-group" id="speechWidthGroup" data-setting="width"><button class="asp-btn" data-value="-80">窄</button><button class="asp-btn" data-value="0">标准</button><button class="asp-btn" data-value="120">宽</button></div></div>
+          <div class="asp-section"><div class="asp-label">首行缩进</div><div class="asp-btn-group" id="speechIndentGroup" data-setting="indent"><button class="asp-btn" data-value="2">缩进</button><button class="asp-btn" data-value="0">不缩进</button></div></div>
+          <div class="asp-section asp-section--light-only" id="speechPaperSection"><div class="asp-label">纸张</div><div class="asp-btn-group" id="speechPaperGroup" data-setting="paper"><button class="asp-btn" data-value="default">默认</button><button class="asp-btn" data-value="warm">米黄</button><button class="asp-btn" data-value="white">纯白</button></div></div>
         </div>
         <div class="ap-actions" aria-label="文章操作"><button class="ap-fav-btn" id="speechFav" type="button" aria-label="收藏文章"><svg class="icon"><use href="#star-icon"/></svg><span>收藏</span></button><button class="ap-copy-btn" id="speechShare" type="button" aria-label="分享文章"><svg class="icon"><use href="#share-icon"/></svg><span>分享</span></button><a class="ap-original-link" id="speechOriginal" target="_blank" rel="noopener" aria-label="查看原文"><svg class="icon"><use href="#external-icon"/></svg><span>原文</span></a></div>
       </div>

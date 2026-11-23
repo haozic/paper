@@ -4052,7 +4052,7 @@ body.speech-active.about-active #speechApp { display: none !important; }
 .speech-page .reading-issue-item { display: flex; width: 100%; border: 0; background: transparent; color: var(--text); font: 13px/1.5 var(--font-sans); text-align: left; cursor: pointer; }
 .speech-page .reading-issue-number { flex: none; width: 26px; color: var(--text-3); }
 .speech-page .reading-operation-menu .ap-settings-panel.show { position: relative; min-width: 0; max-height: none; overflow: visible; }
-.speech-page .reading-operation-menu .asp-section:has(#fontSizeGroup), .speech-page .reading-operation-menu .asp-section:has(#themeGroup) { grid-column: 1 / -1; }
+.speech-page .reading-operation-menu .asp-section:has(#speechFontSizeGroup), .speech-page .reading-operation-menu .asp-section:has(#speechThemeGroup) { grid-column: 1 / -1; }
 .speech-page .reading-operation-menu .ap-actions { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
 .speech-page .reading-operation-menu .ap-actions > * { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: auto; font: 11px var(--font-sans); text-decoration: none; }
 .speech-page .reading-operation-menu .ap-actions svg { width: 18px; height: 18px; }
