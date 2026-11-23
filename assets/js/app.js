@@ -173,6 +173,7 @@ async function loadHomeCounts() {
 
 /* ===== 进入/退出杂志 ===== */
 function enterMagazine(magKey) {
+    document.body.classList.remove('speech-active', 'speech-page', 'reading', 'speech-reading');
     state.currentMag = magKey;
     const conf = MAGAZINES[magKey];
 
@@ -220,7 +221,7 @@ function enterMagazine(magKey) {
 
 function goHome() {
     // 关闭所有覆盖层
-    document.body.classList.remove('article-active', 'section-active', 'about-active', 'mag-active', 'mag-search-open');
+    document.body.classList.remove('article-active', 'section-active', 'about-active', 'mag-active', 'mag-search-open', 'global-search-active', 'speech-active', 'speech-page', 'reading', 'speech-reading');
     state.currentMag = null;
 
     // 重置杂志颜色
@@ -229,6 +230,31 @@ function goHome() {
 
     history.pushState({ home: true }, '', '#');
     renderHomeResume();
+    window.scrollTo(0, 0);
+}
+
+let speechLoading;
+async function enterSpeechLibrary(push = true) {
+    state.currentMag = null;
+    document.body.classList.remove('mag-active', 'about-active', 'section-active', 'article-active');
+    document.body.classList.add('speech-active', 'speech-page');
+    const host = document.getElementById('speechApp');
+    host.hidden = false;
+    if (push) history.pushState({ speech: true }, '', '#m=speeches');
+    if (!speechLoading) speechLoading = (async () => {
+        const response = await fetch('speeches/shell.txt?v=20261123d');
+        if (!response.ok) throw new Error('讲话库界面加载失败');
+        host.innerHTML = await response.text();
+        await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.src = 'speeches/speeches.js?v=20261123d';
+            script.onload = resolve; script.onerror = reject;
+            document.body.appendChild(script);
+        });
+    })();
+    try { await speechLoading; window.__speechRoute?.(); }
+    catch (error) { speechLoading = null; host.textContent = '讲话库加载失败，请刷新页面重试。'; console.error(error); }
     window.scrollTo(0, 0);
 }
 
@@ -452,7 +478,7 @@ function groupCrossMagResults(results) {
     for (const r of results) {
         if (!cur || cur.mag !== r.m) {
             const conf = MAGAZINES[r.m];
-            cur = { mag: r.m, name: conf ? conf.name : r.m, count: 0, items: [] };
+            cur = { mag: r.m, name: conf ? conf.name : r.m === 'speeches' ? '习近平讲话库' : r.m, count: 0, items: [] };
             groups.push(cur);
         }
         cur.count++;
@@ -805,7 +831,7 @@ function crossMagCardsHtml(groups, query, showFav) {
         html += '<div class="result-group-head"><span class="result-group-name">' + escHtml(g.name) + '</span>'
             + '<span class="result-group-count">' + g.count + ' 篇</span></div>';
         g.items.forEach(function (a) {
-            const ci = a.i <= 24 ? CN[a.i - 1] : a.i;
+            const ci = a.m === 'speeches' ? '' : a.i <= 24 ? CN[a.i - 1] : a.i;
             const encUrl = encodeURIComponent(a.u);
             const titleHtml = query ? highlightText(a.t, query) : escHtml(a.t);
             let favBtn = '';
@@ -816,9 +842,9 @@ function crossMagCardsHtml(groups, query, showFav) {
                     + svgStar(isFav) + '</button>';
             }
             html += '<div class="result-card">' + favBtn
-                + '<button type="button" class="result-card-main" onclick="openCrossMagArticle(\'' + a.m + '\', \'' + encUrl + '\')">'
+                + '<button type="button" class="result-card-main" onclick="' + (a.m === 'speeches' ? 'openSpeechArticle' : 'openCrossMagArticle') + '(\'' + a.m + '\', \'' + encUrl + '\')">'
                 + '<span class="rc-title">' + titleHtml + '</span>'
-                + '<span class="rc-meta"><span class="rc-tag">' + a.y + '年第' + ci + '期</span></span>'
+                + '<span class="rc-meta"><span class="rc-tag">' + (a.m === 'speeches' ? a.y + '年' : a.y + '年第' + ci + '期') + '</span></span>'
                 + '</button></div>';
         });
         html += '</div>';
@@ -900,9 +926,18 @@ function updateGlobalSearchScope() {
         btn.setAttribute('aria-pressed', String(active));
     });
     const bodyButton = document.getElementById('globalBodySearch');
-    if (bodyButton) bodyButton.hidden = !state.globalSearchMag || state.globalSearchMag === 'all';
+    if (bodyButton) bodyButton.hidden = !state.globalSearchMag || state.globalSearchMag === 'all' || state.globalSearchMag === 'speeches';
     const input = document.getElementById('globalSearchInput');
-    if (input) input.placeholder = state.globalSearchMag === 'all' ? '搜索四刊文章标题' : '搜索本刊文章标题';
+    if (input) input.placeholder = state.globalSearchMag === 'all' ? '搜索四刊与讲话库文章' : '搜索文章标题';
+}
+
+let speechSearchItems;
+async function loadSpeechSearchItems() {
+    if (speechSearchItems) return speechSearchItems;
+    const response = await fetch(dataUrl('data/speeches/index.json'));
+    if (!response.ok) throw new Error('讲话库目录加载失败');
+    speechSearchItems = (await response.json()).items;
+    return speechSearchItems;
 }
 
 function openBodySearchFromGlobal() {
@@ -934,6 +969,18 @@ async function runGlobalSearch() {
         return;
     }
     const allResults = searchAllTitles(state.searchIndex, query);
+    if (state.globalSearchMag === 'all' || state.globalSearchMag === 'speeches') {
+        try {
+            const speeches = await loadSpeechSearchItems();
+            const q = query.toLocaleLowerCase('zh-CN');
+            for (const item of speeches) {
+                if ((item.t + ' ' + item.d).toLocaleLowerCase('zh-CN').includes(q)) {
+                    const id = item.p?.match(/ARTI\d+/)?.[0] || item.u.match(/ARTI\d+/)?.[0];
+                    if (id) allResults.push({m:'speeches',y:item.y,t:item.t,u:id});
+                }
+            }
+        } catch (error) { console.warn('讲话库搜索不可用：', error); }
+    }
     const results = state.globalSearchMag && state.globalSearchMag !== 'all'
         ? allResults.filter(item => item.m === state.globalSearchMag)
         : allResults;
@@ -1081,6 +1128,13 @@ async function openCrossMagArticle(magKey, encUrl) {
     if (state.currentMag !== magKey || !meta.some(a => a.u === decodeURIComponent(encUrl))) return;
     closeGlobalSearch();
     await showArticle(encUrl);
+}
+
+function openSpeechArticle(magKey, encId) {
+    if (magKey !== 'speeches') return;
+    closeGlobalSearch();
+    history.pushState({ speech: true }, '', '#m=speeches&a=' + decodeURIComponent(encId));
+    enterSpeechLibrary(false);
 }
 
 /* replaceHist=true 时用 replaceState 改写当前历史条目（上一/下一篇切换用，避免后退键逐篇回溯） */
@@ -2587,6 +2641,7 @@ function parseHash() {
     const section = params.get('s');
     const about = params.has('about');
     
+    if (mag === 'speeches') return { page: 'speeches' };
     if (!mag) return { page: 'home' };
     return { page: 'magazine', mag, article, section, about };
 }
@@ -2778,6 +2833,13 @@ async function init() {
 
     // History API
     window.addEventListener('popstate', e => {
+        const route = parseHash();
+        if (route.page === 'speeches') { enterSpeechLibrary(false); return; }
+        if (document.body.classList.contains('speech-active')) {
+            document.body.classList.remove('speech-active', 'speech-page', 'reading', 'speech-reading');
+            if (route.page === 'home') { renderHomeResume(); window.scrollTo(0, 0); }
+            return;
+        }
         if (document.body.classList.contains('article-active')) {
             closeArticlePage();
         } else if (document.body.classList.contains('section-active')) {
@@ -2815,7 +2877,9 @@ async function init() {
 
     // URL 路由
     const route = parseHash();
-    if (route.page === 'magazine' && MAGAZINES[route.mag]) {
+    if (route.page === 'speeches') {
+        enterSpeechLibrary(false);
+    } else if (route.page === 'magazine' && MAGAZINES[route.mag]) {
         enterMagazine(route.mag);
         if (route.about) {
             setTimeout(() => showAboutPage(), 500);

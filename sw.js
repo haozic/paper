@@ -39,9 +39,9 @@
 var VERSION = (function () {
     try {
         var m = /[?&]v=([^&]+)/.exec(self.location.search);
-        return m ? decodeURIComponent(m[1]) : '20261123b';
+        return m ? decodeURIComponent(m[1]) : '20261123d';
     } catch (e) {
-        return '20261123b';
+        return '20261123d';
     }
 })();
 
@@ -57,12 +57,14 @@ var SHELL_ASSETS = [
     './manifest.webmanifest?v=' + VERSION,
     './assets/css/site.css?v=' + VERSION,
     './assets/js/app.js?v=' + VERSION,
+    './speeches/shell.txt?v=' + VERSION,
+    './speeches/speeches.js?v=' + VERSION,
     './assets/img/icon-192.png',
     './assets/img/icon-512.png',
     './assets/img/icon-maskable-512.png',
     './assets/img/apple-touch-icon.png',
-    './assets/img/cover_qs.jpg?v=20261123b',
-    './assets/img/cover_hqwg.jpg?v=20261123b',
+    './assets/img/cover_qs.jpg?v=20261123d',
+    './assets/img/cover_hqwg.jpg?v=20261123d',
     './assets/img/cover_speeches.svg?v=' + VERSION,
     './assets/img/cover_djyj.jpg',
     './assets/img/cover_qz_2026_06.jpg',

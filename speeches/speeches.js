@@ -1,11 +1,13 @@
 'use strict';
-const VERSION = '20261123b';
+const VERSION = '20261123d';
 const savedSettings = JSON.parse(localStorage.getItem('speech-reading') || '{}');
 const settingKeys = {font:'reading_fontsize',theme:'reading_theme',line:'reading_lineheight',width:'reading_width',indent:'reading_indent',paper:'reading_paper'};
 const stored = (key, fallback) => localStorage.getItem(settingKeys[key]) ?? savedSettings[key] ?? fallback;
 const state = { items: [], query: '', scope: 'all', visible: 40, current: -1, loadToken: 0, view: 'catalog', favorites: JSON.parse(localStorage.getItem('speech-favorites') || '[]'),
   reading: { font: stored('font','20'), theme: stored('theme','auto'), line: stored('line','2.05'), width: stored('width','0'), indent: stored('indent','2'), paper: stored('paper','default') } };
-const $ = id => document.getElementById(id);
+const speechRoot = document.getElementById('speechApp');
+const $ = id => speechRoot.querySelector('#' + id);
+const speechHash = id => '#m=speeches' + (id ? '&a=' + id : '');
 const articleId = item => item.p?.match(/ARTI\d+/)?.[0] || item.u.match(/ARTI\d+/)?.[0];
 const safe = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function dateOf(item) { const m = item.u.match(/\/(20\d\d)\/(\d\d)\/(\d\d)\//); return m ? `${m[1]}.${m[2]}.${m[3]}` : String(item.y); }
@@ -95,7 +97,7 @@ async function openArticle(item, replace = false) {
   const token = ++state.loadToken;
   state.current = state.items.indexOf(item);
   $('library').hidden = true; $('reader').hidden = false;
-  document.body.classList.add('reading','article-active');
+  document.body.classList.add('reading','speech-reading');
   closePanels();
   $('articleTitle').textContent = item.t; $('articleSubtitle').textContent = item.d; $('readerDate').textContent = dateOf(item);
   $('speechOriginal').href = item.u;
@@ -105,11 +107,11 @@ async function openArticle(item, replace = false) {
   renderDirectory(item);
   renderRelated();
   updateFavoriteButton();
-  if (replace) history.replaceState(null,'','#id='+articleId(item)); else history.pushState(null,'','#id='+articleId(item));
+  if (replace) history.replaceState({speech:true},'',speechHash(articleId(item))); else history.pushState({speech:true},'',speechHash(articleId(item)));
   window.scrollTo(0,0);
   if (!item.p) { $('articleBody').innerHTML = '<p>官网原文目前无法读取，请使用下方官网链接查看。</p>'; updateProgress(); return; }
   try {
-    const response = await fetch('../' + item.p); if (!response.ok) throw Error(response.status);
+    const response = await fetch(item.p); if (!response.ok) throw Error(response.status);
     const markdown = await response.text();
     if (token === state.loadToken) { $('articleBody').innerHTML = renderBody(markdown); updateProgress(); }
   } catch (_) { if (token === state.loadToken) { $('articleBody').innerHTML = '<p>正文加载失败，请刷新或访问官网原文。</p>'; updateProgress(); } }
@@ -154,9 +156,9 @@ function closePanels() {
 function showLibrary() {
   state.loadToken++;
   $('reader').hidden = true; $('library').hidden = false;
-  document.body.classList.remove('reading','article-active'); closePanels();
+  document.body.classList.remove('reading','speech-reading'); closePanels();
   updateProgress();
-  history.pushState(null,'','#'); window.scrollTo(0,0);
+  history.pushState({speech:true},'',speechHash()); window.scrollTo(0,0);
 }
 function applySettings() {
   const r = state.reading;
@@ -167,7 +169,7 @@ function applySettings() {
   document.documentElement.dataset.articleWidth = Number(r.width) < 0 ? 'narrow' : Number(r.width) > 0 ? 'wide' : 'standard';
   document.documentElement.dataset.readingPaper = r.paper;
   document.documentElement.dataset.theme = r.theme;
-  document.querySelectorAll('[data-setting]').forEach(group => {
+  speechRoot.querySelectorAll('[data-setting]').forEach(group => {
     group.querySelectorAll('button').forEach(b => b.classList.toggle('active',b.dataset.value === r[group.dataset.setting]));
   });
   for (const [key, value] of Object.entries(r)) localStorage.setItem(settingKeys[key], value);
@@ -181,13 +183,12 @@ function togglePanel(id) {
 async function init() {
   applySettings();
   try {
-    const response = await fetch('../data/speeches/index.json?v='+VERSION); if (!response.ok) throw Error(response.status);
+    const response = await fetch('data/speeches/index.json?v='+VERSION); if (!response.ok) throw Error(response.status);
     state.items = (await response.json()).items;
     $('count').textContent = state.items.length + ' 篇 · 2012—2026';
     renderList();
     if (state.view === 'favorites') renderFavorites();
-    const id = location.hash.match(/id=(ARTI\d+)/)?.[1]; if (id) { const item = state.items.find(a => articleId(a) === id); if (item) openArticle(item,true); }
-    else if (location.hash === '#about') showView('about');
+    window.__speechRoute?.();
   } catch (_) { $('list').innerHTML = '<p class="empty">目录暂时无法加载，请稍后重试。</p>'; }
 }
 function showView(view) {
@@ -257,11 +258,11 @@ $('catalogNav').onclick = () => { toggleSearch(false); showView('catalog'); };
 $('favoritesNav').onclick = () => { toggleSearch(false); showView('favorites'); };
 $('catalogTab').onclick = () => { toggleSearch(false); showView('catalog'); };
 $('favoritesTab').onclick = () => { toggleSearch(false); showView('favorites'); };
-$('aboutToggle').onclick = () => { toggleSearch(false); if (state.view === 'about') { showView('catalog'); history.pushState(null,'',location.pathname); } else { showView('about'); history.pushState(null,'','#about'); } };
+$('aboutToggle').onclick = () => { toggleSearch(false); if (state.view === 'about') { showView('catalog'); history.pushState({speech:true},'',speechHash()); } else { showView('about'); history.pushState({speech:true},'','#m=speeches&about'); } };
 $('more').onclick = () => { state.visible += 40; renderSearch(); };
-document.querySelectorAll('[data-scope]').forEach(button => button.onclick = () => {
+speechRoot.querySelectorAll('[data-scope]').forEach(button => button.onclick = () => {
   state.scope = button.dataset.scope; state.visible = 40;
-  document.querySelectorAll('[data-scope]').forEach(other => { const active = other === button; other.classList.toggle('active',active); other.setAttribute('aria-pressed',String(active)); });
+  speechRoot.querySelectorAll('[data-scope]').forEach(other => { const active = other === button; other.classList.toggle('active',active); other.setAttribute('aria-pressed',String(active)); });
   renderSearch();
 });
 if (window.visualViewport) {
@@ -287,14 +288,14 @@ function updateProgress() {
   $('progressRingFg').style.strokeDashoffset = String(131.95 * (1 - progress));
 }
 window.addEventListener('scroll',updateProgress,{passive:true});
-document.querySelectorAll('[data-setting]').forEach(group => group.onclick = event => {
+speechRoot.querySelectorAll('[data-setting]').forEach(group => group.onclick = event => {
   const button = event.target.closest('button[data-value]');
   if (!button) return;
   state.reading[group.dataset.setting] = button.dataset.value;
   applySettings();
 });
-document.addEventListener('click', event => { if (document.body.classList.contains('reading') && !event.target.closest('.reading-dock')) closePanels(); });
-document.addEventListener('keydown', event => { if (event.key === 'Escape') { closePanels(); if (!$('speechSearch').hidden) toggleSearch(false); } });
+document.addEventListener('click', event => { if (document.body.classList.contains('speech-reading') && !event.target.closest('.reading-dock')) closePanels(); });
+document.addEventListener('keydown', event => { if (document.body.classList.contains('speech-active') && event.key === 'Escape') { closePanels(); if (!$('speechSearch').hidden) toggleSearch(false); } });
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applySettings);
-window.onpopstate = () => { const id=location.hash.match(/id=(ARTI\d+)/)?.[1]; const item=state.items.find(a=>articleId(a)===id); if(item) openArticle(item,true); else { state.loadToken++; $('reader').hidden=true; $('library').hidden=false; document.body.classList.remove('reading','article-active'); closePanels(); showView(location.hash === '#about' ? 'about' : 'catalog'); } };
+window.__speechRoute = () => { if (!state.items.length) return; const params = new URLSearchParams(location.hash.slice(1)); const id = params.get('a'); const item = state.items.find(a => articleId(a) === id); if (item) { if (state.items[state.current] !== item || $('reader').hidden) openArticle(item,true); } else { state.loadToken++; $('reader').hidden=true; $('library').hidden=false; document.body.classList.remove('reading','speech-reading'); closePanels(); showView(params.has('about') ? 'about' : 'catalog'); } };
 init();

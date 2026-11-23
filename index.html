@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#96382f">
 <meta name="description" content="党内刊物检索系统 — 求是、红旗文稿、党建研究">
 <title>党内刊物</title>
-<link rel="stylesheet" href="assets/css/site.css?v=20261123b">
-<link rel="manifest" href="manifest.webmanifest?v=20261123b">
-<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261123b">
+<link rel="stylesheet" href="assets/css/site.css?v=20261123d">
+<link rel="manifest" href="manifest.webmanifest?v=20261123d">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=20261123d">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2396382f' stroke-width='1.8'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
 <script>
 (function(){try{
@@ -108,7 +108,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
             <p class="home-eyebrow">四刊与讲话库</p>
             <h1 class="home-title">党内刊物</h1>
             <div class="home-header-actions">
-                <button class="home-search-icon" type="button" onclick="openGlobalSearch()" title="搜索四刊文章" aria-label="搜索四刊文章"><svg class="icon"><use href="#i-search"/></svg><span>搜索</span></button>
+                <button class="home-search-icon" type="button" onclick="openGlobalSearch()" title="搜索四刊与讲话库" aria-label="搜索四刊与讲话库"><svg class="icon"><use href="#i-search"/></svg><span>搜索</span></button>
                 <button class="home-about-btn" onclick="showAboutPage()" title="关于本站" aria-label="关于本站"><svg class="icon"><use href="#i-info"/></svg></button>
             </div>
         </div>
@@ -121,7 +121,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
         </button>
         <div class="magazine-grid">
             <a class="magazine-card" href="#m=qs" onclick="event.preventDefault();enterMagazine('qs')" aria-label="打开求是杂志">
-                <div class="mag-cover mag-cover-qs"><img src="assets/img/cover_qs.jpg?v=20261123b" alt="求是刊物封面" width="600" height="800" fetchpriority="high"></div>
+                <div class="mag-cover mag-cover-qs"><img src="assets/img/cover_qs.jpg?v=20261123d" alt="求是刊物封面" width="600" height="800" fetchpriority="high"></div>
                 <div class="mag-info">
                     <h2>求是</h2>
                     <p class="mag-desc">中共中央委员会主办的理论刊物</p>
@@ -130,7 +130,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
             </a>
 
             <a class="magazine-card" href="#m=hqwg" onclick="event.preventDefault();enterMagazine('hqwg')" aria-label="打开红旗文稿杂志">
-                <div class="mag-cover mag-cover-hqwg"><img src="assets/img/cover_hqwg.jpg?v=20261123b" alt="红旗文稿刊物封面" width="600" height="800" loading="lazy"></div>
+                <div class="mag-cover mag-cover-hqwg"><img src="assets/img/cover_hqwg.jpg?v=20261123d" alt="红旗文稿刊物封面" width="600" height="800" loading="lazy"></div>
                 <div class="mag-info">
                     <h2>红旗文稿</h2>
                     <p class="mag-desc">政治理论半月刊</p>
@@ -154,8 +154,8 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
                     <p class="mag-meta"><span id="qzCount">-</span> 篇 · <span id="qzIssues">-</span> 期</p>
                 </div>
             </a>
-            <a class="magazine-card" href="speeches/" aria-label="打开习近平讲话库">
-                <div class="mag-cover"><img src="assets/img/cover_speeches.svg?v=20261123b" alt="习近平讲话库封面" width="600" height="800" loading="lazy"></div>
+            <a class="magazine-card" href="#m=speeches" onclick="event.preventDefault();enterSpeechLibrary()" aria-label="打开习近平讲话库">
+                <div class="mag-cover"><img src="assets/img/cover_speeches.svg?v=20261123d" alt="习近平讲话库封面" width="600" height="800" loading="lazy"></div>
                 <div class="mag-info">
                     <h2>习近平讲话库</h2>
                     <p class="mag-desc">共产党员网重要讲话</p>
@@ -168,6 +168,8 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
         <p>公益性学习研究项目 · 仅供内部参考</p>
     </footer>
 </div>
+
+<div id="speechApp" hidden></div>
 
 <!-- ===== 杂志应用页 ===== -->
 <div id="app">
@@ -209,7 +211,7 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
 </div><!-- /.app-sidebar -->
 
 <div class="app-main">
-<div class="journal-cover" aria-hidden="true"><img id="journalCoverImage" src="assets/img/cover_qs.jpg?v=20261123b" alt="" width="600" height="800"></div>
+<div class="journal-cover" aria-hidden="true"><img id="journalCoverImage" src="assets/img/cover_qs.jpg?v=20261123d" alt="" width="600" height="800"></div>
 <nav class="nav-tabs desktop-only">
     <button class="nav-tab active" data-mode="catalog"><svg class="icon"><use href="#i-list"/></svg>目录</button>
     <button class="nav-tab" data-mode="section"><svg class="icon"><use href="#i-grid"/></svg>板块</button>
@@ -444,13 +446,14 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
                 <input type="search" id="globalSearchInput" placeholder="搜索文章标题" aria-label="搜索文章标题" autocomplete="off">
             </div>
         </div>
-        <p class="gs-hint">按标题搜索，选定刊物后可搜索正文</p>
+        <p class="gs-hint">检索四刊标题、讲话库标题与副标题；四刊可进一步搜索正文</p>
         <div class="gs-filters" id="globalSearchFilters" aria-label="搜索范围">
-            <button type="button" data-gs-mag="all" class="active">四刊</button>
+            <button type="button" data-gs-mag="all" class="active">全部</button>
             <button type="button" data-gs-mag="qs">求是</button>
             <button type="button" data-gs-mag="hqwg">红旗文稿</button>
             <button type="button" data-gs-mag="djyj">党建研究</button>
             <button type="button" data-gs-mag="qz">旗帜</button>
+            <button type="button" data-gs-mag="speeches">讲话库</button>
         </div>
         <button type="button" class="gs-body-search" id="globalBodySearch" onclick="openBodySearchFromGlobal()" hidden>搜索本刊正文 <svg class="icon"><use href="#i-arrow-right"/></svg></button>
         <div class="gs-count" id="globalSearchCount"></div>
@@ -458,6 +461,6 @@ var ind=g('reading_indent');    if(ind)d.style.setProperty('--article-indent',in
     </div>
 </div>
 
-<script src="assets/js/app.js?v=20261123b"></script>
+<script src="assets/js/app.js?v=20261123d"></script>
 </body>
 </html>

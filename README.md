@@ -27,7 +27,7 @@
 
 | 功能 | 说明 |
 | --- | --- |
-| 四刊合一 | 求是 / 红旗文稿 / 党建研究 / 旗帜 统一在一个站点浏览、检索 |
+| 四刊与讲话库 | 求是 / 红旗文稿 / 党建研究 / 旗帜 / 习近平讲话库统一在一个站点浏览、检索 |
 | 全文搜索 | 支持标题 / 作者 / 正文 / 组合多范围，含搜索词高亮 |
 | 板块 / 目录 | 板块统计 + 按"年→期→板块"展开的目录树 |
 | 文章收藏 | 基于 `localStorage`（键 `djyj_favorites`），可导出 JSON |
@@ -184,6 +184,8 @@ git push -u origin main
 ```
 
 > **关于 `articles/`**：四本杂志的正文也存于 `data/<mag>/issues/<年>-<期>.json` 分片；讲话库正文依赖 `articles/speeches/`，部署时不能排除整个 `articles/` 目录。
+
+讲话库使用首页路由 `#m=speeches`，文章为 `#m=speeches&a=ARTI...`。界面从 `speeches/shell.txt` 按需加载，脚本为 `speeches/speeches.js`；首页搜索在首次查询时按需加载讲话库目录。部署时需保留这两个文件和 `data/speeches/index.json`。
 
 ### 第二步：Cloudflare Pages 部署
 
