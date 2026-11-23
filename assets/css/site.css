@@ -3998,8 +3998,9 @@ body.article-active { --reading-dock-height: 86px; --reader-shortcut-size: 44px;
 .speech-page .sidebar-header { max-width: 1190px; }
 .speech-page .sidebar-brand h1 { margin: 0; }
 .speech-page .sidebar-header > a { display: grid; place-items: center; text-decoration: none; }
+.speech-page .gs-box #query { min-width: 0; height: 100%; padding: 0 18px 0 52px; outline: none; font: 450 16px/1.4 var(--font-sans); -webkit-appearance: none; appearance: none; }
+.speech-page .gs-box #query:focus-visible { outline: none; }
 .speech-page .speech-favorites-toggle.active { background: color-mix(in srgb, var(--primary) 10%, var(--card)); color: var(--primary); }
-.speech-page .app-sidebar .search-bar:not([hidden]) { display: block; }
 .speech-page .search-box { display: flex; align-items: center; gap: 10px; }
 .speech-page .search-box input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); font: 15px var(--font-sans); }
 .speech-page .nav-tab { flex: none; }
@@ -4024,8 +4025,12 @@ body.article-active { --reading-dock-height: 86px; --reader-shortcut-size: 44px;
 .speech-page .article-page-body { box-sizing: content-box; padding-top: 40px; padding-bottom: 66px; }
 .speech-page .article-page-body p { margin: 0 0 1.1em; }
 .speech-page .article-page-body p.center { text-align: center; text-indent: 0; }
+.speech-page .article-page-body p.right { text-align: right; text-indent: 0; }
 .speech-page .article-page-body p.speech-centered-heading { margin: 1.6em 0 .9em; color: var(--text); font-weight: 700; text-align: center; text-indent: 0; }
 .speech-page .article-page-body img { display: block; max-width: 100%; height: auto; margin: 24px auto; }
+.speech-page .article-page-body .speech-figure { margin: 1.8em 0 2em; text-indent: 0; }
+.speech-page .article-page-body .speech-figure img { margin: 0 auto; }
+.speech-page .article-page-body .speech-figure figcaption { max-width: 680px; margin: .65em auto 0; color: var(--text-2); font: 400 .76em/1.65 var(--font-sans); text-align: center; text-indent: 0; }
 .speech-page .reader-footer { max-width: 760px; margin: 0 auto; padding: 26px 18px 125px; }
 .speech-page .reading-dock { z-index: 250; }
 .speech-page .reading-dock .ap-nav > a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 0; min-height: 60px; padding: 7px 2px; border-radius: 17px; color: var(--text-2); font: 550 11px/1.3 var(--font-sans); text-decoration: none; }

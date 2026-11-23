@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f7f6f3">
 <title>习近平讲话库 · 党内刊物</title>
-<link rel="stylesheet" href="../assets/css/site.css?v=20261122e">
+<link rel="stylesheet" href="../assets/css/site.css?v=20261122g">
 </head>
 <body class="speech-page">
 <svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -33,13 +33,13 @@
         <button class="header-about-btn speech-favorites-toggle" id="favoritesToggle" type="button" aria-label="查看收藏"><svg class="icon"><use href="#star-icon"/></svg></button>
         <a class="header-about-btn" href="https://www.12371.cn/special/xxzd/jh/" target="_blank" rel="noopener" aria-label="查看官网目录"><svg class="icon"><use href="#info-icon"/></svg></a>
       </header>
-      <section class="search-bar" id="speechSearch" hidden><div class="search-intro"><strong>检索讲话</strong><span>搜索标题与目录副标题</span></div><label class="search-box"><svg class="icon search-icon"><use href="#search-icon"/></svg><input id="query" type="search" placeholder="输入关键词搜索…" aria-label="搜索讲话标题与副标题"></label></section>
     </div>
     <div class="app-main">
-      <div class="journal-cover" aria-hidden="true"><img src="../assets/img/cover_speeches.svg" alt="" width="600" height="800"></div>
-      <div class="content"><div class="view active" id="catalogView"><div class="result-info" id="resultCount" hidden></div><div class="catalog-list" id="list" aria-live="polite"></div><button class="more" id="more" type="button" hidden>显示更多</button></div><div class="view" id="favoritesView"><div class="catalog-list" id="favoritesList"></div></div></div>
+      <div class="journal-cover" aria-hidden="true"><img src="../assets/img/cover_speeches.svg?v=20261122g" alt="" width="600" height="800"></div>
+      <div class="content"><div class="view active" id="catalogView"><div class="catalog-list" id="list" aria-live="polite"></div></div><div class="view" id="favoritesView"><div class="catalog-list" id="favoritesList"></div></div></div>
     </div>
     <nav class="bottom-nav mobile-only speech-bottom-nav" aria-label="讲话库导航"><a class="bn-item bn-home" href="../"><svg class="icon"><use href="#home-icon"/></svg><span class="bn-label">首页</span></a><button class="bn-item active" id="catalogNav" type="button"><svg class="icon"><use href="#list-icon"/></svg><span class="bn-label">目录</span></button><button class="bn-item" id="favoritesNav" type="button"><svg class="icon"><use href="#star-icon"/></svg><span class="bn-label">收藏</span></button><button class="bn-item" id="searchNav" type="button"><svg class="icon"><use href="#search-icon"/></svg><span class="bn-label">搜索</span></button></nav>
+    <div class="global-search" id="speechSearch" role="dialog" aria-modal="true" aria-labelledby="speechSearchTitle" hidden><div class="gs-panel"><div class="gs-head"><div class="gs-title-row"><h2 id="speechSearchTitle">搜索讲话</h2><button class="gs-close" id="searchClose" type="button" aria-label="关闭搜索"><svg class="icon"><use href="#close-icon"/></svg></button></div><div class="search-box gs-box"><svg class="icon search-icon"><use href="#search-icon"/></svg><input id="query" type="search" placeholder="搜索讲话标题与副标题" aria-label="搜索讲话标题与副标题" autocomplete="off"></div></div><p class="gs-hint">按标题或目录副标题检索讲话库</p><div class="gs-filters" aria-label="搜索范围"><button type="button" data-scope="all" class="active" aria-pressed="true">全部</button><button type="button" data-scope="title" aria-pressed="false">标题</button><button type="button" data-scope="subtitle" aria-pressed="false">副标题</button></div><div class="gs-count" id="resultCount"></div><div class="results-list" id="speechSearchResults"></div><button class="more" id="more" type="button" hidden>显示更多</button></div></div>
   </section>
   <article class="reader article-page" id="reader" hidden>
     <header class="article-page-header article-heading"><div class="ap-header-inner"><h1 class="ap-title" id="articleTitle"></h1><p class="ap-meta" id="articleSubtitle"></p><span class="ap-meta" id="readerDate"></span></div></header>
@@ -71,6 +71,6 @@
     </div>
   </article>
 </main>
-<script src="speeches.js?v=20261122e" defer></script>
+<script src="speeches.js?v=20261122g" defer></script>
 </body>
 </html>

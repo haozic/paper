@@ -1,15 +1,15 @@
 'use strict';
-const VERSION = '20261122e';
+const VERSION = '20261122g';
 const savedSettings = JSON.parse(localStorage.getItem('speech-reading') || '{}');
 const settingKeys = {font:'reading_fontsize',theme:'reading_theme',line:'reading_lineheight',width:'reading_width',indent:'reading_indent',paper:'reading_paper'};
 const stored = (key, fallback) => localStorage.getItem(settingKeys[key]) ?? savedSettings[key] ?? fallback;
-const state = { items: [], query: '', visible: 40, current: -1, loadToken: 0, view: 'catalog', favorites: JSON.parse(localStorage.getItem('speech-favorites') || '[]'),
+const state = { items: [], query: '', scope: 'all', visible: 40, current: -1, loadToken: 0, view: 'catalog', favorites: JSON.parse(localStorage.getItem('speech-favorites') || '[]'),
   reading: { font: stored('font','20'), theme: stored('theme','auto'), line: stored('line','2.05'), width: stored('width','0'), indent: stored('indent','2'), paper: stored('paper','default') } };
 const $ = id => document.getElementById(id);
 const articleId = item => item.p?.match(/ARTI\d+/)?.[0] || item.u.match(/ARTI\d+/)?.[0];
 const safe = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function dateOf(item) { const m = item.u.match(/\/(20\d\d)\/(\d\d)\/(\d\d)\//); return m ? `${m[1]}.${m[2]}.${m[3]}` : String(item.y); }
-function filtered() { const q = state.query.toLocaleLowerCase('zh-CN'); return state.items.filter(a => (a.t + ' ' + a.d).toLocaleLowerCase('zh-CN').includes(q)); }
+function filtered() { const q = state.query.toLocaleLowerCase('zh-CN'); return state.items.filter(a => (state.scope === 'title' ? a.t : state.scope === 'subtitle' ? a.d : a.t + ' ' + a.d).toLocaleLowerCase('zh-CN').includes(q)); }
 function articleRow(item) {
   const b = document.createElement('button'); b.className = 'art-item'; b.type = 'button';
   const title = document.createElement('span'); title.className = 'speech-row-title'; title.textContent = item.t;
@@ -18,15 +18,10 @@ function articleRow(item) {
   return b;
 }
 function renderList() {
-  const rows = state.query ? filtered() : state.items;
-  $('resultCount').textContent = rows.length + ' 篇';
-  $('resultCount').hidden = !state.query;
+  const rows = state.items;
   const frag = document.createDocumentFragment();
-  if (state.query) {
-    for (const item of rows.slice(0,state.visible)) frag.append(articleRow(item));
-  } else {
-    const years = [...new Set(rows.map(a=>a.y))].sort((a,b)=>b-a);
-    for (const year of years) {
+  const years = [...new Set(rows.map(a=>a.y))].sort((a,b)=>b-a);
+  for (const year of years) {
       const entries = rows.filter(a=>a.y===year);
       const group = document.createElement('div'); group.className = 'year-block' + (year === years[0] ? '' : ' collapsed');
       const header = document.createElement('div'); header.className = 'yb-header'; header.role = 'button'; header.tabIndex = 0;
@@ -39,11 +34,27 @@ function renderList() {
       header.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); expand(); } };
       if (year === years[0]) entries.forEach(a=>articles.append(articleRow(a)));
       group.append(header,body); frag.append(group);
-    }
   }
   $('list').replaceChildren(frag);
-  if (!rows.length) $('list').innerHTML = '<p class="speech-empty">没有找到相关讲话</p>';
-  $('more').hidden = !state.query || rows.length <= state.visible;
+  if (!rows.length) $('list').innerHTML = '<p class="speech-empty">目录暂时无法加载</p>';
+}
+function searchRow(item) {
+  const card = document.createElement('div'); card.className = 'result-card';
+  const button = document.createElement('button'); button.className = 'result-card-main'; button.type = 'button';
+  const title = document.createElement('span'); title.className = 'rc-title'; title.textContent = item.t;
+  const meta = document.createElement('span'); meta.className = 'rc-meta';
+  const tag = document.createElement('span'); tag.className = 'rc-tag'; tag.textContent = item.y + '年'; meta.append(tag);
+  const subtitle = document.createElement('span'); subtitle.className = 'rc-snippet'; subtitle.textContent = item.d.length > 110 ? item.d.slice(0,110) + '…' : item.d;
+  button.append(title,meta,subtitle); button.onclick = () => { toggleSearch(false); openArticle(item); };
+  card.append(button); return card;
+}
+function renderSearch() {
+  const list = $('speechSearchResults'); list.replaceChildren();
+  if (!state.query) { $('resultCount').textContent = ''; $('more').hidden = true; return; }
+  const rows = filtered();
+  $('resultCount').textContent = rows.length ? '找到 ' + rows.length + ' 篇讲话' : '未找到匹配的讲话';
+  list.replaceChildren(...rows.slice(0,state.visible).map(searchRow));
+  $('more').hidden = rows.length <= state.visible;
 }
 function inline(text) {
   return safe(text).replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g, (_,alt,url) => `<img loading="lazy" src="${url}" alt="${alt}">`)
@@ -51,14 +62,34 @@ function inline(text) {
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
 }
 function renderBody(md) {
-  return md.split(/\n\s*\n/).map(block => {
-    const s = block.trim(); if (!s) return '';
-    const center = /^<div style="text-align:center">([\s\S]*?)<\/div>$/.exec(s);
-    if (center) return '<p class="' + (/^\*\*/.test(center[1]) ? 'speech-centered-heading' : 'center') + '">' + inline(center[1]) + '</p>';
-    if (s.startsWith('![')) return '<p class="center">' + inline(s) + '</p>';
+  const blocks = md.split(/\n\s*\n/).map(block => block.trim()).filter(Boolean);
+  const aligned = block => /^<div style="text-align:(center|right)">([\s\S]*?)<\/div>$/.exec(block);
+  const content = block => aligned(block)?.[2] ?? block;
+  const imageOnly = block => /^!\[[^\]]*\]\(https?:\/\/[^\s)]+\)$/.test(content(block));
+  const parts = [];
+  for (let i = 0; i < blocks.length; i++) {
+    const s = blocks[i];
+    if (imageOnly(s)) {
+      let caption = '';
+      const next = blocks[i + 1];
+      const nextText = next && content(next);
+      if (nextText && nextText.length <= 180 && !/^(!\[|#|\*\*)/.test(nextText) && !/text-align:right/.test(next)) {
+        caption = '<figcaption>' + inline(nextText) + '</figcaption>';
+        i++;
+      }
+      parts.push('<figure class="speech-figure">' + inline(content(s)) + caption + '</figure>');
+      continue;
+    }
+    const alignment = aligned(s);
+    if (alignment) {
+      const cls = alignment[1] === 'right' ? 'right' : /^\*\*/.test(alignment[2]) ? 'speech-centered-heading' : 'center';
+      parts.push('<p class="' + cls + '">' + inline(alignment[2]) + '</p>');
+      continue;
+    }
     const heading = /^#{1,3} /.test(s);
-    return '<p' + (heading ? ' class="md-heading"' : '') + '>' + inline(s.replace(/^#{1,3} /,'')) + '</p>';
-  }).join('');
+    parts.push('<p' + (heading ? ' class="md-heading"' : '') + '>' + inline(s.replace(/^#{1,3} /,'')) + '</p>');
+  }
+  return parts.join('');
 }
 async function openArticle(item, replace = false) {
   const token = ++state.loadToken;
@@ -201,20 +232,39 @@ async function shareArticle() {
     }
   } catch (_) { /* Cancelled share leaves the reader unchanged. */ }
 }
-$('query').oninput = e => { state.query = e.target.value.trim(); state.visible = 40; renderList(); showView('catalog'); };
+function syncSearchViewport() {
+  if ($('speechSearch').hidden) return;
+  const viewport = window.visualViewport;
+  $('speechSearch').style.setProperty('--gs-viewport-top',(viewport ? viewport.offsetTop : 0)+'px');
+  $('speechSearch').style.setProperty('--gs-viewport-height',(viewport ? viewport.height : innerHeight)+'px');
+}
+$('query').oninput = e => { state.query = e.target.value.trim(); state.visible = 40; renderSearch(); };
 function toggleSearch(open) {
   $('speechSearch').hidden = !open;
   $('searchToggle').setAttribute('aria-expanded', String(open));
-  showView('catalog');
-  if (open) $('query').focus();
-  else if (state.query) { $('query').value = ''; state.query = ''; renderList(); }
+  document.body.classList.toggle('global-search-active',open);
+  $('searchNav').classList.toggle('active',open);
+  $('catalogNav').classList.toggle('active',!open && state.view === 'catalog');
+  $('favoritesNav').classList.toggle('active',!open && state.view === 'favorites');
+  if (open) { syncSearchViewport(); $('query').focus(); $('query').select(); renderSearch(); }
 }
 $('searchToggle').onclick = () => toggleSearch($('speechSearch').hidden);
 $('searchNav').onclick = () => toggleSearch(true);
-$('catalogNav').onclick = () => { toggleSearch(false); window.scrollTo({top:0,behavior:'smooth'}); };
+$('searchClose').onclick = () => toggleSearch(false);
+$('speechSearch').onclick = e => { if (e.target === $('speechSearch')) toggleSearch(false); };
+$('catalogNav').onclick = () => { toggleSearch(false); showView('catalog'); };
 $('favoritesToggle').onclick = () => { if (state.view === 'favorites') showView('catalog'); else { toggleSearch(false); showView('favorites'); } };
 $('favoritesNav').onclick = () => { toggleSearch(false); showView('favorites'); };
-$('more').onclick = () => { state.visible += 40; renderList(); };
+$('more').onclick = () => { state.visible += 40; renderSearch(); };
+document.querySelectorAll('[data-scope]').forEach(button => button.onclick = () => {
+  state.scope = button.dataset.scope; state.visible = 40;
+  document.querySelectorAll('[data-scope]').forEach(other => { const active = other === button; other.classList.toggle('active',active); other.setAttribute('aria-pressed',String(active)); });
+  renderSearch();
+});
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize',syncSearchViewport);
+  window.visualViewport.addEventListener('scroll',syncSearchViewport);
+}
 $('back').onclick = showLibrary;
 $('next').onclick = () => { if (state.current > 0) openArticle(state.items[state.current-1],true); };
 $('directory').onclick = () => togglePanel('directoryPanel');

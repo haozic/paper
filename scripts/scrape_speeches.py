@@ -16,6 +16,16 @@ CATALOG = "https://www.12371.cn/special/xxzd/jh/"
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; PaperArchive/1.0)"}
 
 
+def strip_office_metadata(body):
+    """Remove Word conditional XML that some official article pages prepend."""
+    while body.startswith("[if gte mso "):
+        cleaned = re.sub(r"\A\[if gte mso [\s\S]*?<!\[endif\]\s*", "", body, count=1)
+        if cleaned == body:
+            break
+        body = cleaned
+    return body
+
+
 def fetch(url):
     for attempt in range(3):
         try:
@@ -68,7 +78,7 @@ def article(entry):
         raise ValueError(f"Missing article body: {entry['u']}")
     for unwanted in word.select("script, style, noscript"):
         unwanted.decompose()
-    body = element_to_md(word, entry["u"]).strip()
+    body = strip_office_metadata(element_to_md(word, entry["u"]).strip())
     body = re.sub(r"\n{3,}", "\n\n", body)
     body = "\n".join(line.rstrip() for line in body.splitlines())
     if len(body) < 100 or "�" in body:

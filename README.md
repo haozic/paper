@@ -60,6 +60,8 @@ e:\cursor\xgkt\djyj
 ├── README.md                       # 你正在阅读的文件
 ├── wrangler.jsonc                  # Cloudflare Pages 部署配置
 ├── _headers                        # 自定义 HTTP 头（缓存策略）
+├── _routes.json                    # 仅分享预览请求调用 Pages Function
+├── functions/share/index.js        # 按文章返回分享标题和预览信息
 ├── sw.js                           # Service Worker：离线阅读（PWA）
 ├── manifest.webmanifest            # PWA 清单：应用名 / 图标 / 快捷方式
 ├── .nojekyll                       # 禁用 GitHub Pages 的 Jekyll 处理
@@ -181,7 +183,7 @@ git remote add origin https://github.com/你的用户名/djyj.git
 git push -u origin main
 ```
 
-> **关于 `articles/`**：`articles/` 文件夹有 7000+ 个 Markdown 文件，git 推送较慢。如果不需要保留原始备份（线上站点并不依赖它），可以在 `.gitignore` 中加 `articles/`，`git rm -r --cached articles/` 后再推送。`data/` 仍可保留，因为文章正文也存了 `data/<mag>/issues/<年>-<期>.json` 分片里。
+> **关于 `articles/`**：四本杂志的正文也存于 `data/<mag>/issues/<年>-<期>.json` 分片；讲话库正文依赖 `articles/speeches/`，部署时不能排除整个 `articles/` 目录。
 
 ### 第二步：Cloudflare Pages 部署
 
@@ -191,7 +193,7 @@ git push -u origin main
 2. **Workers & Pages** → **创建应用程序** → **Pages** → **连接到 Git**
 3. 选择仓库 `djyj`，配置：
    - **框架预设**：None
-   - **构建命令**：留空（纯静态站点）
+   - **构建命令**：留空（静态页面和分享预览 Function 无需自定义构建）
    - **构建输出目录**：`/`（仓库根）
 4. **保存并部署**，等待 1-2 分钟获得 `xxx.pages.dev` 域名
 
@@ -263,7 +265,7 @@ python scripts/check_compat.py
 
 ### SEO & 性能
 
-- 站点为纯静态 HTML，发布用样式文件已提交仓库，Cloudflare Pages 无需运行构建命令
+- 页面和数据为静态资源；仅 `/share/` 使用 Pages Function 输出文章级分享标题，`_routes.json` 限定 Function 调用范围
 - 单页应用（SPA-like）通过 History API 实现路由
 - 已支持 Service Worker 离线阅读：应用外壳预缓存，已读正文运行时缓存，断网仍可打开文章
 

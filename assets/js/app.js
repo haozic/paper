@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261122e';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261122g';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -15,7 +15,7 @@ const MAGAZINES = {
         issuesPath: 'data/qs/issues',
         source: 'https://www.qstheory.cn/qs/mulu.htm',
         desc: '中共中央委员会机关刊',
-        cover: 'assets/img/cover_qs.jpg?v=20261122e',
+        cover: 'assets/img/cover_qs.jpg?v=20261122g',
     },
     hqwg: {
         name: '红旗文稿',
@@ -26,7 +26,7 @@ const MAGAZINES = {
         issuesPath: 'data/hqwg/issues',
         source: 'https://www.qstheory.cn/hqwglist/mulu.htm',
         desc: '政治理论半月刊',
-        cover: 'assets/img/cover_hqwg.jpg?v=20261122e',
+        cover: 'assets/img/cover_hqwg.jpg?v=20261122g',
     },
     djyj: {
         name: '党建研究',
@@ -1927,10 +1927,14 @@ function renderRelatedArticles(cur, pos, ordered) {
 /* ===== 分享文章；无系统分享时复制当前文章链接 ===== */
 async function shareArticleLink() {
     const btn = document.getElementById('articleCopyBtn');
-    const url = window.location.href;
+    if (!state.currentMag || !state.currentArticleUrl) return;
     const title = document.getElementById('articleTitle')?.textContent || document.title;
+    const shareUrl = new URL('/share/', window.location.origin);
+    shareUrl.searchParams.set('m', state.currentMag);
+    shareUrl.searchParams.set('u', state.currentArticleUrl);
+    const url = shareUrl.href;
     if (navigator.share) {
-        try { await navigator.share({ title: title, url: url }); return; }
+        try { await navigator.share({ title: title, text: title, url: url }); return; }
         catch (error) { if (error.name === 'AbortError') return; }
     }
     let copied = false;

@@ -11,6 +11,14 @@ assert len({item["u"] for item in items}) == len(items)
 assert all(item["t"] and item["d"] for item in items)
 assert all(urlparse(item["u"]).hostname in {"www.12371.cn", "news.12371.cn", "syss.12371.cn", "biaozhang.12371.cn"} for item in items)
 assert all(re.search(r"/ARTI\d+\.md$", item["p"]) and len((root / item["p"]).read_text("utf-8")) >= 100 for item in items if item["p"])
+unexpected_tags = []
+for item in items:
+    if not item["p"]:
+        continue
+    body = (root / item["p"]).read_text("utf-8")
+    if "<xml>" in body or "<![endif]" in body or re.search(r"<div(?! style=\"text-align:(?:center|right)\")", body):
+        unexpected_tags.append(item["p"])
+assert not unexpected_tags, unexpected_tags[:10]
 missing = [item for item in items if not item["p"]]
 assert len(missing) == 5, len(missing)
 print(f"讲话库：{len(items)} 条目录、{len(items)-len(missing)} 篇正文、{len(missing)} 篇官网失效")
