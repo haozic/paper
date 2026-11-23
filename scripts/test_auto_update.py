@@ -41,6 +41,7 @@ class AutoUpdateTests(unittest.TestCase):
             self.assertIn(f"INDEX_VERSION = '{version}'", (root / "scripts/build_search_index.py").read_text("utf-8"))
             self.assertIn("2027 年第 1 期", (root / "index.html").read_text("utf-8"))
             self.assertIn("2012 年至 2027 年，2 条目录记录；1 篇可阅读正文", (root / "index.html").read_text("utf-8"))
+            self.assertIn("2 篇 · 2012—2027", (root / "index.html").read_text("utf-8"))
 
 
 if __name__ == "__main__":

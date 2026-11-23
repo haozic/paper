@@ -20,6 +20,18 @@
   --glass-border: color-mix(in srgb, var(--card) 68%, var(--border));
   --glass-shadow: 0 10px 32px rgba(26, 35, 55, .10), inset 0 1px rgba(255,255,255,.72);
 }
+.loading button {
+  margin-inline-start: 10px;
+  padding: 7px 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--glass-surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(30, 39, 60, .06);
+}
+.loading button:hover { border-color: var(--primary); }
 html[data-theme="dark"] {
   --bg: #191c22; --bg-2: #252a33; --card: #2b3039;
   --text: #f2f3f5; --text-2: #c6cad3; --text-3: #a4aab5;

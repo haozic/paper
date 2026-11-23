@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '20261123i';
+const VERSION = '20261123j';
 const savedSettings = JSON.parse(localStorage.getItem('speech-reading') || '{}');
 const settingKeys = {font:'reading_fontsize',theme:'reading_theme',line:'reading_lineheight',width:'reading_width',indent:'reading_indent',paper:'reading_paper'};
 const stored = (key, fallback) => localStorage.getItem(settingKeys[key]) ?? savedSettings[key] ?? fallback;
@@ -177,14 +177,38 @@ function togglePanel(id) {
 }
 async function init() {
   applySettings();
+  $('list').innerHTML = '<div class="loading" role="status">目录加载中…</div>';
   try {
-    const response = await fetch('data/speeches/index.json?v='+VERSION); if (!response.ok) throw Error(response.status);
-    state.items = (await response.json()).items;
-    $('count').textContent = state.items.length + ' 篇 · 2012—2026';
+    const url = 'data/speeches/index.json?v='+VERSION;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const response = await fetch(url, attempt ? {cache:'reload'} : undefined);
+        if (!response.ok) throw Error(response.status);
+        const items = (await response.json()).items;
+        if (!Array.isArray(items) || !items.length) throw Error('Invalid speech catalog');
+        state.items = items;
+        break;
+      } catch (error) {
+        if (attempt) throw error;
+        if ('caches' in window) {
+          try {
+            const key = new URL(url, location.href).href;
+            await Promise.all((await caches.keys()).map(async name => (await caches.open(name)).delete(key)));
+          } catch (_) { /* Retry even when cache access is unavailable. */ }
+        }
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+    }
+    const years = state.items.map(item => item.y);
+    $('count').textContent = state.items.length + ' 篇 · ' + Math.min(...years) + '—' + Math.max(...years);
     renderList();
     if (state.view === 'favorites') renderFavorites();
     window.__speechRoute?.();
-  } catch (_) { $('list').innerHTML = '<p class="empty">目录暂时无法加载，请稍后重试。</p>'; }
+  } catch (error) {
+    console.error('讲话库目录加载失败:', error);
+    $('list').innerHTML = '<div class="loading" role="alert">目录加载失败。<button type="button">重试加载</button></div>';
+    $('list').querySelector('button').onclick = init;
+  }
 }
 function showView(view) {
   state.view = view;

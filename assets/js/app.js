@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261123i';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261123j';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -68,6 +68,7 @@ const BODY_YEAR_SPAN = 3;
 /* ===== 状态管理 ===== */
 const state = {
     currentMag: null,       // null=首页, 'qs'|'hqwg'|'djyj'
+    magLoadToken: 0,
     magCache: {},           // {qs: {meta, bodyText, loadedIssues, fullTextReady}, ...}
     favorites: [],
     currentMode: 'section',
@@ -175,6 +176,7 @@ async function loadHomeCounts() {
 function enterMagazine(magKey) {
     document.body.classList.remove('speech-active', 'speech-page', 'reading', 'speech-reading');
     state.currentMag = magKey;
+    const loadToken = ++state.magLoadToken;
     const conf = MAGAZINES[magKey];
 
     // 重置状态
@@ -207,12 +209,14 @@ function enterMagazine(magKey) {
     // 重置视图
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('catalogView').classList.add('active');
+    document.getElementById('catalogContent').innerHTML = '<div class="loading" role="status">目录加载中…</div>';
+    document.getElementById('sectionContent').replaceChildren();
     document.querySelectorAll('.nav-tab, .bn-item[data-mode]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.mode === 'catalog');
     });
 
     // 加载数据
-    initMagazine(magKey);
+    initMagazine(magKey, loadToken);
 
     // History
     history.pushState({ mag: magKey }, '', `#m=${magKey}`);
@@ -223,6 +227,7 @@ function goHome() {
     // 关闭所有覆盖层
     document.body.classList.remove('article-active', 'section-active', 'about-active', 'mag-active', 'mag-search-open', 'global-search-active', 'speech-active', 'speech-page', 'reading', 'speech-reading');
     state.currentMag = null;
+    state.magLoadToken++;
 
     // 重置杂志颜色
     document.documentElement.style.setProperty('--mag-color-base', '#8b0000');
@@ -234,27 +239,53 @@ function goHome() {
 }
 
 let speechLoading;
+let speechLoadAttempt = 0;
 async function enterSpeechLibrary(push = true) {
     state.currentMag = null;
+    state.magLoadToken++;
     document.body.classList.remove('mag-active', 'about-active', 'section-active', 'article-active');
     document.body.classList.add('speech-active', 'speech-page');
     const host = document.getElementById('speechApp');
     host.hidden = false;
     if (push) history.pushState({ speech: true }, '', '#m=speeches');
     if (!speechLoading) speechLoading = (async () => {
-        const response = await fetch('speeches/shell.txt?v=20261123i');
-        if (!response.ok) throw new Error('讲话库界面加载失败');
-        host.innerHTML = await response.text();
+        host.innerHTML = '<div class="loading" role="status">讲话库目录加载中…</div>';
+        const shellUrl = 'speeches/shell.txt?v=20261123j';
+        let shell;
+        for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+                const response = await fetch(shellUrl, attempt ? { cache: 'reload' } : undefined);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                shell = await response.text();
+                if (!shell.includes('id="library"')) throw new Error('讲话库界面格式不正确');
+                break;
+            } catch (error) {
+                if (attempt) throw error;
+                if ('caches' in window) {
+                    try {
+                        const key = new URL(shellUrl, location.href).href;
+                        await Promise.all((await caches.keys()).map(async name => (await caches.open(name)).delete(key)));
+                    } catch (cacheError) { console.warn('清理旧讲话库界面缓存失败:', cacheError); }
+                }
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+        }
+        host.innerHTML = shell;
         await new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.type = 'module';
-            script.src = 'speeches/speeches.js?v=20261123i';
+            script.src = 'speeches/speeches.js?v=20261123j&load=' + (++speechLoadAttempt);
             script.onload = resolve; script.onerror = reject;
             document.body.appendChild(script);
         });
     })();
     try { await speechLoading; window.__speechRoute?.(); }
-    catch (error) { speechLoading = null; host.textContent = '讲话库加载失败，请刷新页面重试。'; console.error(error); }
+    catch (error) {
+        speechLoading = null;
+        host.innerHTML = '<div class="loading" role="alert">讲话库加载失败。<button type="button">重试加载</button></div>';
+        host.querySelector('button').onclick = () => enterSpeechLibrary(false);
+        console.error(error);
+    }
     window.scrollTo(0, 0);
 }
 
@@ -274,21 +305,48 @@ async function loadMagMeta(magKey) {
     return ms.meta;
 }
 
-async function initMagazine(magKey) {
+async function fetchMagazineMeta(conf) {
+    const url = dataUrl(`${conf.dataPath}/meta.json`);
+    for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+            const resp = await fetch(url, attempt ? { cache: 'reload' } : undefined);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const meta = await resp.json();
+            if (!Array.isArray(meta) || !meta.length) throw new Error('期刊目录格式不正确');
+            return meta;
+        } catch (error) {
+            if (attempt) throw error;
+            if ('caches' in window) {
+                try {
+                    const key = new URL(url, location.href).href;
+                    await Promise.all((await caches.keys()).map(async name => (await caches.open(name)).delete(key)));
+                } catch (cacheError) { console.warn('清理旧目录缓存失败:', cacheError); }
+            }
+            await new Promise(resolve => setTimeout(resolve, 300));
+        }
+    }
+}
+
+async function initMagazine(magKey, loadToken = state.magLoadToken) {
     const conf = MAGAZINES[magKey];
     const ms = getMagState();
 
     if (ms.meta.length === 0) {
         try {
-            const resp = await fetch(dataUrl(`${conf.dataPath}/meta.json`));
-            ms.meta = await resp.json();
+            ms.meta = await fetchMagazineMeta(conf);
         } catch (e) {
             console.error('加载元数据失败:', e);
-            document.getElementById('sectionContent').innerHTML =
-                '<div class="loading"><div>数据加载失败，请刷新重试</div></div>';
+            if (state.currentMag !== magKey || state.magLoadToken !== loadToken) return;
+            const catalog = document.getElementById('catalogContent');
+            catalog.innerHTML = '<div class="loading" role="alert">目录加载失败。<button type="button">重试加载</button></div>';
+            catalog.querySelector('button').onclick = () => {
+                catalog.innerHTML = '<div class="loading" role="status">目录加载中…</div>';
+                initMagazine(magKey, loadToken);
+            };
             return;
         }
     }
+    if (state.currentMag !== magKey || state.magLoadToken !== loadToken) return;
 
     document.getElementById('totalCount').textContent = ms.meta.length;
 

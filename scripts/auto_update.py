@@ -93,6 +93,10 @@ def update_about():
                            f"习近平讲话库：{min(years)} 年至 {max(years)} 年，{len(items)} 条目录记录；{readable} 篇可阅读正文", html, count=1)
     if count != 1:
         raise RuntimeError("About-page speech count not found")
+    html, count = re.subn(r'(<h2>习近平讲话库</h2>[\s\S]*?<p class="mag-meta">)\d+ 篇 · \d{4}—\d{4}',
+                           rf'\g<1>{len(items)} 篇 · {min(years)}—{max(years)}', html, count=1)
+    if count != 1:
+        raise RuntimeError("Home-page speech count not found")
     path.write_text(html, encoding="utf-8")
 
 
