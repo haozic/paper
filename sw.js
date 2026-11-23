@@ -39,9 +39,9 @@
 var VERSION = (function () {
     try {
         var m = /[?&]v=([^&]+)/.exec(self.location.search);
-        return m ? decodeURIComponent(m[1]) : '20261123g';
+        return m ? decodeURIComponent(m[1]) : '20261123h';
     } catch (e) {
-        return '20261123g';
+        return '20261123h';
     }
 })();
 
@@ -63,8 +63,8 @@ var SHELL_ASSETS = [
     './assets/img/icon-512.png',
     './assets/img/icon-maskable-512.png',
     './assets/img/apple-touch-icon.png',
-    './assets/img/cover_qs.jpg?v=20261123g',
-    './assets/img/cover_hqwg.jpg?v=20261123g',
+    './assets/img/cover_qs.jpg?v=20261123h',
+    './assets/img/cover_hqwg.jpg?v=20261123h',
     './assets/img/cover_speeches.svg?v=' + VERSION,
     './assets/img/cover_djyj.jpg',
     './assets/img/cover_qz_2026_06.jpg',

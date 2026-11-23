@@ -242,13 +242,13 @@ async function enterSpeechLibrary(push = true) {
     host.hidden = false;
     if (push) history.pushState({ speech: true }, '', '#m=speeches');
     if (!speechLoading) speechLoading = (async () => {
-        const response = await fetch('speeches/shell.txt?v=20261123g');
+        const response = await fetch('speeches/shell.txt?v=20261123h');
         if (!response.ok) throw new Error('讲话库界面加载失败');
         host.innerHTML = await response.text();
         await new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.type = 'module';
-            script.src = 'speeches/speeches.js?v=20261123g';
+            script.src = 'speeches/speeches.js?v=20261123h';
             script.onload = resolve; script.onerror = reject;
             document.body.appendChild(script);
         });

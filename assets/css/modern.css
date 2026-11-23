@@ -226,7 +226,7 @@ html[data-theme="dark"] .year-block, html[data-theme="dark"] .nav-tab.active { b
 .ap-related-name { display: block; overflow: visible; text-overflow: clip; white-space: normal; font: 600 16px/1.5 var(--font-sans); }
 .ap-related-meta { display: block; margin-top: 4px; color: var(--text-3); font-size: 11px; line-height: 1.4; }
 .ap-related-arrow { flex: none; color: var(--text-3); font-size: 20px; line-height: 1; }
-body.article-active { --reading-dock-height: 86px; --reader-shortcut-size: 44px; --dock-bottom: max(12px, env(safe-area-inset-bottom, 0px)); }
+body.article-active, body.speech-reading { --reading-dock-height: 86px; --reader-shortcut-size: 44px; --dock-bottom: max(12px, env(safe-area-inset-bottom, 0px)); }
 .reading-dock { position: fixed; inset: auto auto var(--dock-bottom) 50%; box-sizing: border-box; width: min(540px, calc(100% - 28px)); padding: 5px; transform: translateX(-50%); border: 1px solid var(--glass-border); border-radius: 23px; background: color-mix(in srgb, var(--card) 68%, transparent); backdrop-filter: saturate(165%) blur(16px); box-shadow: inset 0 1px rgba(255,255,255,.6); }
 .reading-dock .ap-nav { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); width: 100%; max-width: none; margin: 0; padding: 0; border: 0; }
 .reading-dock .ap-nav > button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 0; min-height: 60px; padding: 7px 2px; border: 0; border-radius: 17px; box-shadow: none; color: var(--text-2); font: 550 11px/1.3 var(--font-sans); white-space: nowrap; }
@@ -333,7 +333,7 @@ body.article-active { --reading-dock-height: 86px; --reader-shortcut-size: 44px;
   .ap-related-title { font-size: 23px; }
   .ap-related-item { min-height: 68px; padding: 12px 14px; }
   .ap-related-name { font-size: 15px; }
-  body.article-active { --reading-dock-height: 64px; --dock-bottom: var(--mobile-dock-bottom); }
+  body.article-active, body.speech-reading { --reading-dock-height: 64px; --dock-bottom: var(--mobile-dock-bottom); }
   .reading-dock { width: min(420px, calc(100% - 28px)); border-radius: 21px; }
   .reading-dock .ap-nav > button { min-height: 52px; font-size: 10px; }
   .reading-dock .ap-nav .icon { width: 20px; height: 20px; }
