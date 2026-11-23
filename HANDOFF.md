@@ -11,7 +11,7 @@
 ### 验收、卡点与下一步
 
 - 分享函数用真实《求是》元数据模拟请求，返回 200、文章标题和正确跳转路径；示例讲话《携手共建亚太命运共同体》的渲染检查确认不出现可见 div 标记、两张图片各有图注。四刊数据、讲话库数据、搜索索引、样式构建、JS 语法和 `git diff --check` 通过。
-- 本机 Playwright 浏览器访问本地 HTTP 服务报 `ERR_NETWORK_ACCESS_DENIED`，未完成视觉浏览器验收。下一步提交推送后检查 Cloudflare 线上资源和分享路由。
+- 本机 Playwright 浏览器访问本地 HTTP 服务报 `ERR_NETWORK_ACCESS_DENIED`，未完成视觉浏览器验收。提交 `c5604b2` 已推送 GitHub `main`；Cloudflare 线上讲话库页面已引用 `20261122g`，新脚本已返回，`/share/` 实测返回 200 且 OG 标题为真实文章标题。线上示例讲话 Markdown 可读取。当前无功能卡点。
 
 ### 踩过的坑
 
