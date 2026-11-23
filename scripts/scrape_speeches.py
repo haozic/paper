@@ -31,8 +31,11 @@ def fetch(url):
         try:
             response = requests.get(url, headers=HEADERS, timeout=25)
             response.raise_for_status()
-            response.encoding = response.apparent_encoding
-            return response.text
+            # The site often omits HTTP charset while declaring UTF-8 in HTML.
+            # Charset guessing has previously turned valid Chinese into mojibake.
+            match = re.search(rb"<meta\b[^>]*charset\s*=\s*['\"]?([\w-]+)", response.content[:8192], re.I)
+            encoding = match.group(1).decode("ascii") if match else response.apparent_encoding
+            return response.content.decode(encoding)
         except requests.RequestException:
             if attempt == 2:
                 raise
@@ -70,7 +73,7 @@ def catalog():
 
 def article(entry):
     path = ROOT / entry["p"]
-    if "--refresh" not in sys.argv and path.exists() and len(path.read_text("utf-8")) > 100:
+    if "--refresh" not in sys.argv and path.exists() and not corrupt_body(path.read_text("utf-8")):
         return entry, None
     soup = BeautifulSoup(fetch(entry["u"]), "html.parser")
     word = soup.select_one("#font_area .word")
@@ -81,16 +84,26 @@ def article(entry):
     body = strip_office_metadata(element_to_md(word, entry["u"]).strip())
     body = re.sub(r"\n{3,}", "\n\n", body)
     body = "\n".join(line.rstrip() for line in body.splitlines())
-    if len(body) < 100 or "�" in body:
+    if corrupt_body(body):
         raise ValueError(f"Invalid article body: {entry['u']} ({len(body)} chars)")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes((body + "\n").encode("utf-8"))
     return entry, path
 
 
+def corrupt_body(body):
+    chinese = sum("\u3400" <= char <= "\u9fff" for char in body)
+    return len(body) < 100 or "�" in body or chinese < 50 or chinese / len(body) < 0.2
+
+
 def main():
-    entries = catalog()
-    print(f"Official catalog: {len(entries)} unique articles", flush=True)
+    if "--repair-encoding" in sys.argv:
+        entries = json.loads((ROOT / "data/speeches/index.json").read_text("utf-8"))["items"]
+        entries = [entry for entry in entries if entry["p"] and corrupt_body((ROOT / entry["p"]).read_text("utf-8"))]
+        print(f"Repairing {len(entries)} corrupt archived articles", flush=True)
+    else:
+        entries = catalog()
+    print(f"Official catalog: {len(entries)} unique articles" if "--repair-encoding" not in sys.argv else f"Repair batch: {len(entries)} articles", flush=True)
     failures = []
     unavailable = []
     with ThreadPoolExecutor(max_workers=8) as pool:
@@ -115,6 +128,8 @@ def main():
         return 1
     if unavailable:
         print(f"Official pages without retrievable text: {len(unavailable)}", *unavailable, sep="\n", flush=True)
+    if "--repair-encoding" in sys.argv:
+        return 0
     output = ROOT / "data/speeches/index.json"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_bytes(json.dumps({"source": CATALOG, "items": entries}, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))

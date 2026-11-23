@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261122g';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261123i';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -242,13 +242,13 @@ async function enterSpeechLibrary(push = true) {
     host.hidden = false;
     if (push) history.pushState({ speech: true }, '', '#m=speeches');
     if (!speechLoading) speechLoading = (async () => {
-        const response = await fetch('speeches/shell.txt?v=20261123h');
+        const response = await fetch('speeches/shell.txt?v=20261123i');
         if (!response.ok) throw new Error('讲话库界面加载失败');
         host.innerHTML = await response.text();
         await new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.type = 'module';
-            script.src = 'speeches/speeches.js?v=20261123h';
+            script.src = 'speeches/speeches.js?v=20261123i';
             script.onload = resolve; script.onerror = reject;
             document.body.appendChild(script);
         });

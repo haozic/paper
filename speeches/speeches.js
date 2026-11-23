@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '20261123h';
+const VERSION = '20261123i';
 const savedSettings = JSON.parse(localStorage.getItem('speech-reading') || '{}');
 const settingKeys = {font:'reading_fontsize',theme:'reading_theme',line:'reading_lineheight',width:'reading_width',indent:'reading_indent',paper:'reading_paper'};
 const stored = (key, fallback) => localStorage.getItem(settingKeys[key]) ?? savedSettings[key] ?? fallback;
@@ -92,10 +92,24 @@ async function openArticle(item, replace = false) {
   window.scrollTo(0,0);
   if (!item.p) { $('articleBody').innerHTML = '<p>官网原文目前无法读取，请使用下方官网链接查看。</p>'; updateProgress(); return; }
   try {
-    const response = await fetch(item.p); if (!response.ok) throw Error(response.status);
-    const markdown = await response.text();
+    let response = await fetch(item.p + '?v=' + VERSION); if (!response.ok) throw Error(response.status);
+    let markdown = await response.text();
+    // An older service worker keyed speech Markdown by path and may still serve
+    // a corrupted copy during the first load after this release.
+    if (speechBodyLooksCorrupt(markdown) && 'caches' in window) {
+      await caches.open('djyj-md-v2').then(cache => cache.delete(new URL(item.p, location.href).href));
+      response = await fetch(item.p + '?v=' + VERSION + '&repair=1', { cache: 'reload' });
+      if (!response.ok) throw Error(response.status);
+      markdown = await response.text();
+    }
+    if (speechBodyLooksCorrupt(markdown)) throw Error('Corrupt speech body');
     if (token === state.loadToken) { $('articleBody').innerHTML = renderBody(markdown); updateProgress(); }
   } catch (_) { if (token === state.loadToken) { $('articleBody').innerHTML = '<p>正文加载失败，请刷新或访问官网原文。</p>'; updateProgress(); } }
+}
+
+function speechBodyLooksCorrupt(body) {
+  const chinese = (body.match(/[\u3400-\u9fff]/g) || []).length;
+  return body.length < 100 || body.includes('�') || chinese < 50 || chinese / body.length < 0.2;
 }
 function renderDirectory(item) {
   $('directoryTitle').textContent = '习近平讲话库 · ' + item.y + '年';

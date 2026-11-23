@@ -88,6 +88,8 @@ python scripts/check_speeches.py
 python scripts/build_speech_body_search.py --check
 ```
 
+若只需修复已存档讲话正文的乱码，可运行 `python scripts/scrape_speeches.py --repair-encoding`，再重建正文索引并执行上述检查。修复模式只从共产党员网原文重新抓取识别出的异常正文，不改动目录。
+
 四刊元数据更新后，重建跨刊标题索引并检查数据：
 
 ```bash

@@ -39,9 +39,9 @@
 var VERSION = (function () {
     try {
         var m = /[?&]v=([^&]+)/.exec(self.location.search);
-        return m ? decodeURIComponent(m[1]) : '20261123h';
+        return m ? decodeURIComponent(m[1]) : '20261123i';
     } catch (e) {
-        return '20261123h';
+        return '20261123i';
     }
 })();
 
@@ -63,8 +63,8 @@ var SHELL_ASSETS = [
     './assets/img/icon-512.png',
     './assets/img/icon-maskable-512.png',
     './assets/img/apple-touch-icon.png',
-    './assets/img/cover_qs.jpg?v=20261123h',
-    './assets/img/cover_hqwg.jpg?v=20261123h',
+    './assets/img/cover_qs.jpg?v=20261123i',
+    './assets/img/cover_hqwg.jpg?v=20261123i',
     './assets/img/cover_speeches.svg?v=' + VERSION,
     './assets/img/cover_djyj.jpg',
     './assets/img/cover_qz_2026_06.jpg',
@@ -99,6 +99,9 @@ function cacheKeyFor(request) {
     }
     if (p.indexOf('/data/') === 0) {
         return new Request(url.origin + p);   /* 正文分片：按路径 */
+    }
+    if (p.indexOf('/articles/speeches/') === 0) {
+        return request;              /* 讲话库正文可能修复：保留版本号 */
     }
     if (p.indexOf('/articles/') === 0) {
         return new Request(url.origin + p);   /* 正文 md：按路径 */
