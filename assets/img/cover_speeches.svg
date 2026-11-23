@@ -1,11 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" role="img" aria-labelledby="title">
 <title id="title">习近平讲话库</title>
-<rect width="600" height="800" fill="#69252d"/>
-<path d="M0 0h12v800H0z" fill="#4e1b23"/>
-<path d="M70 122h460" stroke="#bb9a90" stroke-width="1" opacity=".7"/>
-<text x="72" y="99" fill="#e7d7c8" font-family="Songti SC, SimSun, serif" font-size="24" letter-spacing="6">重要讲话</text>
-<text x="70" y="374" fill="#fffaf2" font-family="Songti SC, SimSun, serif" font-size="82" font-weight="700" letter-spacing="5">习近平</text>
-<text x="70" y="486" fill="#fffaf2" font-family="Songti SC, SimSun, serif" font-size="82" font-weight="700" letter-spacing="5">讲话库</text>
-<path d="M70 655h460" stroke="#bb9a90" stroke-width="1" opacity=".7"/>
-<text x="72" y="711" fill="#e7d7c8" font-family="Songti SC, SimSun, serif" font-size="23" letter-spacing="5">共产党员网</text>
+<defs><linearGradient id="paper" x2="1" y2="1"><stop stop-color="#f9f5ed"/><stop offset="1" stop-color="#e9dfd1"/></linearGradient><linearGradient id="red" x2="1" y2="1"><stop stop-color="#ae2c2a"/><stop offset="1" stop-color="#762222"/></linearGradient></defs>
+<rect width="600" height="800" fill="url(#paper)"/>
+<path d="M0 0h600v14H0z" fill="#9c2927"/>
+<path d="M-40 661c121-44 234-32 355-94 89-46 194-118 325-120v353H0z" fill="#9e3029" opacity=".08"/>
+<path d="M-30 714c139-83 271-44 414-109 77-35 145-84 246-89" fill="none" stroke="#aa4539" stroke-width="2" opacity=".2"/>
+<path d="M-30 744c139-83 271-44 414-109 77-35 145-84 246-89" fill="none" stroke="#aa4539" stroke-width="2" opacity=".13"/>
+<text x="54" y="86" fill="#8c3b32" font-family="Songti SC, STSong, SimSun, serif" font-size="22" letter-spacing="5">重要讲话 · 原文阅读</text>
+<path d="M54 106h492" stroke="#ae8b78" stroke-width="1" opacity=".65"/>
+<text x="48" y="270" fill="url(#red)" font-family="Songti SC, STSong, SimSun, serif" font-size="93" font-weight="700" letter-spacing="8">习近平</text>
+<text x="48" y="387" fill="url(#red)" font-family="Songti SC, STSong, SimSun, serif" font-size="93" font-weight="700" letter-spacing="8">讲话库</text>
+<path d="M54 425h130" stroke="#a3352d" stroke-width="5"/>
+<text x="54" y="691" fill="#6f5147" font-family="Songti SC, STSong, SimSun, serif" font-size="22" letter-spacing="4">2012 — 2026</text>
+<text x="54" y="737" fill="#8f776b" font-family="Songti SC, STSong, SimSun, serif" font-size="19" letter-spacing="4">共产党员网</text>
 </svg>

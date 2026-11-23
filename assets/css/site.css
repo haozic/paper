@@ -4000,7 +4000,6 @@ body.article-active { --reading-dock-height: 86px; --reader-shortcut-size: 44px;
 .speech-page .sidebar-header > a { display: grid; place-items: center; text-decoration: none; }
 .speech-page .gs-box #query { min-width: 0; height: 100%; padding: 0 18px 0 52px; outline: none; font: 450 16px/1.4 var(--font-sans); -webkit-appearance: none; appearance: none; }
 .speech-page .gs-box #query:focus-visible { outline: none; }
-.speech-page .speech-favorites-toggle.active { background: color-mix(in srgb, var(--primary) 10%, var(--card)); color: var(--primary); }
 .speech-page .search-box { display: flex; align-items: center; gap: 10px; }
 .speech-page .search-box input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); font: 15px var(--font-sans); }
 .speech-page .nav-tab { flex: none; }
@@ -4054,7 +4053,6 @@ html[data-theme="dark"] .speech-page .article-page { --bg: #191c22; --bg-2: #252
 @media (prefers-color-scheme: dark) { html[data-theme="auto"] .speech-page .article-page { --bg: #191c22; --bg-2: #252a33; --card: #2b3039; --text: #f2f3f5; --text-2: #c6cad3; --text-3: #a4aab5; --border: #404650; --border-2: #565c67; } }
 @media (max-width: 767px) {
   .speech-page .sidebar-header .header-home-btn { display: none; }
-  .speech-page .sidebar-header .speech-favorites-toggle { display: none; }
   .speech-page .app-main { padding: 0; }
   .speech-page .content { padding: 18px 16px 96px; }
   .speech-page .year-block { padding-inline: 15px; }

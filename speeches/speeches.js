@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '20261122g';
+const VERSION = '20261123a';
 const savedSettings = JSON.parse(localStorage.getItem('speech-reading') || '{}');
 const settingKeys = {font:'reading_fontsize',theme:'reading_theme',line:'reading_lineheight',width:'reading_width',indent:'reading_indent',paper:'reading_paper'};
 const stored = (key, fallback) => localStorage.getItem(settingKeys[key]) ?? savedSettings[key] ?? fallback;
@@ -193,10 +193,10 @@ function showView(view) {
   state.view = view;
   $('catalogView').classList.toggle('active',view === 'catalog');
   $('favoritesView').classList.toggle('active',view === 'favorites');
-  $('favoritesToggle').classList.toggle('active',view === 'favorites');
+  $('catalogTab').classList.toggle('active',view === 'catalog');
+  $('favoritesTab').classList.toggle('active',view === 'favorites');
   $('catalogNav').classList.toggle('active',view === 'catalog' && $('speechSearch').hidden);
   $('favoritesNav').classList.toggle('active',view === 'favorites');
-  $('searchNav').classList.toggle('active',view === 'catalog' && !$('speechSearch').hidden);
   if (view === 'favorites') renderFavorites();
   window.scrollTo(0,0);
 }
@@ -243,18 +243,17 @@ function toggleSearch(open) {
   $('speechSearch').hidden = !open;
   $('searchToggle').setAttribute('aria-expanded', String(open));
   document.body.classList.toggle('global-search-active',open);
-  $('searchNav').classList.toggle('active',open);
   $('catalogNav').classList.toggle('active',!open && state.view === 'catalog');
   $('favoritesNav').classList.toggle('active',!open && state.view === 'favorites');
   if (open) { syncSearchViewport(); $('query').focus(); $('query').select(); renderSearch(); }
 }
 $('searchToggle').onclick = () => toggleSearch($('speechSearch').hidden);
-$('searchNav').onclick = () => toggleSearch(true);
 $('searchClose').onclick = () => toggleSearch(false);
 $('speechSearch').onclick = e => { if (e.target === $('speechSearch')) toggleSearch(false); };
 $('catalogNav').onclick = () => { toggleSearch(false); showView('catalog'); };
-$('favoritesToggle').onclick = () => { if (state.view === 'favorites') showView('catalog'); else { toggleSearch(false); showView('favorites'); } };
 $('favoritesNav').onclick = () => { toggleSearch(false); showView('favorites'); };
+$('catalogTab').onclick = () => { toggleSearch(false); showView('catalog'); };
+$('favoritesTab').onclick = () => { toggleSearch(false); showView('favorites'); };
 $('more').onclick = () => { state.visible += 40; renderSearch(); };
 document.querySelectorAll('[data-scope]').forEach(button => button.onclick = () => {
   state.scope = button.dataset.scope; state.visible = 40;
