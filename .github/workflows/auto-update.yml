@@ -1,0 +1,55 @@
+name: Update official content
+
+on:
+  schedule:
+    # 09:17 and 20:17 in Asia/Shanghai (UTC+8); avoid the busy top of hour.
+    - cron: '17 1,12 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: official-content-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install scraper dependencies
+        run: python -m pip install requests beautifulsoup4
+      - name: Check official catalogs and archive new content
+        run: python scripts/auto_update.py
+      - name: Validate before publication
+        run: |
+          python -m unittest scripts/test_auto_update.py
+          python scripts/check_data.py
+          python scripts/build_search_index.py --check
+          python scripts/check_speeches.py
+          python scripts/build_speech_body_search.py --check
+          python scripts/build_styles.py --check
+          node --check assets/js/app.js
+          node --check speeches/speeches.js
+          node --check sw.js
+          node --test scripts/test_reading_progress.js
+          git diff --check
+      - name: Commit and publish verified changes
+        run: |
+          git add -- data/ articles/ assets/img/ index.html assets/js/app.js sw.js speeches/shell.txt speeches/speeches.js scripts/build_search_index.py
+          if git diff --cached --quiet; then
+            echo 'Official sources have no new content.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Update official periodicals and speech archive'
+          git push origin HEAD:main

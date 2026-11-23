@@ -2,6 +2,8 @@
 
 本文件描述"如何把最新一期的四本党刊抓取并发布到网站"的标准操作流程。
 
+日常更新已由 [GitHub Actions 自动更新任务](../.github/workflows/auto-update.yml)处理：每天北京时间 09:17、20:17 检查四刊与讲话库；有更新且全部检查通过才提交 `main`，Cloudflare Pages 随后部署。可从 Actions 页面手动触发，或运行 `python scripts/auto_update.py --check-only` 只读查看差异。下列步骤保留作为官网页面结构变化、抓取失败或封面需要人工处理时的手工流程。
+
 > **适用场景**：每月 1 日 / 15 日左右，新刊发布后的 1–2 天内需要更新。
 
 ---

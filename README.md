@@ -79,6 +79,14 @@ python scripts/build_styles.py --check
 
 四刊抓取步骤、期次参数和正文修复方法见 [采集脚本说明](scripts/README.md)。抓取脚本需要 `requests` 与 `beautifulsoup4`；纯数据检查和构建脚本不依赖这两个包。
 
+GitHub Actions 的 [Update official content](.github/workflows/auto-update.yml) 每天北京时间 09:17、20:17 自动检查四刊和讲话库官网目录。发现新增内容后，它会抓取、重建索引、更新页面日期与缓存版本，通过数据和脚本检查后提交到 `main`，再由 Cloudflare Pages 的 Git 集成发布；无更新时不提交。抓取或校验失败会使任务失败，不发布部分结果。也可在 GitHub 仓库的 **Actions → Update official content → Run workflow** 手动运行，或本地只读检查：
+
+```bash
+python scripts/auto_update.py --check-only
+```
+
+《旗帜》新期的文章与目录可自动更新；官网档案页没有可直接使用的封面，首页封面仍需人工核对并替换。GitHub 定时任务可能延迟；公开仓库连续 60 天无活动时，GitHub 会停用定时任务，届时需在 Actions 页面重新启用。
+
 讲话库从[共产党员网官方目录](https://www.12371.cn/special/xxzd/jh/)采集。更新讲话库目录或文章后，必须重建正文索引：
 
 ```bash

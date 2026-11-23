@@ -241,7 +241,7 @@ def element_to_md(element, base_url=''):
 
 # ===== 检查更新 =====
 def get_latest_issue(mag_key):
-    """从杂志网站获取最新一期号"""
+    """从杂志网站获取最新的 (年份, 期号)。"""
     if mag_key == 'qz':
         from scrape_qizhi import archive_issues
         year, issue, _ = archive_issues()[0]
@@ -252,19 +252,14 @@ def get_latest_issue(mag_key):
     html = resp.text
 
     if mag_key in ('qs', 'hqwg'):
-        # 求是/红旗文稿：从目录页图片alt中提取期数
-        alts = re.findall(r'alt="2026年第(\d+)期"', html)
-        if alts:
-            return int(alts[0])
-        # 备用：从文本中提取
-        issues = re.findall(r'2026年第(\d+)期', html)
+        # 不写死年份，跨年后仍能识别新一期。
+        issues = re.findall(r'(20\d{2})年第(\d+)期', html)
         if issues:
-            return max(int(x) for x in issues)
+            return max((int(year), int(issue)) for year, issue in issues)
     elif mag_key == 'djyj':
-        # 党建研究：从链接中提取
-        links = re.findall(r'href="https?://djyj\.12371\.cn/2026/(\d+)/"', html)
+        links = re.findall(r'href="https?://djyj\.12371\.cn/(20\d{2})/(\d+)/"', html)
         if links:
-            return max(int(x) for x in links)
+            return max((int(year), int(issue)) for year, issue in links)
     return None
 
 def get_local_latest_issue(mag_key):
@@ -307,7 +302,7 @@ def check_updates():
         latest = get_latest_issue(mag_key)
         if latest and local:
             local_year, local_issue = local
-            latest_year, latest_issue = latest if isinstance(latest, tuple) else (2026, latest)
+            latest_year, latest_issue = latest
             has_update = (latest_year > local_year) or (latest_year == local_year and latest_issue > local_issue)
             status = "有更新" if has_update else "已最新"
             print(f"  {conf['name']}: 本地 {local_year}年第{local_issue}期 | 网站 {latest_year}年第{latest_issue}期 | {status}")
@@ -626,11 +621,12 @@ def process_magazine(mag_key, year, issue):
     # 找到目录页URL
     catalog_url = find_catalog_url(mag_key, year, issue)
     # 求是/红旗文稿：mulu.htm 只返回最新期，需要从年度汇总页里找目标期
-    if mag_key in ('qs', 'hqwg') and year == 2026 and issue < get_latest_issue(mag_key):
+    if mag_key in ('qs', 'hqwg') and (year, issue) < get_latest_issue(mag_key):
         issue_url = find_issue_url_in_year(mag_key, year, issue)
-        if issue_url:
-            catalog_url = issue_url
-            print(f"  找到目标期目录: {issue_url}")
+        if not issue_url:
+            raise RuntimeError(f"官网年度目录找不到 {conf['name']} {year}年第{issue}期")
+        catalog_url = issue_url
+        print(f"  找到目标期目录: {issue_url}")
     if not catalog_url:
         print("  !! 未找到目录页URL")
         return []
@@ -754,13 +750,14 @@ def main():
         if mag not in MAGAZINES:
             print(f"未知杂志: {mag}（可选: qs, hqwg, djyj, qz）")
             return
-        year = int(args[i+1]) if i+1 < len(args) else 2026
+        year = int(args[i+1]) if i+1 < len(args) else None
         issue = int(args[i+2]) if i+2 < len(args) else None
-        if issue is None:
+        if year is None or issue is None:
             # 自动检测最新期号
             latest = get_latest_issue(mag)
             if latest:
-                issue = latest if isinstance(latest, int) else latest[1]
+                year = year or latest[0]
+                issue = issue or latest[1]
             else:
                 print(f"  无法获取 {MAGAZINES[mag]['name']} 最新期号")
                 return
