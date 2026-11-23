@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '20261123m';
+const VERSION = '20261123n';
 const savedSettings = JSON.parse(localStorage.getItem('speech-reading') || '{}');
 const settingKeys = {font:'reading_fontsize',theme:'reading_theme',line:'reading_lineheight',width:'reading_width',indent:'reading_indent',paper:'reading_paper'};
 const stored = (key, fallback) => localStorage.getItem(settingKeys[key]) ?? savedSettings[key] ?? fallback;
@@ -76,6 +76,7 @@ function renderBody(md) {
   return parts.join('');
 }
 async function openArticle(item, replace = false) {
+  window.closeShareOptions();
   const token = ++state.loadToken;
   state.current = state.items.indexOf(item);
   $('library').hidden = true; $('reader').hidden = false;
@@ -150,6 +151,7 @@ function closePanels() {
   $('directory').setAttribute('aria-expanded','false'); $('settings').setAttribute('aria-expanded','false');
 }
 function showLibrary() {
+  window.closeShareOptions();
   state.loadToken++;
   $('reader').hidden = true; $('library').hidden = false;
   document.body.classList.remove('reading','speech-reading'); closePanels();
@@ -244,15 +246,14 @@ function toggleFavorite() {
 }
 async function shareArticle() {
   const item = state.items[state.current]; if (!item) return;
+  window.closeShareOptions();
   const data = {title:item.t,url:location.href};
-  try {
-    if (navigator.share) await navigator.share(data);
-    else {
-      if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(data.url);
-      else { const input = document.createElement('textarea'); input.value = data.url; document.body.append(input); input.select(); document.execCommand('copy'); input.remove(); }
-      $('speechShare').classList.add('copied'); setTimeout(()=>$('speechShare').classList.remove('copied'),1800);
-    }
-  } catch (_) { /* Cancelled share leaves the reader unchanged. */ }
+  if (typeof navigator.share === 'function') {
+    try { await navigator.share(data); return; }
+    catch (error) { if (error.name === 'AbortError') return; }
+  }
+  closePanels();
+  window.showShareOptions(data.title, data.url);
 }
 $('searchToggle').onclick = () => openGlobalSearch();
 $('catalogNav').onclick = () => { closeGlobalSearch(); showView('catalog'); };

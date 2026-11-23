@@ -6,7 +6,7 @@ const { test } = require('node:test');
 const source = fs.readFileSync('assets/js/app.js', 'utf8').split("window.addEventListener('online'")[0];
 
 function makeReader(scrollY) {
-    const window = { scrollY, innerHeight: 800, visualViewport: null, scrollTo(options) { this.lastScroll = options; } };
+    const window = { scrollY, innerHeight: 800, visualViewport: null, addEventListener() {}, scrollTo(options) { this.lastScroll = options; } };
     const last = { getBoundingClientRect: () => ({ bottom: 3000 - window.scrollY }) };
     const nodes = {
         articleBody: { lastElementChild: last },
@@ -14,7 +14,7 @@ function makeReader(scrollY) {
         articleContinue: { hidden: false },
     };
     nodes.articlePage = { querySelector: selector => nodes[selector.slice(1)] || null };
-    const document = { getElementById: id => nodes[id] || null };
+    const document = { getElementById: id => nodes[id] || null, addEventListener() {} };
     const context = vm.createContext({ window, document, console,
         localStorage: { getItem: key => key === 'reading_position' ? JSON.stringify({ u1: { r: 0.5 } }) : null },
         setTimeout: fn => fn() });

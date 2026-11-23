@@ -24,7 +24,7 @@
       </header>
     </div>
     <div class="app-main">
-      <div class="journal-cover" aria-hidden="true"><img src="assets/img/cover_speeches.svg?v=20261123m" alt="" width="600" height="800"></div>
+      <div class="journal-cover" aria-hidden="true"><img src="assets/img/cover_speeches.svg?v=20261123n" alt="" width="600" height="800"></div>
       <nav class="nav-tabs desktop-only speech-tabs" aria-label="讲话库内容"><button class="nav-tab active" id="catalogTab" type="button"><svg class="icon"><use href="#list-icon"/></svg>目录</button><button class="nav-tab" id="favoritesTab" type="button"><svg class="icon"><use href="#star-icon"/></svg>收藏</button></nav>
       <div class="content"><div class="view active" id="speechCatalogView"><div class="catalog-list" id="list" aria-live="polite"></div></div><div class="view" id="speechFavoritesView"><div class="catalog-list" id="favoritesList"></div></div></div>
     </div>

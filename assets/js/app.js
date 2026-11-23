@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261123m';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261123n';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -230,6 +230,7 @@ function enterMagazine(magKey) {
 
 function goHome() {
     // 关闭所有覆盖层
+    closeShareOptions();
     document.body.classList.remove('article-active', 'section-active', 'about-active', 'mag-active', 'mag-search-open', 'global-search-active', 'speech-active', 'speech-page', 'reading', 'speech-reading');
     state.currentMag = null;
     state.magLoadToken++;
@@ -255,7 +256,7 @@ async function enterSpeechLibrary(push = true) {
     if (push) history.pushState({ speech: true }, '', '#m=speeches');
     if (!speechLoading) speechLoading = (async () => {
         host.innerHTML = '<div class="loading" role="status">讲话库目录加载中…</div>';
-        const shellUrl = 'speeches/shell.txt?v=20261123m';
+        const shellUrl = 'speeches/shell.txt?v=20261123n';
         let shell;
         for (let attempt = 0; attempt < 2; attempt++) {
             try {
@@ -279,7 +280,7 @@ async function enterSpeechLibrary(push = true) {
         await new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.type = 'module';
-            script.src = 'speeches/speeches.js?v=20261123m&load=' + (++speechLoadAttempt);
+            script.src = 'speeches/speeches.js?v=20261123n&load=' + (++speechLoadAttempt);
             script.onload = resolve; script.onerror = reject;
             document.body.appendChild(script);
         });
@@ -1267,6 +1268,7 @@ function openSpeechArticle(magKey, encId) {
 
 /* replaceHist=true 时用 replaceState 改写当前历史条目（上一/下一篇切换用，避免后退键逐篇回溯） */
 async function showArticle(encUrl, replaceHist) {
+    closeShareOptions();
     const url = decodeURIComponent(encUrl);
     let ms = getMagState();
     let idx = -1;
@@ -1495,6 +1497,7 @@ function navigateFromReader(destination) {
 }
 
 function closeArticlePage() {
+    closeShareOptions();
     // 关闭前先记录当前阅读位置（此时页面仍在 article-active 状态，滚动高度有效）
     if (document.body.classList.contains('article-active')) {
         const url = state.currentArticleUrl;
@@ -2106,33 +2109,59 @@ function renderRelatedArticles(cur, pos, ordered) {
     });
 }
 
-/* ===== 分享文章；无系统分享时复制当前文章链接 ===== */
+/* ===== 分享文章；系统分享不可用时展示显式分享选项 ===== */
 async function shareArticleLink() {
-    const btn = document.getElementById('articleCopyBtn');
     if (!state.currentMag || !state.currentArticleUrl) return;
+    closeShareOptions();
     const title = articleElement('articleTitle')?.textContent || document.title;
     const shareUrl = new URL('/share/', window.location.origin);
     shareUrl.searchParams.set('m', state.currentMag);
     shareUrl.searchParams.set('u', state.currentArticleUrl);
     const url = shareUrl.href;
-    if (navigator.share) {
-        try { await navigator.share({ title: title, text: title, url: url }); return; }
+    if (typeof navigator.share === 'function') {
+        try { await navigator.share({ title: title, url: url }); return; }
         catch (error) { if (error.name === 'AbortError') return; }
     }
+    showShareOptions(title, url);
+}
+
+function showShareOptions(title, url) {
+    const sheet = document.getElementById('shareSheet');
+    if (!sheet) return;
+    closeReadingTrays();
+    document.getElementById('shareSheetTitle').textContent = title;
+    document.getElementById('shareSheetUrl').value = url;
+    document.getElementById('shareSheetCopy').textContent = '复制链接';
+    sheet.hidden = false;
+}
+
+function closeShareOptions() {
+    const sheet = document.getElementById('shareSheet');
+    if (sheet) sheet.hidden = true;
+}
+
+async function copyShareOptionLink() {
+    const sheet = document.getElementById('shareSheet');
+    if (!sheet || sheet.hidden) return;
+    const url = document.getElementById('shareSheetUrl').value;
     let copied = false;
     try {
         if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(url); copied = true; }
     } catch (_) { /* Try the selection fallback below. */ }
     if (!copied) copied = fallbackCopyText(url);
-    if (!btn) return;
-    const label = btn.querySelector('span');
-    btn.classList.toggle('copied', copied);
-    if (label) label.textContent = copied ? '已复制' : '复制失败';
-    setTimeout(function () {
-        btn.classList.remove('copied');
-        if (label) label.textContent = '分享';
-    }, 1800);
+    document.getElementById('shareSheetCopy').textContent = copied ? '已复制' : '复制失败';
 }
+
+document.addEventListener('click', function (event) {
+    const sheet = document.getElementById('shareSheet');
+    if (!sheet || sheet.hidden || sheet.contains(event.target)) return;
+    if (event.target.closest('#articleCopyBtn, #speechShare')) return;
+    closeShareOptions();
+});
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') closeShareOptions();
+});
+window.addEventListener('hashchange', closeShareOptions);
 
 /* 非安全上下文（http）或老浏览器下的复制兜底 */
 function fallbackCopyText(text) {
