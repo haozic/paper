@@ -1,317 +1,128 @@
-# 党内刊物检索系统
+# 党内刊物阅读
 
-收录《求是》《红旗文稿》《党建研究》《旗帜》四本党刊和习近平讲话库，内容只取对应官方网站，提供**全文搜索、目录浏览、文章收藏、自适应阅读**等功能。
+将《求是》《红旗文稿》《党建研究》《旗帜》和习近平讲话库整理在同一个阅读网站。目录与文章只从各自官方网站采集；本站提供统一检索、收藏、阅读设置和移动端阅读界面。
 
-> 配套的备考资料请见 [`linxuan-beikao-zhinan/`](./linxuan-beikao-zhinan/linxuan-beikao-zhinan.html) 子页。
->
-> 想抓取最新一期？请直接跳到 [`scripts/README.md`](./scripts/README.md)。
+- 网站：[paper.zhouhao.cn](https://paper.zhouhao.cn/)
+- 仓库：[haozic/paper](https://github.com/haozic/paper)
+- 更新采集说明：[scripts/README.md](scripts/README.md)
 
----
+## 阅读与检索
 
-## 目录
+首页展示四本刊物和讲话库。四刊按年、期次和栏目浏览；讲话库按年份浏览。文章页支持目录、上一篇或下一篇、相关阅读、收藏、分享、字号、行距、页宽、首行缩进、纸张和主题设置。收藏和阅读设置保存在当前浏览器的 `localStorage` 中，不会跨设备同步。
 
-- [项目特点](#项目特点)
-- [数据范围](#数据范围)
-- [项目结构](#项目结构)
-- [更新文章：抓取脚本使用流程](#更新文章抓取脚本使用流程)
-- [本地开发](#本地开发)
-- [部署到 GitHub + Cloudflare Pages](#部署到-github--cloudflare-pages)
-- [浏览器兼容性](#浏览器兼容性)
-- [性能与缓存策略](#性能与缓存策略)
-- [常见问题](#常见问题)
-- [更多文档](#更多文档)
+首页及目录页使用同一搜索弹层。默认检索四刊标题与讲话库标题、副标题；选择单个来源后，可进一步搜索正文。讲话库正文检索会在用户点击“进一步搜正文”后按年份加载索引，不会在打开首页时下载全部正文。
 
----
+讲话库与四刊共用首页路由：
 
-## 项目特点
-
-| 功能 | 说明 |
-| --- | --- |
-| 四刊与讲话库 | 求是 / 红旗文稿 / 党建研究 / 旗帜 / 习近平讲话库统一在一个站点浏览、检索 |
-| 全文搜索 | 支持标题 / 作者 / 正文 / 组合多范围，含搜索词高亮 |
-| 板块 / 目录 | 板块统计 + 按"年→期→板块"展开的目录树 |
-| 文章收藏 | 基于 `localStorage`（键 `djyj_favorites`），可导出 JSON |
-| 阅读设置 | 字号（16/20/24/28）、白天/夜晚/跟随系统主题 |
-| 移动适配 | 移动端底部 tab + 桌面端顶部 tab，自适应响应式 |
-| Markdown 渲染 | 自动渲染粗体、标题、链接、图片、对齐，保留版式 |
-| 跨刊跳转 | 收藏的文章跨杂志自动切换 |
-| 离线阅读 | Service Worker 缓存应用外壳与已读正文，断网仍可打开并继续阅读 |
-| Chrome 69 兼容 | 站点对 2018 年的 Chrome 69 仍可正常使用 |
-
----
+```text
+/#m=qs                  《求是》目录
+/#m=speeches            讲话库目录
+/#m=speeches&a=ARTI...  讲话库文章
+/#m=speeches&about      从讲话库进入全站关于页
+```
 
 ## 数据范围
 
-| 杂志 | 时间跨度 | 文章数 | 最新一期 |
-| --- | --- | --- | --- |
-| 《求是》 | 2019 年第 1 期 — 2026 年第 20 期 | 3400+ | 2026-10-15 |
-| 《红旗文稿》 | 2020 年第 1 期 — 2026 年第 20 期 | 2200+ | 2026-10-25 |
-| 《党建研究》 | 2020 年第 12 期 — 2026 年第 10 期 | 1700+ | 2026-10-10 |
+以下是 2026 年 11 月 23 日仓库数据的快照；最新数据请查看网站首页和 `data/counts.json`。
 
-> 期数与文章数会随定期抓取持续增长，请以 `index.html` 的"关于本站 → 数据更新"区块为准。
+| 来源 | 覆盖范围 | 文章 | 期数 |
+| --- | --- | ---: | ---: |
+| 《求是》 | 2019 年第 1 期至 2026 年第 22 期 | 3,444 | 190 |
+| 《红旗文稿》 | 2020 年第 1 期至 2026 年第 21 期 | 2,277 | 165 |
+| 《党建研究》 | 2020 年第 12 期至 2026 年第 10 期 | 1,748 | 71 |
+| 《旗帜》 | 2021 年第 7 期至 2026 年第 6 期 | 2,223 | 60 |
+| 习近平讲话库 | 2012—2026 年 | 1,540 | 按年浏览 |
 
----
+讲话库有 1,535 篇已归档正文、5 篇官网原文暂不可读取。部分刊物旧文章也缺少可读取的全文；目录仍保留这些条目，并提供官网来源信息。
 
 ## 项目结构
 
-```
-e:\cursor\xgkt\djyj
-├── index.html                      # 入口：首页 + 杂志应用 + 文章阅读
-├── README.md                       # 你正在阅读的文件
-├── wrangler.jsonc                  # Cloudflare Pages 部署配置
-├── _headers                        # 自定义 HTTP 头（缓存策略）
-├── _routes.json                    # 仅分享预览请求调用 Pages Function
-├── functions/share/index.js        # 按文章返回分享标题和预览信息
-├── sw.js                           # Service Worker：离线阅读（PWA）
-├── manifest.webmanifest            # PWA 清单：应用名 / 图标 / 快捷方式
-├── .nojekyll                       # 禁用 GitHub Pages 的 Jekyll 处理
-├── .gitignore
-│
-├── assets/
-│   ├── css/
-│   │   └── style.css               # 移动优先响应式样式（含 Chrome 69 兼容补丁）
-│   ├── js/
-│   │   └── app.js                  # 核心逻辑（搜索/收藏/懒加载/路由）
-│   └── img/                        # 杂志封面图（cover_qs/hqwg/djyj.jpg）+ PWA 图标
-│
-├── data/                           # ⭐ 网站运行依赖
-│   ├── article_index.json          # URL → articles/.../*.md 路径映射
-│   ├── counts.json                 # 首页计数：各刊文章数 / 期数（~200 字节）
-│   ├── meta.json                   # 党建研究全部文章元数据（标题/作者/期号/URL）
-│   ├── issues/2020-12..2026-10.json# 党建研究按期分片的正文（懒加载）
-│   ├── qs/
-│   │   ├── meta.json               # 求是全部文章元数据
-│   │   └── issues/2019-1..2026-20.json # 求是按期分片的正文
-│   └── hqwg/
-│       ├── meta.json               # 红旗文稿全部文章元数据
-│       └── issues/2020-1..2026-20.json # 红旗文稿按期分片的正文
-│
-├── articles/                       # 📦 原始 Markdown 备份（git 体积大但方便人工查阅）
-│   ├── djyj/                       # 党建研究，命名格式：YYYY_NN_<标题>.md
-│   ├── qs/                         # 求是
-│   └── hqwg/                       # 红旗文稿
-│
-├── linxuan-beikao-zhinan/          # 🎓 遴选备考专题（独立 HTML 子页）
-│   └── linxuan-beikao-zhinan.html
-│
-├── scripts/                        # 🛠 抓取与运维脚本
-│   ├── scrape_magazines.py         # 四刊抓取主脚本（详见 scripts/README.md）
-│   ├── rebuild_data.py             # 正文重分片（years/<年> → issues/<年>-<期>）+ 去污染 + 索引瘦身
-│   ├── check_data.py               # 数据体检：期号覆盖 / 重复 / 正文缺失 / 分片与 counts 一致性 / 目录顺序
-│   ├── check_compat.py             # Chrome 69 兼容性体检：特性黑名单 + flex gap 兜底检查
-│   ├── fix_catalog_order.py        # 按官网目录页顺序重排 meta（带自检与顺序快照）
-│   ├── clean_meta_authors.py       # 清洗 meta 里被网页页脚污染的"作者"字段
-│   ├── repair_empty_urls.py        # 修复历史遗留的空 URL 条目
-│   ├── make_icons.py               # 生成 PWA 图标（192 / 512 / maskable / apple-touch）
-│   └── README.md                   # 脚本使用、字段、URL 规律、踩坑记录
-│
-├── data/catalog_order.json         # 📌 官网目录页顺序快照（fix_catalog_order.py 生成，体检基准）
-│
-└── docs/                           # 📚 架构、流程、踩坑文档
-    ├── ARCHITECTURE.md             # 系统架构、模块划分、数据流
-    ├── UPDATE_FLOW.md              # 每月更新文章的标准操作流程
-    ├── CHROME69_COMPAT.md          # 浏览器兼容性的处理清单
-    └── UX_MODERNIZATION.md         # 阅读体验现代化与舒适度优化建议
+```text
+index.html                         首页、四刊目录与阅读页、全站搜索和关于页
+assets/js/app.js                   首页路由、四刊阅读及全站搜索
+speeches/shell.txt                 按需加载的讲话库界面
+speeches/speeches.js               讲话库目录与阅读逻辑
+assets/css/{style,books,one,system,modern}.css  样式源码
+assets/css/site.css                由五份样式源码生成的发布文件
+data/{meta.json,qs/,hqwg/,qz/}    四刊目录与按期正文数据
+data/search_index.json             四刊标题索引
+data/speeches/index.json           讲话库目录
+data/speeches/body_search/         按年分片的讲话库正文索引
+articles/speeches/                 讲话库 Markdown 正文
+functions/share/index.js           四刊文章的分享预览页
+_routes.json                       限定 Pages Function 只处理分享路径
+sw.js                              应用外壳与已读数据的离线缓存
+scripts/                           抓取、构建与数据检查脚本
+.github/workflows/quality.yml      推送和 PR 的质量检查
 ```
 
-> **重要**：阅读正文优先加载 `data/<刊物>/issues/<年>-<期>.json`，同一期只请求一次。`articles/` 和 `data/article_index.json` 仅在期次正文请求失败时作为备份；若移除 `articles/`，需同步删除备份索引或接受备份读取不可用。访问权限的实际限制见 [访问控制迁移](docs/ACCESS_CONTROL.md)。
+四刊正文主要存于 `data/<刊物>/issues/`；讲话库正文依赖 `articles/speeches/`。部署时需保留整个 `data/`、`articles/speeches/`、`speeches/`、`functions/` 和根目录配置文件。
 
----
+## 本地运行
 
-## 更新文章：抓取脚本使用流程
-
-完整说明、命令行清单、字段含义、URL 规律、踩坑记录见 [`scripts/README.md`](./scripts/README.md)。这里给出**最短流程**：
+这是静态网站，无需前端打包。推荐使用 Python 3.11+ 和 Node.js 22+；本地启动 HTTP 服务：
 
 ```bash
-# 0. 进入项目根目录
-cd e:\cursor\xgkt\djyj
-
-# 1. 查看哪本杂志有新刊
-python scripts\scrape_magazines.py --check
-
-# 2. 抓取指定期号（自动定位目录页、自动下载封面）
-python scripts\scrape_magazines.py qs 2026 21
-python scripts\scrape_magazines.py hqwg 2026 20
-python scripts\scrape_magazines.py djyj 2026 10
-python scripts\scrape_magazines.py qz 2026 6
-
-# 3. 同步 index.html 的"数据更新"区块（修改日期 + 各刊期号范围）
-# 4. 把 index.html / assets/js/app.js 中的 ?v=YYYYMMDDx 同步升级
-#    同时把 assets/js/app.js 顶部的 DATA_VERSION 常量一并升级
-#    （封面图的 ?v= 各自独立，只在换封面时才改）
-
-# 5. 提交并推送
-git add -A
-git commit -m "更新求是2026年第21期、红旗文稿2026年第20期"
-git push origin main
-```
-
-> **缓存破坏五件套**：`index.html` 的 style.css `?v=`、`manifest` `?v=`、`apple-touch-icon` `?v=`、
-> `app.js` `?v=`、`DATA_VERSION` 常量。
-> 这五个值必须同步改动，否则用户会看到旧版（因为 CSS/JS/JSON 都用 `immutable` 缓存）。
-> 详细的更新流程与 Service Worker 验证步骤见 [`docs/UPDATE_FLOW.md`](./docs/UPDATE_FLOW.md)。
-
----
-
-## 本地开发
-
-```bash
-cd e:\cursor\xgkt\djyj
 python -m http.server 8765
-# 浏览器打开 http://localhost:8765/
 ```
 
-也可以用任何静态服务器（`npx serve .`、`php -S localhost:8000` 等）。
+然后访问 `http://localhost:8765/`。直接通过 `file://` 打开会使浏览器的 `fetch()` 无法正常读取目录和正文。
 
-修改 `assets/css/style.css`、`books.css`、`one.css`、`system.css` 或 `modern.css` 后，运行 `python scripts/build_styles.py` 更新发布用的 `assets/css/site.css`；提交前可用 `python scripts/build_styles.py --check` 检查是否遗漏。站点部署时仍直接发布仓库文件。
-
-> **不要直接 `file://` 打开 `index.html`**：浏览器对 `file://` 协议下的 `fetch()` 有限制，跨域读取 JSON 会失败。务必通过 HTTP 服务访问。
-
----
-
-## 部署到 GitHub + Cloudflare Pages
-
-### 第一步：上传到 GitHub
+修改任一份样式源码后，重建发布文件：
 
 ```bash
-cd e:\cursor\xgkt\djyj
-git init                       # 如果尚未初始化
-git add .
-git commit -m "init: 党内刊物检索系统"
-git branch -M main
-git remote add origin https://github.com/你的用户名/djyj.git
-git push -u origin main
+python scripts/build_styles.py
+python scripts/build_styles.py --check
 ```
 
-> **关于 `articles/`**：四本杂志的正文也存于 `data/<mag>/issues/<年>-<期>.json` 分片；讲话库正文依赖 `articles/speeches/`，部署时不能排除整个 `articles/` 目录。
+## 更新内容
 
-讲话库使用首页路由 `#m=speeches`，文章为 `#m=speeches&a=ARTI...`。界面从 `speeches/shell.txt` 按需加载，脚本为 `speeches/speeches.js`；全站共用搜索弹层，讲话库标题与副标题检索在首次查询时按需加载目录，点击“进一步搜正文”后才逐年读取 `data/speeches/body_search/`。正文索引由 `python scripts/build_speech_body_search.py` 生成，更新讲话库文章后须重建并运行 `--check`。部署时需保留这两个文件、目录数据和正文索引。
+四刊抓取步骤、期次参数和正文修复方法见 [采集脚本说明](scripts/README.md)。抓取脚本需要 `requests` 与 `beautifulsoup4`；纯数据检查和构建脚本不依赖这两个包。
 
-### 第二步：Cloudflare Pages 部署
-
-#### 方式 A（推荐）：连接 GitHub 自动部署
-
-1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)
-2. **Workers & Pages** → **创建应用程序** → **Pages** → **连接到 Git**
-3. 选择仓库 `djyj`，配置：
-   - **框架预设**：None
-   - **构建命令**：留空（静态页面和分享预览 Function 无需自定义构建）
-   - **构建输出目录**：`/`（仓库根）
-4. **保存并部署**，等待 1-2 分钟获得 `xxx.pages.dev` 域名
-
-#### 方式 B：Wrangler CLI 手动部署
+讲话库从[共产党员网官方目录](https://www.12371.cn/special/xxzd/jh/)采集。更新讲话库目录或文章后，必须重建正文索引：
 
 ```bash
-npm install -g wrangler
-wrangler login
-wrangler pages deploy . --project-name=djyj
+python scripts/scrape_speeches.py
+python scripts/build_speech_body_search.py
+python scripts/check_speeches.py
+python scripts/build_speech_body_search.py --check
 ```
 
-> `wrangler.jsonc` 中已经配置了 `assets.directory = "."`，无需额外参数。
-
-### 第三步：绑定自定义域名（可选）
-
-1. Cloudflare Pages 项目 → **自定义域** → 添加域名
-2. 按提示配置 CNAME 记录
-3. Cloudflare 自动签发 SSL 证书
-
----
-
-## 浏览器兼容性
-
-| 浏览器 | 最低支持版本 | 备注 |
-| --- | --- | --- |
-| Chrome / Edge | 69+（2018 年） | 已通过专门的兼容补丁支持 |
-| Firefox | 62+ | |
-| Safari | 12+ | |
-| iOS Safari | 12+ | 含底部安全区适配 |
-| Android Chrome | 90+ | |
-
-**Chrome 69 兼容**采用渐进增强（`@supports` 兜底），现代浏览器走原生路径：
-- `oklch()` 颜色 → hex
-- `aspect-ratio` → `@supports not (aspect-ratio: …)` 里的 `padding-top` 兼容写法
-- `:has()` 选择器 → `.checked` 镜像类 + JS 同步
-- flex `gap` → `@supports` 兜底块里的 `> * + *` margin（现代浏览器仍走原生 `gap`）
-- `inset` 简写 → `top/right/bottom/left` 长写兜底
-- `accent-color` / `appearance` → 全浏览器自绘表单控件
-- JS 可选链 `?.` → 改写为 ES5 兼容写法
-
-改动 CSS / JS 后请跑一次体检：
+四刊元数据更新后，重建跨刊标题索引并检查数据：
 
 ```bash
-python scripts/check_compat.py
+python scripts/build_search_index.py
+python scripts/check_data.py
+python scripts/build_search_index.py --check
 ```
 
-详见 [`docs/CHROME69_COMPAT.md`](./docs/CHROME69_COMPAT.md)。
+发布样式或脚本修改时，同步更新 `index.html`、`assets/js/app.js`、`speeches/speeches.js`、`speeches/shell.txt` 和 `sw.js` 中使用的资源版本号；缓存与发布细节见 [更新流程](docs/UPDATE_FLOW.md)。
 
----
+## 部署与质量检查
 
-## 性能与缓存策略
+当前网站由 GitHub `main` 分支连接 Cloudflare Pages 自动部署。站点从仓库根目录发布，框架预设为 None，无前端构建命令。`wrangler.jsonc` 将静态资源目录设为 `.`；`functions/share/index.js` 与 `_routes.json` 为四刊文章提供带标题的分享预览。
 
-### 缓存配置（`_headers`）
+提交前可运行与 [GitHub Actions](.github/workflows/quality.yml) 相同的核心检查：
 
-| 路径 | 缓存策略 | 原因 |
-| --- | --- | --- |
-| `/data/*` | `max-age=31536000, immutable` | 数据文件很大，URL 携带 `?v=YYYYMMDDx` 版本号，更新即失效 |
-| `/assets/*` | `max-age=0, must-revalidate` | CSS/JS 修改后必须立即生效 |
-| `/*.html` | `max-age=0, must-revalidate` | 入口文件，确保更新及时 |
-| `/sw.js` | `max-age=0, must-revalidate` | SW 必须每次回源校验，否则离线缓存停在旧版 |
-| `/manifest.webmanifest` | `max-age=0, must-revalidate` | 桌面安装信息需随发版更新 |
+```bash
+python scripts/check_data.py
+python scripts/build_search_index.py --check
+python scripts/check_speeches.py
+python scripts/build_speech_body_search.py --check
+python scripts/build_styles.py --check
+node --check assets/js/app.js
+node --check speeches/speeches.js
+node --check sw.js
+node --test scripts/test_reading_progress.js
+```
 
-### 关键性能数据
-
-- **总数据量**：约 190 MB（data 目录 104 MB + 文章 md 备份 85 MB）
-- **样式加载**：五份源码按原有顺序合成一个发布文件，减少四次样式请求；原始样式约 172 KB，按 gzip 估算传输约 32 KB
-- **搜索体验**：先搜标题（立即响应），正文搜索按需加载当年份数据
-- **阅读文章**：按需加载当前期次正文分片，同期切换文章复用已加载数据；全站 Markdown 路径索引仅在期次正文失败时请求
-
-### SEO & 性能
-
-- 页面和数据为静态资源；仅 `/share/` 使用 Pages Function 输出文章级分享标题，`_routes.json` 限定 Function 调用范围
-- 单页应用（SPA-like）通过 History API 实现路由
-- 已支持 Service Worker 离线阅读：应用外壳预缓存，已读正文运行时缓存，断网仍可打开文章
-
----
-
-## 常见问题
-
-#### 1. 浏览器报 `CORS / Mixed Content` 错误
-
-- 用 `http://localhost:8765/` 而不是 `file:///path/to/index.html`
-- Cloudflare Pages 默认 HTTPS，不会出现 Mixed Content
-
-#### 2. 修改了数据后看不到新内容
-
-- 检查 `index.html` 和 `app.js` 顶部的 `?v=YYYYMMDDx` 缓存破坏号是否同步更新
-- 检查 `app.js` 顶部的 `DATA_VERSION` 常量是否与之一致
-- 浏览器**强制刷新**（Ctrl+Shift+R / Cmd+Shift+R）
-
-#### 3. 抓取脚本被反爬拦截
-
-求是/红旗文稿的目录页不限制访问频率，但请在 `scripts/scrape_magazines.py` 的 `time.sleep(0.5)` 处适当调大（如 1.0）。脚本默认每次请求间隔 0.5 秒。
-
-#### 4. `articles/` 目录太大
-
-- 临时排除：在 `.gitignore` 加 `articles/`，执行 `git rm -r --cached articles/`
-- 永久排除：从本地磁盘删除 `articles/`，但保留 `data/<mag>/issues/`（线上站点只依赖 data/）
-
-#### 5. 想自定义主题色
-
-所有主题色都是 CSS 变量，位于 `assets/css/style.css` 的 `:root` 选择器。改一行 `--primary: #...` 即可全站生效。
-
----
+网站通过 Service Worker 缓存应用外壳和已读正文。`_headers` 为静态数据设置长期缓存，因此更新数据或脚本时需同步升级资源版本。访问控制与部署注意事项见 [访问控制文档](docs/ACCESS_CONTROL.md)。
 
 ## 更多文档
 
-- [`scripts/README.md`](./scripts/README.md) — 抓取脚本详细使用文档
-- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — 系统架构、模块划分、数据流
-- [`docs/UPDATE_FLOW.md`](./docs/UPDATE_FLOW.md) — 每月更新文章的标准操作流程
-- [`docs/CHROME69_COMPAT.md`](./docs/CHROME69_COMPAT.md) — 浏览器兼容性的处理清单
-- [`docs/UX_MODERNIZATION.md`](./docs/UX_MODERNIZATION.md) — 阅读体验现代化与舒适度优化建议（排版/导航/性能，含优先级与路线图）
-- [`linxuan-beikao-zhinan/`](./linxuan-beikao-zhinan/) — 遴选备考专题页面
+- [站点架构](docs/ARCHITECTURE.md)
+- [内容更新流程](docs/UPDATE_FLOW.md)
+- [采集脚本说明](scripts/README.md)
+- [阅读体验设计记录](docs/UX_MODERNIZATION.md)
 
----
-
-## 协议
-
-本仓库源代码采用 MIT 协议。所收录文章版权归原作者及出版方（《求是》杂志社、《党建研究》杂志社、《红旗文稿》杂志社）所有，仅供个人学习研究使用。
+本站代码与文章内容的权利归属不同；收录文章的版权归原作者及出版方。请通过文章中的来源链接核对原文。
