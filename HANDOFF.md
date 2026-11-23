@@ -16,11 +16,12 @@
 ### 验收、卡点与下一步
 
 - 本地浏览器按上述路径验证，二次进入杂志目录可见 8 组年份；讲话库目录 15 组年份、讲话库正文和设置、杂志正文、板块及搜索切回目录均正常。修复后 `catalogView` 只出现一次。阅读进度测试 2 项、DOM ID 检查、样式生成检查、JS 语法和 `git diff --check` 均通过。
-- 待提交、推送 GitHub、确认 `Site quality` 和 Cloudflare 线上版本；推送后更新此节。当前无功能卡点。
+- 手机 390px 视口按上述完整路径复核：二次进入杂志目录仍显示 8 组年份，无横向溢出。修复内容已发布到 GitHub `main` 提交 `f162318`，对应 [Site quality](https://github.com/haozic/paper/actions/runs/45121941486) 成功，Cloudflare 线上首页已引用 `20261123m`。本地分支也已对齐远端，当前无功能卡点。
 
 ### 踩过的坑
 
 - 单独反复点击同一本杂志未必复现；必须先加载讲话库的延迟 HTML，重复 ID 才会进入 DOM。讲话库位于杂志容器前，`document.getElementById` 会命中隐藏元素。只修目录 ID 不够，正文和设置也存在相同风险。
+- 本轮普通 `git push` 多次遭遇 GitHub HTTPS 连接重置；通过 GitHub Git API 上传相同文件树并快进 `main`，之后 `git fetch` 成功。API 会把提交时间归一化为 UTC，生成的提交 SHA 与本地提交不同；确认文件树完全相同后，用 `git reset --soft origin/main` 对齐本地分支，避免留下分叉。
 
 ---
 
