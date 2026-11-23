@@ -16,7 +16,7 @@
 ### 验收、卡点与下一步
 
 - 本地 390px 浏览器逐一进入求是、红旗文稿、党建研究、旗帜正文；模拟系统分享不可用时四刊均显示分享面板，剪贴板调用为 0。模拟系统分享可用时调用原生接口并传入文章标题；显式点“复制链接”后才调用剪贴板。讲话库正文也显示同一分享面板，无横向溢出。目视检查面板位于手机底栏上方且未占满屏幕。
-- `node --test scripts/test_reading_progress.js` 两项、DOM ID 唯一性、样式生成、JS 语法和差异检查通过。待推送 GitHub 并核对线上版本和 `Site quality`；当前无功能卡点。
+- `node --test scripts/test_reading_progress.js` 两项、DOM ID 唯一性、样式生成、JS 语法和差异检查通过。修复提交 `42842cf` 已推送 GitHub `main`，[Site quality](https://github.com/haozic/paper/actions/runs/45129194116) 成功，Cloudflare 线上首页已引用 `20261123n`。当前无功能卡点。
 
 ### 踩过的坑
 
