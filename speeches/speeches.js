@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '20261123a';
+const VERSION = '20261123b';
 const savedSettings = JSON.parse(localStorage.getItem('speech-reading') || '{}');
 const settingKeys = {font:'reading_fontsize',theme:'reading_theme',line:'reading_lineheight',width:'reading_width',indent:'reading_indent',paper:'reading_paper'};
 const stored = (key, fallback) => localStorage.getItem(settingKeys[key]) ?? savedSettings[key] ?? fallback;
@@ -187,16 +187,19 @@ async function init() {
     renderList();
     if (state.view === 'favorites') renderFavorites();
     const id = location.hash.match(/id=(ARTI\d+)/)?.[1]; if (id) { const item = state.items.find(a => articleId(a) === id); if (item) openArticle(item,true); }
+    else if (location.hash === '#about') showView('about');
   } catch (_) { $('list').innerHTML = '<p class="empty">目录暂时无法加载，请稍后重试。</p>'; }
 }
 function showView(view) {
   state.view = view;
   $('catalogView').classList.toggle('active',view === 'catalog');
   $('favoritesView').classList.toggle('active',view === 'favorites');
+  $('aboutView').classList.toggle('active',view === 'about');
   $('catalogTab').classList.toggle('active',view === 'catalog');
   $('favoritesTab').classList.toggle('active',view === 'favorites');
   $('catalogNav').classList.toggle('active',view === 'catalog' && $('speechSearch').hidden);
   $('favoritesNav').classList.toggle('active',view === 'favorites');
+  $('aboutToggle').classList.toggle('active',view === 'about');
   if (view === 'favorites') renderFavorites();
   window.scrollTo(0,0);
 }
@@ -254,6 +257,7 @@ $('catalogNav').onclick = () => { toggleSearch(false); showView('catalog'); };
 $('favoritesNav').onclick = () => { toggleSearch(false); showView('favorites'); };
 $('catalogTab').onclick = () => { toggleSearch(false); showView('catalog'); };
 $('favoritesTab').onclick = () => { toggleSearch(false); showView('favorites'); };
+$('aboutToggle').onclick = () => { toggleSearch(false); if (state.view === 'about') { showView('catalog'); history.pushState(null,'',location.pathname); } else { showView('about'); history.pushState(null,'','#about'); } };
 $('more').onclick = () => { state.visible += 40; renderSearch(); };
 document.querySelectorAll('[data-scope]').forEach(button => button.onclick = () => {
   state.scope = button.dataset.scope; state.visible = 40;
@@ -292,5 +296,5 @@ document.querySelectorAll('[data-setting]').forEach(group => group.onclick = eve
 document.addEventListener('click', event => { if (document.body.classList.contains('reading') && !event.target.closest('.reading-dock')) closePanels(); });
 document.addEventListener('keydown', event => { if (event.key === 'Escape') { closePanels(); if (!$('speechSearch').hidden) toggleSearch(false); } });
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applySettings);
-window.onpopstate = () => { const id=location.hash.match(/id=(ARTI\d+)/)?.[1]; const item=state.items.find(a=>articleId(a)===id); if(item) openArticle(item,true); else { state.loadToken++; $('reader').hidden=true; $('library').hidden=false; document.body.classList.remove('reading','article-active'); closePanels(); } };
+window.onpopstate = () => { const id=location.hash.match(/id=(ARTI\d+)/)?.[1]; const item=state.items.find(a=>articleId(a)===id); if(item) openArticle(item,true); else { state.loadToken++; $('reader').hidden=true; $('library').hidden=false; document.body.classList.remove('reading','article-active'); closePanels(); showView(location.hash === '#about' ? 'about' : 'catalog'); } };
 init();

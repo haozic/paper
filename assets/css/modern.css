@@ -369,6 +369,11 @@ body.article-active { --reading-dock-height: 86px; --reader-shortcut-size: 44px;
 .speech-page .speech-row-title { display: block; font-size: 15px; font-weight: 600; line-height: 1.55; }
 .speech-page .speech-row-subtitle { display: block; margin-top: 3px; color: var(--text-3); font-size: 12px; line-height: 1.6; }
 .speech-page .speech-empty { padding: 28px 0; color: var(--text-3); text-align: center; }
+.speech-page .header-about-btn.active { color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, var(--card)); }
+.speech-page .speech-about { max-width: 720px; margin: 24px auto; padding: 32px; border: 1px solid var(--border); border-radius: 20px; background: var(--card); color: var(--text-2); line-height: 1.85; }
+.speech-page .speech-about h2 { margin: 0 0 16px; color: var(--text); font-size: 22px; }
+.speech-page .speech-about p { margin: 0 0 14px; }
+.speech-page .speech-about a { color: var(--primary); }
 .speech-page .more { display: block; margin: 22px auto; padding: 9px 22px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text); cursor: pointer; }
 .speech-page.reading .library { display: none; }
 .speech-page .reader { min-height: 100vh; }
