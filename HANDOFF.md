@@ -17,12 +17,14 @@
 ### 卡点与下一步
 
 - 用户尚未提供完整收件 QQ 邮箱地址，也未在 GitHub 配置 `UPDATE_MAIL_USER`、`UPDATE_MAIL_PASSWORD`（SMTP 授权码）。仓库目前没有任何 Actions Secrets，因此邮件功能待配置和实际发信验证；通知开关暂不启用，原自动更新应保持正常运行。
-- 代码待完成差异检查、提交、推送与 CI 验证；收到邮箱地址后仍需用户自行将授权码放入 GitHub Secrets，切勿在聊天中传递。配置后设置仓库变量 `UPDATE_MAIL_ENABLED=true`，用一次真实内容更新或受控测试验证投递。
+- 代码已发布到 GitHub `main` 提交 `733224c`（本地原始提交文件树相同、SHA 不同），[Site quality](https://github.com/haozic/paper/actions/runs/45315963547) 成功。[手动自动更新运行](https://github.com/haozic/paper/actions/runs/45316120971) 成功，日志显示官网无新增内容、无提交，`Email content update` 步骤按条件跳过。
+- 收到邮箱地址后仍需用户自行将授权码放入 GitHub Secrets，切勿在聊天中传递。配置后设置仓库变量 `UPDATE_MAIL_ENABLED=true`，用一次真实内容更新或受控测试验证投递。
 
 ### 踩过的坑
 
 - GitHub 自带 Actions 邮件通知按工作流运行结果发送，不能满足“只在新增内容时通知”；必须由同一自动更新工作流在推送成功后条件发信。发信失败时内容已推送，不能回滚，工作流会显示失败以便排查。
 - 本机 Python 缺少抓取依赖 `requests`，因此 `test_auto_update.py` 在本机未运行；CI 工作流会先安装依赖。新增邮件测试只用标准库，本机已通过。
+- 本轮 `git push` 连续遭遇 HTTPS 连接重置；通过 GitHub Git API 上传相同文件树并快进主分支，之后 `git fetch` 成功，已用 `git reset --soft origin/main` 对齐本地分支。
 
 ---
 
