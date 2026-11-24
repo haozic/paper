@@ -5,6 +5,11 @@ on:
     # 09:17 and 20:17 in Asia/Shanghai (UTC+8); avoid the busy top of hour.
     - cron: '17 1,12 * * *'
   workflow_dispatch:
+    inputs:
+      test_email:
+        description: Send one test email when there is no content update
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -65,3 +70,10 @@ jobs:
           UPDATE_MAIL_PASSWORD: ${{ secrets.UPDATE_MAIL_PASSWORD }}
           UPDATE_MAIL_TO: ${{ secrets.UPDATE_MAIL_TO }}
         run: python scripts/send_update_email.py
+      - name: Email notification test
+        if: steps.publish.outputs.updated != 'true' && inputs.test_email == true && vars.UPDATE_MAIL_ENABLED == 'true'
+        env:
+          UPDATE_MAIL_USER: ${{ secrets.UPDATE_MAIL_USER }}
+          UPDATE_MAIL_PASSWORD: ${{ secrets.UPDATE_MAIL_PASSWORD }}
+          UPDATE_MAIL_TO: ${{ secrets.UPDATE_MAIL_TO }}
+        run: python scripts/send_update_email.py --test

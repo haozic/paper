@@ -49,6 +49,22 @@ class UpdateEmailTests(unittest.TestCase):
         self.assertEqual(message["To"], "reader@qq.com")
         self.assertIn("新增文章", message.get_content())
 
+    def test_manual_test_email_does_not_require_new_articles(self):
+        env = {
+            "UPDATE_MAIL_USER": "reader@qq.com",
+            "UPDATE_MAIL_PASSWORD": "test-authorization-code",
+            "GITHUB_REPOSITORY": "haozic/paper",
+            "GITHUB_RUN_ID": "43",
+        }
+        with patch.dict(mail.os.environ, env, clear=True), \
+             patch.object(mail, "items_at") as items_at, \
+             patch.object(mail.smtplib, "SMTP_SSL") as smtp:
+            self.assertEqual(mail.main(test=True), 0)
+        items_at.assert_not_called()
+        message = smtp.return_value.__enter__.return_value.send_message.call_args.args[0]
+        self.assertEqual(message["Subject"], "文章库更新通知测试")
+        self.assertIn("/actions/runs/43", message.get_content())
+
 
 if __name__ == "__main__":
     unittest.main()

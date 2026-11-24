@@ -1,5 +1,6 @@
 """Email a digest only after the auto-update workflow publishes new articles."""
 
+import argparse
 import json
 import os
 from email.message import EmailMessage
@@ -57,15 +58,16 @@ def required_env(name):
     return value
 
 
-def main():
+def main(test=False):
     changes = []
-    for name, path in SOURCES:
-        added = new_items(items_at("HEAD^", path), items_at("HEAD", path))
-        if added:
-            changes.append((name, added))
-    if not changes:
-        print("Published commit contains no new articles; no email needed.")
-        return 0
+    if not test:
+        for name, path in SOURCES:
+            added = new_items(items_at("HEAD^", path), items_at("HEAD", path))
+            if added:
+                changes.append((name, added))
+        if not changes:
+            print("Published commit contains no new articles; no email needed.")
+            return 0
 
     host = os.environ.get("UPDATE_MAIL_HOST") or "smtp.qq.com"
     port = int(os.environ.get("UPDATE_MAIL_PORT") or "465")
@@ -73,8 +75,16 @@ def main():
     password = required_env("UPDATE_MAIL_PASSWORD")
     sender = os.environ.get("UPDATE_MAIL_FROM") or user
     recipients = [address.strip() for address in (os.environ.get("UPDATE_MAIL_TO") or user).split(",") if address.strip()]
-    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
-    subject, body = make_digest(changes, commit, os.environ["GITHUB_REPOSITORY"], os.environ["GITHUB_RUN_ID"])
+    repository = os.environ["GITHUB_REPOSITORY"]
+    run_id = os.environ["GITHUB_RUN_ID"]
+    if test:
+        subject = "文章库更新通知测试"
+        body = ("这是一封手动触发的测试邮件，说明 QQ SMTP 发信已配置成功。\n"
+                "正常定时检查没有新增文章时不会发邮件。\n\n"
+                f"运行记录：https://github.com/{repository}/actions/runs/{run_id}")
+    else:
+        commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+        subject, body = make_digest(changes, commit, repository, run_id)
     message = EmailMessage()
     message["From"] = sender
     message["To"] = ", ".join(recipients)
@@ -92,9 +102,11 @@ def main():
             smtp.send_message(message)
     else:
         raise ValueError("UPDATE_MAIL_PORT must be 465 (SSL) or 587 (STARTTLS)")
-    print(f"Sent update digest for {sum(len(items) for _, items in changes)} new articles.")
+    print("Sent test email." if test else f"Sent update digest for {sum(len(items) for _, items in changes)} new articles.")
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--test", action="store_true", help="Send one manually requested SMTP test email")
+    raise SystemExit(main(test=parser.parse_args().test))

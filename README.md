@@ -91,6 +91,7 @@ python scripts/auto_update.py --check-only
 - **Variables**：`UPDATE_MAIL_ENABLED` 设为 `true`。未开启时自动更新照常运行，不尝试发邮件。
 
 工作流只有在新增内容通过检查、提交且推送成功后才发一封摘要邮件，列出新增文章及提交、运行记录链接；没有新增内容时不发送。发信使用 `smtp.qq.com:465` 的加密连接，授权码只由 Actions Secrets 注入。若邮件发送失败，已推送的内容不会回滚，运行记录会显示失败以便排查。
+首次配置后，可在 **Actions → Update official content → Run workflow** 勾选 `test_email` 手动测试一次；若本次同时发现新文章，只发送真实更新摘要，不会重复发送测试邮件。
 
 《旗帜》新期的文章与目录可自动更新；官网档案页没有可直接使用的封面，首页封面仍需人工核对并替换。GitHub 定时任务可能延迟；公开仓库连续 60 天无活动时，GitHub 会停用定时任务，届时需在 Actions 页面重新启用。
 
