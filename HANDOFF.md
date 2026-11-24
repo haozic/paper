@@ -16,7 +16,7 @@
 
 ### 卡点与下一步
 
-- 用户尚未提供完整收件 QQ 邮箱地址，也未在 GitHub 配置 `UPDATE_MAIL_USER`、`UPDATE_MAIL_PASSWORD`（SMTP 授权码）。仓库目前没有任何 Actions Secrets，因此邮件功能待配置和实际发信验证；通知开关暂不启用，原自动更新应保持正常运行。
+- 用户已提供收件 QQ 邮箱地址，已将地址保存为 GitHub Actions Secret `UPDATE_MAIL_USER`；默认由同一邮箱收发，不在仓库文件中写明地址。用户仍需自行新增 `UPDATE_MAIL_PASSWORD`（QQ SMTP 授权码）；通知开关 `UPDATE_MAIL_ENABLED` 暂不启用，原自动更新保持正常运行。当前未做真实发信验证。
 - 代码已发布到 GitHub `main` 提交 `733224c`（本地原始提交文件树相同、SHA 不同），[Site quality](https://github.com/haozic/paper/actions/runs/45315963547) 成功。[手动自动更新运行](https://github.com/haozic/paper/actions/runs/45316120971) 成功，日志显示官网无新增内容、无提交，`Email content update` 步骤按条件跳过。
 - 收到邮箱地址后仍需用户自行将授权码放入 GitHub Secrets，切勿在聊天中传递。配置后设置仓库变量 `UPDATE_MAIL_ENABLED=true`，用一次真实内容更新或受控测试验证投递。
 
