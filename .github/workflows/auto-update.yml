@@ -32,6 +32,7 @@ jobs:
       - name: Validate before publication
         run: |
           python -m unittest scripts/test_auto_update.py
+          python -m unittest scripts/test_send_update_email.py
           python scripts/check_data.py
           python scripts/build_search_index.py --check
           python scripts/check_speeches.py
@@ -44,13 +45,23 @@ jobs:
           node --test scripts/test_reading_progress.js
           git diff --check
       - name: Commit and publish verified changes
+        id: publish
         run: |
           git add -- data/ articles/ assets/img/ index.html assets/js/app.js sw.js speeches/shell.txt speeches/speeches.js scripts/build_search_index.py
           if git diff --cached --quiet; then
             echo 'Official sources have no new content.'
+            echo 'updated=false' >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'Update official periodicals and speech archive'
           git push origin HEAD:main
+          echo 'updated=true' >> "$GITHUB_OUTPUT"
+      - name: Email content update
+        if: steps.publish.outputs.updated == 'true' && vars.UPDATE_MAIL_ENABLED == 'true'
+        env:
+          UPDATE_MAIL_USER: ${{ secrets.UPDATE_MAIL_USER }}
+          UPDATE_MAIL_PASSWORD: ${{ secrets.UPDATE_MAIL_PASSWORD }}
+          UPDATE_MAIL_TO: ${{ secrets.UPDATE_MAIL_TO }}
+        run: python scripts/send_update_email.py

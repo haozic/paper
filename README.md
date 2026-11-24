@@ -85,6 +85,13 @@ GitHub Actions 的 [Update official content](.github/workflows/auto-update.yml) 
 python scripts/auto_update.py --check-only
 ```
 
+需要只在内容更新后收到 QQ 邮件时，到仓库 **Settings → Secrets and variables → Actions** 配置：
+
+- **Secrets**：`UPDATE_MAIL_USER` 填发件 QQ 邮箱地址，`UPDATE_MAIL_PASSWORD` 填该邮箱开启 SMTP 后生成的授权码（不是登录密码）。若收件邮箱不同，再设置可选的 `UPDATE_MAIL_TO`；默认发给同一个邮箱。
+- **Variables**：`UPDATE_MAIL_ENABLED` 设为 `true`。未开启时自动更新照常运行，不尝试发邮件。
+
+工作流只有在新增内容通过检查、提交且推送成功后才发一封摘要邮件，列出新增文章及提交、运行记录链接；没有新增内容时不发送。发信使用 `smtp.qq.com:465` 的加密连接，授权码只由 Actions Secrets 注入。若邮件发送失败，已推送的内容不会回滚，运行记录会显示失败以便排查。
+
 《旗帜》新期的文章与目录可自动更新；官网档案页没有可直接使用的封面，首页封面仍需人工核对并替换。GitHub 定时任务可能延迟；公开仓库连续 60 天无活动时，GitHub 会停用定时任务，届时需在 Actions 页面重新启用。
 
 讲话库从[共产党员网官方目录](https://www.12371.cn/special/xxzd/jh/)采集。更新讲话库目录或文章后，必须重建正文索引：

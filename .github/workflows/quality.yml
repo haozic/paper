@@ -29,3 +29,5 @@ jobs:
         run: node --check assets/js/app.js && node --check speeches/speeches.js && node --check sw.js
       - name: Check reading progress behavior
         run: node --test scripts/test_reading_progress.js
+      - name: Check update notification digest
+        run: python -m unittest scripts/test_send_update_email.py
