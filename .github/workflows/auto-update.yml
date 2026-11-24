@@ -66,6 +66,7 @@ jobs:
       - name: Email content update
         if: steps.publish.outputs.updated == 'true' && vars.UPDATE_MAIL_ENABLED == 'true'
         env:
+          UPDATE_MAIL_PORT: ${{ vars.UPDATE_MAIL_PORT }}
           UPDATE_MAIL_USER: ${{ secrets.UPDATE_MAIL_USER }}
           UPDATE_MAIL_PASSWORD: ${{ secrets.UPDATE_MAIL_PASSWORD }}
           UPDATE_MAIL_TO: ${{ secrets.UPDATE_MAIL_TO }}
@@ -73,6 +74,7 @@ jobs:
       - name: Email notification test
         if: steps.publish.outputs.updated != 'true' && inputs.test_email == true && vars.UPDATE_MAIL_ENABLED == 'true'
         env:
+          UPDATE_MAIL_PORT: ${{ vars.UPDATE_MAIL_PORT }}
           UPDATE_MAIL_USER: ${{ secrets.UPDATE_MAIL_USER }}
           UPDATE_MAIL_PASSWORD: ${{ secrets.UPDATE_MAIL_PASSWORD }}
           UPDATE_MAIL_TO: ${{ secrets.UPDATE_MAIL_TO }}

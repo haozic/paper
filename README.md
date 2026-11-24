@@ -88,7 +88,7 @@ python scripts/auto_update.py --check-only
 需要只在内容更新后收到 QQ 邮件时，到仓库 **Settings → Secrets and variables → Actions** 配置：
 
 - **Secrets**：`UPDATE_MAIL_USER` 填发件 QQ 邮箱地址，`UPDATE_MAIL_PASSWORD` 填该邮箱开启 SMTP 后生成的授权码（不是登录密码）。若收件邮箱不同，再设置可选的 `UPDATE_MAIL_TO`；默认发给同一个邮箱。
-- **Variables**：`UPDATE_MAIL_ENABLED` 设为 `true`。未开启时自动更新照常运行，不尝试发邮件。
+- **Variables**：`UPDATE_MAIL_ENABLED` 设为 `true`。未开启时自动更新照常运行，不尝试发邮件。可选的 `UPDATE_MAIL_PORT` 默认为 465；若该端口在运行环境中无法完成发信，可设为 587（STARTTLS）。
 
 工作流只有在新增内容通过检查、提交且推送成功后才发一封摘要邮件，列出新增文章及提交、运行记录链接；没有新增内容时不发送。发信使用 `smtp.qq.com:465` 的加密连接，授权码只由 Actions Secrets 注入。若邮件发送失败，已推送的内容不会回滚，运行记录会显示失败以便排查。
 首次配置后，可在 **Actions → Update official content → Run workflow** 勾选 `test_email` 手动测试一次；若本次同时发现新文章，只发送真实更新摘要，不会重复发送测试邮件。
