@@ -19,6 +19,8 @@ jobs:
         run: python scripts/check_data.py
       - name: Check generated search index
         run: python scripts/build_search_index.py --check
+      - name: Check README data range
+        run: python scripts/update_readme_data.py --check
       - name: Check speech library and body search files
         run: python scripts/check_speeches.py && python scripts/build_speech_body_search.py --check
       - name: Check generated stylesheet

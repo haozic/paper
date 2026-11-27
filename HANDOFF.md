@@ -6,6 +6,24 @@
 
 ---
 
+## 2026-11-27：自动更新时同步 README 数据范围
+
+### 当前任务与已完成
+
+- 用户要求 GitHub Actions 在线更新文章后，同时更新项目首页 README 的“数据范围”。新增 `scripts/update_readme_data.py`，依据首页采集日期、四刊 `meta.json` 与 `counts.json`、讲话库目录生成日期、期次范围、文章数、期数和正文归档数；检查 counts 与目录一致，提供 `--check` 只读校验。
+- `auto_update.py` 在抓取完成、更新首页说明后运行 README 生成脚本；自动更新工作流验证并将 README 与数据一同提交，站点质量工作流增加 README 一致性检查。当前 README 已补到 2026-11-27 数据（红旗文稿 2,289 篇/166 期，党建研究 1,773 篇/72 期）。
+
+### 验收、卡点与下一步
+
+- 隔离测试覆盖 README 更新及 counts 不一致时失败；本地 `test_auto_update.py` 两项、README `--check`、Python 编译与 `git diff --check` 均通过。需提交推送、确认 GitHub Site quality；若标准 Git HTTPS 仍不可用，可用 GitHub Git API 发布相同文件树并重建本地提交对象对齐。
+- 无内容更新时 `auto_update.py` 提前返回，不改 README、不给邮件。
+
+### 踩过的坑
+
+- README 原文件是 CRLF；生成脚本要保留换行符，否则更新一个表格会造成整份文件的无关差异。
+
+---
+
 ## 2026-11-27：清理仓库旧页面与演示素材
 
 ### 当前任务与已完成
@@ -17,7 +35,7 @@
 
 - 全仓检索（排除历史交接和文章数据）没有已删除路径或脚本的引用。Service Worker 导航 5 项及反向自检 2 项、JS 注释与 SW 求值、DOM ID、CSS 构建、搜索索引和 `git diff --check` 均通过。
 - 首次本地反向自检因系统临时目录沙箱权限失败；把 `TEMP`、`TMP` 指向工作区后 2 项通过，属于测试环境问题。
-- 下一步：提交并推送清理变更，确认 GitHub Site quality 和线上页面状态。当前未发现代码卡点。
+- 清理已发布至 GitHub `main` 提交 `527d9a1`，Site quality 运行 `45924608001` 成功。Git HTTPS 连接重置，改用 GitHub Git API 发布与本地相同的文件树，并重建远端提交对象把本地 `main` 与 `origin/main` 对齐。当前未发现代码卡点。
 
 ### 踩过的坑
 

@@ -39,6 +39,7 @@ jobs:
           python -m unittest scripts/test_auto_update.py
           python -m unittest scripts/test_send_update_email.py
           python scripts/check_data.py
+          python scripts/update_readme_data.py --check
           python scripts/build_search_index.py --check
           python scripts/check_speeches.py
           python scripts/build_speech_body_search.py --check
@@ -52,7 +53,7 @@ jobs:
       - name: Commit and publish verified changes
         id: publish
         run: |
-          git add -- data/ articles/ assets/img/ index.html assets/js/app.js sw.js speeches/shell.txt speeches/speeches.js scripts/build_search_index.py
+          git add -- README.md data/ articles/ assets/img/ index.html assets/js/app.js sw.js speeches/shell.txt speeches/speeches.js scripts/build_search_index.py
           if git diff --cached --quiet; then
             echo 'Official sources have no new content.'
             echo 'updated=false' >> "$GITHUB_OUTPUT"

@@ -23,13 +23,13 @@
 
 ## 数据范围
 
-以下是 2026 年 11 月 23 日仓库数据的快照；最新数据请查看网站首页和 `data/counts.json`。
+以下是截至 2026 年 11 月 27 日的仓库数据快照；最新数据请查看网站首页和 `data/counts.json`。
 
 | 来源 | 覆盖范围 | 文章 | 期数 |
 | --- | --- | ---: | ---: |
 | 《求是》 | 2019 年第 1 期至 2026 年第 22 期 | 3,444 | 190 |
-| 《红旗文稿》 | 2020 年第 1 期至 2026 年第 21 期 | 2,277 | 165 |
-| 《党建研究》 | 2020 年第 12 期至 2026 年第 10 期 | 1,748 | 71 |
+| 《红旗文稿》 | 2020 年第 1 期至 2026 年第 22 期 | 2,289 | 166 |
+| 《党建研究》 | 2020 年第 12 期至 2026 年第 11 期 | 1,773 | 72 |
 | 《旗帜》 | 2021 年第 7 期至 2026 年第 6 期 | 2,223 | 60 |
 | 习近平讲话库 | 2012—2026 年 | 1,540 | 按年浏览 |
 
@@ -79,7 +79,7 @@ python scripts/build_styles.py --check
 
 四刊抓取步骤、期次参数和正文修复方法见 [采集脚本说明](scripts/README.md)。抓取脚本需要 `requests` 与 `beautifulsoup4`；纯数据检查和构建脚本不依赖这两个包。
 
-GitHub Actions 的 [Update official content](.github/workflows/auto-update.yml) 每天北京时间 09:17、20:17 自动检查四刊和讲话库官网目录。发现新增内容后，它会抓取、重建索引、更新页面日期与缓存版本，通过数据和脚本检查后提交到 `main`，再由 Cloudflare Pages 的 Git 集成发布；无更新时不提交。抓取或校验失败会使任务失败，不发布部分结果。也可在 GitHub 仓库的 **Actions → Update official content → Run workflow** 手动运行，或本地只读检查：
+GitHub Actions 的 [Update official content](.github/workflows/auto-update.yml) 每天北京时间 09:17、20:17 自动检查四刊和讲话库官网目录。发现新增内容后，它会抓取、重建索引、同步本页“数据范围”、更新页面日期与缓存版本，通过数据和脚本检查后提交到 `main`，再由 Cloudflare Pages 的 Git 集成发布；无更新时不提交。抓取或校验失败会使任务失败，不发布部分结果。也可在 GitHub 仓库的 **Actions → Update official content → Run workflow** 手动运行，或本地只读检查：
 
 ```bash
 python scripts/auto_update.py --check-only
@@ -112,6 +112,7 @@ python scripts/build_speech_body_search.py --check
 python scripts/build_search_index.py
 python scripts/check_data.py
 python scripts/build_search_index.py --check
+python scripts/update_readme_data.py --check
 ```
 
 发布样式或脚本修改时，同步更新 `index.html`、`assets/js/app.js`、`speeches/speeches.js`、`speeches/shell.txt` 和 `sw.js` 中使用的资源版本号；缓存与发布细节见 [更新流程](docs/UPDATE_FLOW.md)。

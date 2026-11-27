@@ -71,6 +71,10 @@ python scripts\check_data.py --dedup
 python scripts\build_search_index.py
 python scripts\build_search_index.py --check
 
+# 根据已归档内容同步 README 的数据范围；--check 只验证，不写文件
+python scripts\update_readme_data.py
+python scripts\update_readme_data.py --check
+
 # 更新首页每刊最新文章快捷入口（改了 meta.json 后执行）
 python scripts\build_home_latest.py
 
@@ -121,8 +125,9 @@ python scripts\make_icons.py
 
 | 脚本 | 作用 | 何时用 |
 | --- | --- | --- |
-| `check_data.py` | 体检三刊的 meta / 正文分片 / counts / article_index 一致性 + 目录顺序（对照官网快照） | 每次抓取后；怀疑数据异常时 |
-| `build_search_index.py` | 从三份 `meta.json` 生成跨刊标题索引 `data/search_index.json` | 改了 `meta.json` 之后；详见 [§13](#13-跨刊标题索引) |
+| `check_data.py` | 体检四刊的 meta / 正文分片 / counts / article_index 一致性 + 目录顺序（对照官网快照） | 每次抓取后；怀疑数据异常时 |
+| `build_search_index.py` | 从四份 `meta.json` 生成跨刊标题索引 `data/search_index.json` | 改了 `meta.json` 之后；详见 [§13](#13-跨刊标题索引) |
+| `update_readme_data.py` | 根据首页更新日期、四刊目录与讲话库索引刷新 README 数据范围 | 内容归档后自动运行；也可用 `--check` 只读校验 |
 | `rebuild_data.py` | 把正文重分片为 `issues/<年>-<期>.json`，丢弃不可达正文，瘦身 article_index | 迁移到分片布局时；怀疑正文文件过大时 |
 | `repair_empty_urls.py` | 修复 `u` 字段为空的条目 | 体检报出空 URL 时 |
 | `refresh_sections.py` | 只抓目录页刷新板块名（不重下正文、不重建分片） | 板块页出现"目录/评论"假板块，或整期无板块时 |

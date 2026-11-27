@@ -152,6 +152,7 @@ def main():
     magazines.write_counts()
     version = new_version()
     update_about()
+    run("update_readme_data.py")
     run("build_search_index.py")
     print(f"Archive updated; resource version {version}", flush=True)
     return 0
