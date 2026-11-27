@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '20261123n';
+const VERSION = '20261127013309';
 const savedSettings = JSON.parse(localStorage.getItem('speech-reading') || '{}');
 const settingKeys = {font:'reading_fontsize',theme:'reading_theme',line:'reading_lineheight',width:'reading_width',indent:'reading_indent',paper:'reading_paper'};
 const stored = (key, fallback) => localStorage.getItem(settingKeys[key]) ?? savedSettings[key] ?? fallback;

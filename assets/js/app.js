@@ -1,7 +1,7 @@
 'use strict';
 
 /* ===== 全局缓存版本号（与 index.html 一致，用于 data 目录下的 json 缓存破坏） ===== */
-const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261123n';
+const DATA_VERSION = (typeof window !== 'undefined' && window.__DATA_VERSION__) || '20261127013309';
 function dataUrl(p) { return p + (p.includes('?') ? '&' : '?') + 'v=' + DATA_VERSION; }
 
 /* ===== 杂志配置 ===== */
@@ -256,7 +256,7 @@ async function enterSpeechLibrary(push = true) {
     if (push) history.pushState({ speech: true }, '', '#m=speeches');
     if (!speechLoading) speechLoading = (async () => {
         host.innerHTML = '<div class="loading" role="status">讲话库目录加载中…</div>';
-        const shellUrl = 'speeches/shell.txt?v=20261123n';
+        const shellUrl = 'speeches/shell.txt?v=20261127013309';
         let shell;
         for (let attempt = 0; attempt < 2; attempt++) {
             try {
@@ -280,7 +280,7 @@ async function enterSpeechLibrary(push = true) {
         await new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.type = 'module';
-            script.src = 'speeches/speeches.js?v=20261123n&load=' + (++speechLoadAttempt);
+            script.src = 'speeches/speeches.js?v=20261127013309&load=' + (++speechLoadAttempt);
             script.onload = resolve; script.onerror = reject;
             document.body.appendChild(script);
         });
