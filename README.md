@@ -6,6 +6,16 @@
 - 仓库：[haozic/paper](https://github.com/haozic/paper)
 - 更新采集说明：[scripts/README.md](scripts/README.md)
 
+## 页面预览
+
+首页：
+
+![项目首页，展示四本刊物和习近平讲话库](docs/screenshots/home.png)
+
+文章阅读页：
+
+![文章阅读页，展示正文排版和底部工具栏](docs/screenshots/reading.png)
+
 ## 阅读与检索
 
 首页展示四本刊物和讲话库。四刊按年、期次和栏目浏览；讲话库按年份浏览。文章页支持目录、上一篇或下一篇、相关阅读、收藏、分享、字号、行距、页宽、首行缩进、纸张和主题设置。收藏和阅读设置保存在当前浏览器的 `localStorage` 中，不会跨设备同步。
