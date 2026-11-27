@@ -36,9 +36,11 @@ class AutoUpdateTests(unittest.TestCase):
             speech_index.write_text(json.dumps({"items": [{"y": 2027, "p": "body.md"}, {"y": 2012, "p": None}]}), encoding="utf-8")
             with patch.object(auto_update, "ROOT", root):
                 version = auto_update.new_version()
+                next_version = auto_update.new_version()
                 auto_update.update_about()
-            self.assertIn(version, (root / "speeches/speeches.js").read_text("utf-8"))
-            self.assertIn(f"INDEX_VERSION = '{version}'", (root / "scripts/build_search_index.py").read_text("utf-8"))
+            self.assertGreater(next_version, version)
+            self.assertIn(next_version, (root / "speeches/speeches.js").read_text("utf-8"))
+            self.assertIn(f"INDEX_VERSION = '{next_version}'", (root / "scripts/build_search_index.py").read_text("utf-8"))
             self.assertIn("2027 年第 1 期", (root / "index.html").read_text("utf-8"))
             self.assertIn("2012 年至 2027 年，2 条目录记录；1 篇可阅读正文", (root / "index.html").read_text("utf-8"))
             self.assertIn("2 篇 · 2012—2027", (root / "index.html").read_text("utf-8"))

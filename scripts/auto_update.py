@@ -53,8 +53,8 @@ def issue_set(magazine):
 def new_version():
     old = re.search(r"^const VERSION = '([^']+)';", (ROOT / "speeches/speeches.js").read_text("utf-8"), re.M).group(1)
     version = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-    if version == old:
-        raise RuntimeError("Resource version did not advance")
+    if re.fullmatch(r"\d{14}", old) and version <= old:
+        version = (datetime.strptime(old, "%Y%m%d%H%M%S") + timedelta(seconds=1)).strftime("%Y%m%d%H%M%S")
     for name in VERSION_FILES:
         path = ROOT / name
         text = path.read_text("utf-8")
