@@ -94,13 +94,6 @@ python scripts\refresh_sections.py --mag qs --issues 2026-15,2026-20
 python scripts\canonical_sections.py
 python scripts\canonical_sections.py --check
 
-# Chrome 69 兼容性体检（零依赖，有问题返回非 0 退出码）
-python scripts\check_compat.py
-python scripts\check_compat.py --list
-
-# 体检脚本自身的判定逻辑反向自测（15 条用例）
-python scripts\test_check_compat.py
-
 # JS 注释层体检：防"块注释被提前闭合"+ Service Worker 求值冒烟
 python scripts\check_js_comments.py
 python scripts\check_js_comments.py --no-runtime   # 只跑词法扫描
@@ -110,14 +103,6 @@ python scripts\check_js_comments.py --self-test    # 反向自检（8 条用例�
 python scripts\check_sw_navigate.py
 python scripts\check_sw_navigate.py --list          # 列出用例
 python scripts\check_sw_navigate.py --self-test     # 反向自检（2 条用例）
-
-# 备考全书大作文范例字面体检：结构 / 分论点 / 字数 / 重复 / 英文 / Markdown / 乱码 / 体例
-python scripts\check_essays.py
-python scripts\check_essays.py --self-test    # 反向自检（1 正对照 + 12 条注入用例）
-
-# 面试指南结构与字面体检：章节 / 目录锚点 / 标题层级 / 英文 / 乱码 / 体例 / 重复 / 事实锚点 / 模拟题折叠
-python scripts\check_mianshi.py
-python scripts\check_mianshi.py --self-test    # 反向自检（1 正对照 + 13 条注入用例 + 1 条例外用例）
 
 # 目录顺序修正：按官网目录页顺序重排 meta（默认预演，加 --apply 才写盘）
 python scripts\fix_catalog_order.py
@@ -142,12 +127,8 @@ python scripts\make_icons.py
 | `repair_empty_urls.py` | 修复 `u` 字段为空的条目 | 体检报出空 URL 时 |
 | `refresh_sections.py` | 只抓目录页刷新板块名（不重下正文、不重建分片） | 板块页出现"目录/评论"假板块，或整期无板块时 |
 | `canonical_sections.py` | 合并"同一栏目被改过名"产生的多张相似卡片（归一表附来源站证据） | 板块页上出现两张长得很像的卡片时 |
-| `check_compat.py` | 体检 Chrome 69 兼容性（特性黑名单 + flex gap 兜底缺失） | 改动 CSS / JS 后；详见 [`docs/CHROME69_COMPAT.md`](../docs/CHROME69_COMPAT.md) |
-| `test_check_compat.py` | `check_compat.py` 的反向自测（`@supports` 语义、兜底缺失、注释剥离） | 改动 `check_compat.py` 的解析逻辑后 |
-| `check_js_comments.py` | 体检 JS 注释层（块注释提前闭合）+ Service Worker 求值冒烟 | 改动任何 `.js` 后；详见 [`docs/CHROME69_COMPAT.md` §3.3](../docs/CHROME69_COMPAT.md) |
-| `check_sw_navigate.py` | 体检 SW 的导航处理（跳转 → opaque 过滤、只接管外壳路由、离线回落） | 改动 `sw.js` 后；首页入口打不开时；详见 [`docs/CHROME69_COMPAT.md` §4.10](../docs/CHROME69_COMPAT.md) |
-| `check_essays.py` | 体检《备考全书》第十章第六节八篇大作文范例的字面合规（结构 / 分论点同构 / 字数 / 重复段落 / 英文夹杂 / Markdown 残留 / 乱码 / 体例 / 批注数字自证） | 改动大作文范例后；详见 [§9.9](#99-大作文范例字面体检) |
-| `check_mianshi.py` | 体检《湖北省直遴选面试指南》的结构与字面合规（章节 / 目录锚点 / 标题层级 / 英文夹杂 / 乱码 / 体例 / 重复段落 / 关键事实锚点） | 改动面试指南正文后；详见 [§9.10](#910-面试指南结构与字面体检) |
+| `check_js_comments.py` | 体检 JS 注释层（块注释提前闭合）+ Service Worker 求值冒烟 | 改动任何 `.js` 后 |
+| `check_sw_navigate.py` | 体检 SW 的导航处理（跳转 → opaque 过滤、只接管外壳路由、离线回落） | 改动 `sw.js` 后；首页入口打不开时 |
 | `make_icons.py` | 生成 PWA 图标（192 / 512 / maskable-512 / apple-touch-icon） | 改图标设计时；需要 Pillow |
 | `fix_catalog_order.py` | 按官网目录页顺序重排 meta，并把顺序存成 `data/catalog_order.json` 快照 | 站内目录顺序与官网对不上时；新增期次后刷新快照 |
 | `clean_meta_authors.py` | 清洗 meta 里被网页页脚（发布时间 / 扫码提示 / 网站声明 / 评论引导）污染的"作者"字段 | 目录里出现长串乱码作者时 |
@@ -416,123 +397,6 @@ python scripts\refresh_sections.py --apply    # 写盘
 
 **边界**：求是 2019–2025 年 14 期（158 期）的栏目信息**在来源站已彻底下线**
 （实时目录页里 `│` = 0、红色标题 = 0），这批文章只能进"未分栏目"。
-
-### 9.8 首页底部的"备考指南/备考全书"打不开（空白、没有样式）
-
-**2026-10-30 用户报障查清的根因**（属于 **Service Worker 层**，不是文件缺失、
-也不是部署问题 —— 线上返回的字节与本地文件 MD5 完全一致）：
-
-1. Cloudflare Workers Static Assets 的 `html_handling` 会把 `.html` 路径
-   **308 重定向**到无扩展名路径（`/x/x.html` → `/x/x`）。
-2. SW 接管导航时，旧代码直接 `fetch(request)`。而在 Service Worker 里 fetch
-   一个 mode 为 `navigate` 的请求，**只要该地址发生跳转**，Fetch 规范就会把
-   响应过滤成 **opaque**：`status=0、ok=false、redirected=false`
-   （浏览器实测诊断输出：`BRANCH=not-ok / response.status=0 / response.redirected=false`）。
-3. 旧代码把 `!response.ok` 一律当成"断网"，于是回落到缓存的 `index.html`，
-   把**首页 HTML 塞到了子页面地址上**。
-4. `index.html` 的 `assets/css`、`assets/js` 都是**相对路径**，在
-   `/linxuan-beikao-zhinan/` 目录下全部 404 —— 样式没了、app 没启动、
-   body 几乎是空的 → 用户看到的就是**"打开了新页面，但空白、没有样式"**。
-5. 缓存里查不到 `index.html` 时 SW 返回 `Response.error()`，
-   浏览器直接 `net::ERR_FAILED`（`chrome-error://chromewebdata/`）。
-
-**处理**：
-
-```bash
-python scripts\check_sw_navigate.py          # 行为级体检（4 条用例）
-python scripts\check_sw_navigate.py --self-test   # 反向自检
-```
-
-**两条硬规则**（已写进 `sw.js` 注释）：
-
-- SW 里**不要**用 navigate 模式的请求去 `fetch`。要抓正文就用
-  `new Request(url, { mode: 'same-origin' })`，跳转才会被正常跟随。
-- SW **只接管应用外壳路由**（`/` 与 `/index.html`）；备考指南这类独立静态页
-  直接放行给网络，浏览器自己处理 308 重定向。
-
-**排查这类"线上空白"问题的通用顺序**：先比对线上与本地的字节
-（`curl -o 文件` + MD5），字节一致就说明**不是服务端问题**，再往客户端查
-（SW / 缓存 / 相对路径 404）。
-
----
-
-### 9.9 大作文范例字面体检
-
-《荆楚遴选备考全书》第十章第六节「预测热点大作文完整范例（8篇）」是手写内容，
-篇幅大、句式重复，最容易出**低级文字差错**——写作过程中真实出现过整段复制、
-英文夹杂、乱码、Markdown 标记残留四类问题。它们都不会让页面报错，只会让
-读者看到病句。
-
-```bash
-python scripts\check_essays.py                 # 体检（9 类规则 E1–E9）
-python scripts\check_essays.py --self-test     # 反向自检（1 正对照 + 12 条注入用例）
-```
-
-规则一览：
-
-| 编号 | 检查项 | 抓的是哪类事故 |
-| --- | --- | --- |
-| E1 | 结构完整（八篇齐全，每篇有【审题立意】/【参考范文】/ 亮点批注） | 小节被截断、标签写错 |
-| E2 | 每篇恰好三个分论点，且以"X"领起同构 | 分论点漏写、句式不统一 |
-| E3 | 每篇正文 ≥ 900 字 | 只有提纲没有成文 |
-| E4 | 同一篇内无完全重复的正文段落 | **整段复制**（真实发生过） |
-| E5 | 无未授权英文单词 | **英文夹杂**（fancy / eVTOL 等） |
-| E6 | 无 `**` / `__` 残留 | **Markdown 标记**（纯 HTML 不渲染，会露出星号） |
-| E7 | 无替换字符 / 非法控制字符 / 中英粘连 | **乱码**、中文里粘进英文片段 |
-| E8 | 无感叹号、无网络用语 | 口语化、体例不符 |
-| E9 | 亮点批注里声明的「嵌入 N 处」必须与所列清单条目数一致 | 自己写了个对不上的数字 |
-
-**反向自检必须自带鉴别力**：脚本会先搭一套结构合规的八篇骨架（正对照，必须零错误），
-再逐条注入事故写法，并要求**命中指定的规则编号**。只断言"报错了"是不够的——
-那样会因为别的规则先报错而假通过。
-
-> 写完正文后，**渲染成图片逐张目检**，文字抽取和单元测试都不能替代：
-> 排版错位、表格溢出、callout 塌陷这类问题只有在渲染结果里才看得见。
-
----
-
-### 9.10 面试指南结构与字面体检
-
-`hubei-linxuan-mianshi/hubei-linxuan-mianshi.html` 是《湖北省直遴选面试指南》
-（8 章 34 节，全文手写）。它的问题域与 §9.9 的范例不同：范例怕的是**重复与体例**，
-面试指南怕的是**结构散架与依据被删**——目录锚点悬空、标题层级越级、公告里的关键
-数字被后续编辑顺手改掉，页面不会报错，只会悄悄失真。
-
-```bash
-python scripts\check_mianshi.py                 # 体检（10 类规则 E1–E10）
-python scripts\check_mianshi.py --self-test     # 反向自检（1 正对照 + 13 条注入用例 + 1 条例外用例）
-```
-
-规则一览：
-
-| 编号 | 检查项 | 抓的是哪类事故 |
-| --- | --- | --- |
-| E1 | 结构完整（9 章齐全，每章有章标题与小节；侧边栏 `partNames` 覆盖全部章号） | 章节漏写、侧边栏与正文脱节 |
-| E2 | 目录每个 `href="#xxx"` 都能在正文找到同名 id | 目录锚点悬空，点过去没反应 |
-| E3 | 标题层级不越级（`h2.chapter-title` 只出现在 chapter 内） | 层级错乱，目录层级跟着乱 |
-| E4 | 无 `**` / `__` 残留 | Markdown 标记（纯 HTML 不渲染，会露出星号） |
-| E5 | 无未授权英文单词（URL 另行剔除） | 英文夹杂 |
-| E6 | 无替换字符 / 非法控制字符 / 中英粘连 | 乱码 |
-| E7 | 无感叹号、无网络用语（**第三方热词表按来源原文录入，单独摘出**） | 口语化、体例不符 |
-| E8 | 同一章内无完全重复的正文段落 | 整段复制 |
-| E9 | 24 项关键考情事实锚点必须仍在文中 | 把公告依据（面试权重 50%、80 分门槛、考场规则八条等）删掉或改错 |
-| E10 | 模拟练习八道题齐全：编号连续、每题一个 `details`、默认不带 `open`、折叠标题为"参考答案"、答案正文不少于 150 字 | 答案默认摊开（学员还没答就看见答案）、漏题、答案写成空壳 |
-
-**模拟练习章的折叠答案**：第八章用原生 `details`/`summary`（Chrome 12+ 起支持，
-Chrome 69 无碍），不引脚本。参考答案默认收起，点"参考答案"才展开，样式写在页面自身的
-`style` 块里（`.practice-answer` / `.practice-answer-body` / `.practice-points`），
-不影响站内其他页面。E10 专门盯住"默认收起"这条——带 `open` 属性即判不合格。
-
-**E7 的例外是窄口径、有意为之**：第三章那张热点词表按第三方来源原文录入，其中含
-`"网红"打卡点` 一类当年时政流行语。那是**考试热词的引用**，不是本指南的行文用语，
-改写会与来源对不上。因此脚本按表头（"面试涉及的主要热点"）定位这一张表，把它从俚语
-扫描里摘出；表头一旦被改写，定位随即失效并退回全页扫描——**宁可误报，不可漏报**。
-反向自检里配了一条用例专门盯这个边界：俚语写进正文必须报错，写进引用区则不报错。
-
-**反向自检必须自带鉴别力**：注入用例要断言**命中指定的规则编号**，不能只断言
-"报错了"——只断言"报错了"会因为别的规则先报错而假通过（§9.9 踩过这个坑）。
-
----
 
 ## 10. 自定义扩展
 

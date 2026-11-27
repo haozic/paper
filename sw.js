@@ -192,7 +192,7 @@ function contentTypeMatches(path, response) {
 }
 
 /* 应用外壳路由：只有首页由 SW 接管导航。
-   其余路径（备考指南等独立静态页）一律放行给网络，
+   其余路径一律放行给网络，
    浏览器自己处理 Cloudflare 的 .html -> 无扩展名 308 重定向。 */
 function isShellPath(pathname) {
     return pathname === '/' || pathname === '/index.html';
@@ -319,7 +319,7 @@ self.addEventListener('fetch', function (event) {
     if (!isSameOrigin(url)) return;          /* 跨域请求不接管 */
 
     if (request.mode === 'navigate') {
-        /* 只有应用外壳路由才接管导航；备考指南等独立静态页放行给网络，
+        /* 只有应用外壳路由才接管导航；其他路径放行给网络，
            避免 SW 参与它们的 308 重定向处理（见 fetchShell 注释里的坑 1）。 */
         if (!isShellPath(url.pathname)) return;
         event.respondWith(handleNavigate(request, event));

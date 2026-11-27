@@ -141,6 +141,5 @@ node --test scripts/test_reading_progress.js
 - [站点架构](docs/ARCHITECTURE.md)
 - [内容更新流程](docs/UPDATE_FLOW.md)
 - [采集脚本说明](scripts/README.md)
-- [阅读体验设计记录](docs/UX_MODERNIZATION.md)
 
 本站代码与文章内容的权利归属不同；收录文章的版权归原作者及出版方。请通过文章中的来源链接核对原文。

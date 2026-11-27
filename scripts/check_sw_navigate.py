@@ -3,9 +3,9 @@
 """
 Service Worker 导航处理体检：防"首页入口打不开"这一类回归
 
-真实事故（2026-10-30，用户报"首页底部的备考指南和备考全书打不开"）
+历史事故（2026-10-30，独立静态页导航被错误接管）
 ------------------------------------------------------------------
-现象：点首页底部两个入口卡片 → 打开了新页面，但**空白、没有样式**。
+现象：独立静态页打开后空白、没有样式。
 
 因果链（已在浏览器 + 本地复现环境逐环验证）：
 
@@ -18,9 +18,8 @@ Service Worker 导航处理体检：防"首页入口打不开"这一类回归
      （实测诊断输出：BRANCH=not-ok / response.status=0 / response.redirected=false）
   3. 旧代码把 `!response.ok` 一律当成"断网"，于是回落到缓存的 index.html，
      把**首页 HTML 塞到了子页面地址上**。
-  4. index.html 的 assets/css、assets/js 都是**相对路径**，在
-     /linxuan-beikao-zhinan/ 目录下全部 404 —— 样式没了、app 没启动、
-     body 几乎是空的 → 用户看到的就是"空白页 + 没有样式"。
+  4. index.html 的资源路径是相对路径，在独立静态页地址下解析错误，
+     导致样式和内容丢失。
   5. 缓存里查不到 index.html 时，SW 返回 Response.error()，
      浏览器直接 net::ERR_FAILED（chrome-error://chromewebdata/）。
 
@@ -32,7 +31,7 @@ Fetch 规范"在 navigate 模式下把重定向响应过滤成 opaque"的假 fet
   T1  首页 `/` 正常联网 → 返回网络响应，而不是缓存里的 index.html
   T2  外壳路径 `/index.html`（线上会 308）→ 返回**不带 redirected 标记**的
       干净响应，且绝不是缓存里的 index.html
-  T3  非外壳路径（备考指南等独立静态页）→ SW **不接管**，直接放行给网络
+  T3  非外壳路径 → SW **不接管**，直接放行给网络
   T4  断网时首页 → 回落到缓存里的 index.html（离线能力不能丢）
   T5  缓存写入停滞时首页 → 仍立即返回网络响应
 
@@ -251,7 +250,7 @@ const cases = [];
 Promise.resolve()
   .then(function () { return runNavigate('/'); })
   .then(function (r) { cases.push({ id: 'T1', ...r }); return runNavigate('/index.html'); })
-  .then(function (r) { cases.push({ id: 'T2', ...r }); return runNavigate('/linxuan-beikao-zhinan/linxuan-beikao-zhinan.html'); })
+  .then(function (r) { cases.push({ id: 'T2', ...r }); return runNavigate('/unrelated-static-page.html'); })
   .then(function (r) { cases.push({ id: 'T3', ...r }); return runNavigate('/', { offline: true }); })
   .then(function (r) { cases.push({ id: 'T4', ...r }); return runNavigate('/', { stallCache: true }); })
   .then(function (r) { cases.push({ id: 'T5', ...r }); })
@@ -267,7 +266,7 @@ Promise.resolve()
 EXPECT = {
     'T1': ('ok', '首页正常联网，应返回网络响应（不能是缓存里的 index.html）'),
     'T2': ('ok', '外壳路径 /index.html 线上会 308：应返回干净响应，既不能是缓存首页，也不能是带 redirected 标记的响应'),
-    'T3': ('not-handled', '非外壳路径（备考指南等）应由 SW 放行，不接管导航'),
+    'T3': ('not-handled', '非外壳路径应由 SW 放行，不接管导航'),
     'T4': ('cached-index', '断网时应回落到缓存里的 index.html（离线能力不能丢）'),
     'T5': ('ok', '缓存写入卡住时，首页网络响应仍应立即返回'),
 }
