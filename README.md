@@ -52,6 +52,7 @@ articles/speeches/                 讲话库 Markdown 正文
 functions/share/index.js           四刊文章的分享预览页
 _routes.json                       限定 Pages Function 只处理分享路径
 sw.js                              应用外壳与已读数据的离线缓存
+404.html                           未知路径与已下线页面的提示
 scripts/                           抓取、构建与数据检查脚本
 .github/workflows/quality.yml      推送和 PR 的质量检查
 ```

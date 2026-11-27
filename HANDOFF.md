@@ -15,12 +15,29 @@
 
 ### 验收、卡点与下一步
 
-- 隔离测试覆盖 README 更新及 counts 不一致时失败；本地 `test_auto_update.py` 两项、README `--check`、Python 编译与 `git diff --check` 均通过。需提交推送、确认 GitHub Site quality；若标准 Git HTTPS 仍不可用，可用 GitHub Git API 发布相同文件树并重建本地提交对象对齐。
+- 隔离测试覆盖 README 更新及 counts 不一致时失败；本地 `test_auto_update.py` 两项、README `--check`、Python 编译与 `git diff --check` 均通过。提交 `2fcf495` 已推送，Site quality 运行 `45925196754` 成功。手动自动更新运行 `45925280362` 成功，无新增内容、无提交或邮件；README 一致性检查通过。
 - 无内容更新时 `auto_update.py` 提前返回，不改 README、不给邮件。
 
 ### 踩过的坑
 
 - README 原文件是 CRLF；生成脚本要保留换行符，否则更新一个表格会造成整份文件的无关差异。
+
+---
+
+## 2026-11-27：已删页面线上误回退首页
+
+### 当前任务与已完成
+
+- 清理提交部署后，检查三个旧遴选页面和 `design-demo` 路径仍返回 200；下载响应与首页 SHA256 完全相同，说明旧文件已消失，但 Cloudflare 静态资源配置的 `single-page-application` 会把未知路径回退到首页。官方 Cloudflare 文档说明可切为 `404-page` 并提供根目录 `404.html`。
+- 已修改 `wrangler.jsonc` 为 `404-page` 并新增简洁中文 `404.html`；站内目录与正文使用首页 hash 路由，路径仍为 `/`，不受此改动影响。README 项目结构增加 404 页面说明。
+
+### 验收、卡点与下一步
+
+- 下一步：提交并推送，等待 GitHub Site quality 与 Cloudflare 部署，然后逐一核对首页、旧路径和分享页响应。未发现代码卡点。
+
+### 踩过的坑
+
+- GitHub 删除静态页不等于旧网址返回 404；`wrangler.jsonc` 中显式 SPA 回退会让任何不存在的页面返回首页，需检查线上状态和响应内容。
 
 ---
 
